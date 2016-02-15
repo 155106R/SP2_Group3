@@ -11,18 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//#include "Scene1.h"
-//#include "Scene2.h"
-//#include "Scene3.h"
-//#include "Scene4.h"
-//ur a faggot
-//#include "SceneLight.h"
-
-//#include "Assignment1.h"
-//#include "Assignment2.h"
-
-//#include "ModelScene.h"
-
 GLFWwindow* m_window;
 const unsigned char FPS = 60; // FPS of this game
 const unsigned int frameTime = 1000 / FPS; // time for each frame
