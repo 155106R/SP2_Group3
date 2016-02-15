@@ -15,7 +15,7 @@
 //#include "Scene2.h"
 //#include "Scene3.h"
 //#include "Scene4.h"
-#include "Assignment3.h"
+//ur a faggot
 //#include "SceneLight.h"
 
 //#include "Assignment1.h"
