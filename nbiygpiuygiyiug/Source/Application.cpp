@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+<<<<<<< HEAD
 //#include "Scene1.h"
 //#include "Scene2.h"
 //#include "Scene3.h"
@@ -23,6 +24,8 @@
 
 //#include "ModelScene.h"
 
+=======
+>>>>>>> origin/master
 GLFWwindow* m_window;
 const unsigned char FPS = 60; // FPS of this game
 const unsigned int frameTime = 1000 / FPS; // time for each frame
