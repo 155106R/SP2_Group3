@@ -379,7 +379,7 @@ void OpenGalaxyScene::generateSkybox(){
 	//Back
 	modelStack.PushMatrix();
 	modelStack.Rotate(90, 1, 0, 0);
-	//modelStack.Rotate(180, 0, 1, 0);
+	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Translate(0, 500, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Znega], false);
@@ -388,19 +388,19 @@ void OpenGalaxyScene::generateSkybox(){
 	//Left
 	modelStack.PushMatrix();
 	modelStack.Rotate(90, 0, 0, 1);
-	modelStack.Rotate(90, 0, 1, 0);
+	//modelStack.Rotate(-90, 0, 1, 0);
 	modelStack.Translate(0, 500, 0);
 	modelStack.Scale(1000, 1000, 1000);	
-	//RenderMesh(meshList[SKYBOX_Xnega], false);
+	RenderMesh(meshList[SKYBOX_Xnega], false);
 	modelStack.PopMatrix();
 
-	//Right
+	//Right - done
 	modelStack.PushMatrix();
 	modelStack.Rotate(-90, 0, 0, 1);
-	modelStack.Rotate(-90, 0, 1, 0);
+	modelStack.Rotate(180, 0, 1, 0);
 	modelStack.Translate(0, 500, 0);
 	modelStack.Scale(1000, 1000, 1000);
-	//RenderMesh(meshList[SKYBOX_Xposv], false);
+	RenderMesh(meshList[SKYBOX_Xposv], false);
 	modelStack.PopMatrix();
 
 	//Bottom - done
