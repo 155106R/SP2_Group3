@@ -26,13 +26,20 @@ void OpenGalaxyScene::Init()
 	rotateTextY = 0;
 	rotateTextZ = 0;
 
+	rotateShip = 0;
+	shipAxisX = 0;
+	shipAxisY = 0;
+	shipAxisZ = 0;
+	noseOfShip = new Vector3(0, 0, 5);
+	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
+
 	for (unsigned i = 0; i < 1000; i++){
 		randTranslateX[i] = Math::RandFloatMinMax(-1000, 1000);
 		randTranslateY[i] = Math::RandFloatMinMax(-1000, 1000);
 		randTranslateZ[i] = Math::RandFloatMinMax(-1000, 1000);
 
 		randScaleX[i] = Math::RandFloatMinMax(5, 10);
-		randScaleY[i] = Math::RandFloatMinMax(5, 7);
+		randScaleY[i] = Math::RandFloatMinMax(5, 10);
 		randScaleZ[i] = Math::RandFloatMinMax(5, 10);
 	}
 
@@ -125,8 +132,8 @@ void OpenGalaxyScene::Init()
 	//Render wishlist
 	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("Axes", 1000, 1000, 1000);
 
-	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateOBJ("LightSource", "OBJ//planet.obj");
-	meshList[GEO_LIGHTBALL]->textureID = LoadTGA("Image//planetSunTexture.tga");
+	meshList[PLANET_SUN] = MeshBuilder::GenerateOBJ("LightSource", "OBJ//planet.obj");
+	meshList[PLANET_SUN]->textureID = LoadTGA("Image//planetSunTexture.tga");
 
 	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
 	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
@@ -145,7 +152,14 @@ void OpenGalaxyScene::Init()
 	meshList[SKYBOX_Znega] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1));
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
 
-	//Cave Rocks
+	//Proxy SpaceShip
+	meshList[PROXY_SPACESHIP] = MeshBuilder::GenerateCube("Proxy spaceship", Color(1, 1, 1));
+	meshList[PROXY_SPACESHIP]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
+	meshList[PROXY_SPACESHIP]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
+	meshList[PROXY_SPACESHIP]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
+	meshList[PROXY_SPACESHIP]->material.kShininess = 0.1f;
+
+	//Asteroids
 	meshList[ASTEROIDS] = MeshBuilder::GenerateSphere("Asteroids", Color(0.2941, 0.2941, 0.2941), 5, 10); //75, 75, 75 in RGB (Grey)
 	meshList[ASTEROIDS]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
 	meshList[ASTEROIDS]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
@@ -186,7 +200,10 @@ void OpenGalaxyScene::Update(double dt)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
-		camera.Update(dt);
+	//camera.Update(dt);
+	//update Ship axes
+	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
+	noseOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ + 5);
 
 	//Light
 	if (Application::IsKeyPressed('8')){
@@ -224,6 +241,26 @@ void OpenGalaxyScene::Update(double dt)
 			rotateTextY -= 1.0f;
 		}
 	}*/
+
+	if (Application::IsKeyPressed('A')){
+		rotateShip -= 1.0f;
+	}
+
+	if (Application::IsKeyPressed('D')){
+		rotateShip += 1.0f;
+	}
+
+	if (Application::IsKeyPressed('S')){
+		if ((shipAxisZ + 10) > 0){
+			shipAxisZ -= 1.0f;
+		}
+	}
+
+	if (Application::IsKeyPressed('W')){
+		if ((shipAxisZ + 10) > 0){
+			shipAxisZ += 1.0f;
+		}
+	}
 
 	if (((camera.position - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
 		land = true;
@@ -427,7 +464,7 @@ void OpenGalaxyScene::Render()
 	modelStack.PushMatrix();
 	modelStack.Translate(light[0].position.x, light[0].position.y, light[0].position.z);
 	modelStack.Scale(50, 50, 50);
-	RenderMesh(meshList[GEO_LIGHTBALL], false);
+	RenderMesh(meshList[PLANET_SUN], false);
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
@@ -435,13 +472,21 @@ void OpenGalaxyScene::Render()
 	generateSkybox();
 	modelStack.PopMatrix();
 
-	for (unsigned i = 0; i < 2000; i++){
+	for (unsigned i = 0; i < 1000; i++){
 		modelStack.PushMatrix();
 		modelStack.Translate(randTranslateX[i], randTranslateY[i], randTranslateZ[i]);
 		modelStack.Scale(randScaleX[i], randScaleY[i], randScaleZ[i]);
 		RenderMesh(meshList[ASTEROIDS], true);
 		modelStack.PopMatrix();
 	}
+
+	modelStack.PushMatrix();
+	//modelStack.Translate(camera.position.x, camera.position.y - 10, camera.position.z - 20);
+	modelStack.Translate(shipAxisX, shipAxisY, shipAxisZ);
+	modelStack.Rotate(rotateShip, 0, 1, 0);
+	modelStack.Scale(10, 5, 15);
+	RenderMesh(meshList[PROXY_SPACESHIP], true);
+	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
 	modelStack.Translate(250, 250, 0);
