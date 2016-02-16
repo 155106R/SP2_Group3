@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "OpenGalaxyScene.h"
+#include "PlanetJellyScene.h"
 
 //#include "Scene1.h"
 //#include "Scene2.h"
@@ -115,7 +115,7 @@ void Application::Init()
 void Application::Run()
 {
 	//Main Loop
-	Scene *scene = new OpenGalaxyScene();
+	Scene *scene = new PlanetJellyScene();
 	scene->Init();
 
 	m_timer.startTimer();    // Start timer to calculate how long it takes to render this frame

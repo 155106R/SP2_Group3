@@ -74,6 +74,9 @@
     <ClCompile Include="Source\OpenGalaxyScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\PlanetJellyScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Application.h">
@@ -134,6 +137,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\OpenGalaxyScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PlanetJellyScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
