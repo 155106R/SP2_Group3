@@ -26,7 +26,7 @@ void OpenGalaxyScene::Init()
 	rotateTextY = 0;
 	rotateTextZ = 0;
 
-	for (unsigned i = 0; i < 2000; i++){
+	for (unsigned i = 0; i < 1000; i++){
 		randTranslateX[i] = Math::RandFloatMinMax(-1000, 1000);
 		randTranslateY[i] = Math::RandFloatMinMax(-1000, 1000);
 		randTranslateZ[i] = Math::RandFloatMinMax(-1000, 1000);

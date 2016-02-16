@@ -173,12 +173,12 @@ private:
 	bool land;
 	float rotateTextX, rotateTextY, rotateTextZ;
 
-	float randScaleX[2000];
-	float randScaleY[2000];
-	float randScaleZ[2000];
-	float randTranslateX[2000];
-	float randTranslateY[2000];
-	float randTranslateZ[2000];
+	float randScaleX[1000];
+	float randScaleY[1000];
+	float randScaleZ[1000];
+	float randTranslateX[1000];
+	float randTranslateY[1000];
+	float randTranslateZ[1000];
 
 	//For Light
 	bool enableLight;
