@@ -242,7 +242,6 @@ void OpenGalaxyScene::Update(double dt)
 		}
 	}*/
 
-
 	//Camera frozen, for ship movement
 	if (Application::IsKeyPressed('J')){
 		rotateShip += 1.0f;
@@ -259,10 +258,10 @@ void OpenGalaxyScene::Update(double dt)
 		(*noseOfShip) = rotate * (*noseOfShip);
 	}
 	if (Application::IsKeyPressed('K')){
-		*middleOfShip -= *noseOfShip * 10 * dt;//SPEED VALUE
+		*middleOfShip -= *noseOfShip * 10 * dt;
 	}
 	if (Application::IsKeyPressed('I')){
-		*middleOfShip += *noseOfShip * 50 * dt;//SPEED VALUE
+		*middleOfShip += *noseOfShip * 50 * dt;
 	}
 	if (Application::IsKeyPressed('U')){
 		middleOfShip->y += 0.5f;
@@ -270,7 +269,6 @@ void OpenGalaxyScene::Update(double dt)
 	if (Application::IsKeyPressed('O')){
 		middleOfShip->y -= 0.5f;
 	}
-
 
 
 	//Planet interaction/docking
