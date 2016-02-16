@@ -20,7 +20,7 @@ class OpenGalaxyScene : public Scene
 	enum GEOMETRY_TYPE
 	{
 		GEO_AXES,
-		PLANET_SUN,	//light source
+		GEO_LIGHTBALL,
 		GEO_TEXTBOX,
 
 		U_TEXT_ENABLED,
@@ -38,8 +38,6 @@ class OpenGalaxyScene : public Scene
 		PLANET_C,
 
 		ASTEROIDS,
-
-		PROXY_SPACESHIP,
 
 		GEO_TEXT,
 
@@ -174,12 +172,6 @@ private:
 
 	bool land;
 	float rotateTextX, rotateTextY, rotateTextZ;
-
-	Vector3 *noseOfShip;
-	Vector3 *middleOfShip;
-	float shipAxisX, shipAxisY, shipAxisZ;
-	float rotateShip;
-	float translateShip;
 
 	float randScaleX[1000];
 	float randScaleY[1000];
