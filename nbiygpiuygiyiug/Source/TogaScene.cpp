@@ -137,8 +137,47 @@ void TogaScene::Init()
 	meshList[MINERAL_SHOP] = MeshBuilder::GenerateOBJ("mineral merchant head", "OBJ//mineralshopA.obj");
 	meshList[MINERAL_SHOP]->textureID = LoadTGA("Image//mineralshop_textureA.tga");
 
-}
 
+	//Drone stuff
+	meshList[NPC_DRONE_BODY] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantdrone_bodyA.obj");
+	meshList[NPC_DRONE_BODY]->textureID = LoadTGA("Image//merchantdrone_textureA.tga");
+
+	meshList[NPC_DRONE_EYE] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantdrone_eyeA.obj");
+	meshList[NPC_DRONE_EYE]->textureID = LoadTGA("Image//merchantdrone_textureA.tga");
+
+	meshList[NPC_DRONE_ARMS] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantdrone_armsA.obj");
+	meshList[NPC_DRONE_ARMS]->textureID = LoadTGA("Image//merchantdrone_textureA.tga");
+
+	meshList[DRONE_SHOP] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//drone_shopA.obj");
+	meshList[DRONE_SHOP]->textureID = LoadTGA("Image//droneshop_textureA.tga");
+
+
+
+	//Upgrade stuff
+	meshList[NPC_UPGRADE_BODY] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantupgrade_bodyA.obj");
+	meshList[NPC_UPGRADE_BODY]->textureID = LoadTGA("Image//merchantupgrade_textureA.tga");
+
+	meshList[NPC_UPGRADE_HEAD] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantupgrade_headA.obj");
+	meshList[NPC_UPGRADE_HEAD]->textureID = LoadTGA("Image//merchantupgrade_textureA.tga");
+
+	meshList[NPC_UPGRADE_ARML ] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantupgrade_armleftA.obj");
+	meshList[NPC_UPGRADE_ARML]->textureID = LoadTGA("Image//merchantupgrade_textureA.tga");
+
+	meshList[NPC_UPGRADE_ARMR] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantupgrade_armrightA.obj");
+	meshList[NPC_UPGRADE_ARMR]->textureID = LoadTGA("Image//merchantupgrade_textureA.tga");
+
+	meshList[UPGRADE_SHOP] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//upgradeshopA.obj");
+	meshList[UPGRADE_SHOP]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
+
+
+
+
+
+
+
+
+
+}
 
 void TogaScene::Update(double dt)
 {
@@ -380,8 +419,21 @@ void TogaScene::Render()
 	modelStack.Rotate(35,0,1,0);
 	generateMineralmerchant();
 	modelStack.PopMatrix();
-}
 
+	//Drone merchant
+	modelStack.PushMatrix();
+	modelStack.Translate(60, -5, -80);
+	modelStack.Rotate(-75, 0, 1, 0);
+	generateDronemerchant();
+	modelStack.PopMatrix();
+
+	//Upgrade merchant
+	modelStack.PushMatrix();
+	modelStack.Translate(-40, -8, 410);
+	modelStack.Rotate(155, 0, 1, 0);
+	generateUpgrademerchant();
+	modelStack.PopMatrix();
+}
 
 void TogaScene::Exit()
 {
@@ -468,4 +520,74 @@ void TogaScene::generateMineralmerchant()
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[MINERAL_SHOP], true);
 	modelStack.PopMatrix();
+}
+
+void TogaScene::generateDronemerchant()
+{
+
+	//head
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_DRONE_BODY], true);
+	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_DRONE_EYE], false);
+	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_DRONE_ARMS], true);
+	modelStack.PopMatrix();
+	
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[DRONE_SHOP], true);
+	modelStack.PopMatrix();
+}
+
+void TogaScene::generateUpgrademerchant()
+{
+
+	//hbody
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_UPGRADE_BODY], true);
+	modelStack.PopMatrix();
+
+
+	//head
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_UPGRADE_HEAD], true);
+	modelStack.PopMatrix();
+
+	//Larm
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_UPGRADE_ARML], true);
+	modelStack.PopMatrix();
+
+	//Rarm
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_UPGRADE_ARMR], true);
+	modelStack.PopMatrix();
+
+	//ashop
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[UPGRADE_SHOP], true);
+	modelStack.PopMatrix();
+
 }
