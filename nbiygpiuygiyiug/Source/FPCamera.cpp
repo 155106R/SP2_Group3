@@ -47,20 +47,28 @@ void FPCamera::Update(double dt){
 	if (Application::IsKeyPressed('W'))
 	{
 		Vector3 view = (target - position).Normalized();
-		position.x += view.x * dt * MOVE_SPEED;
+		/*position.x += view.x * dt * MOVE_SPEED;
 		position.z += view.z * dt * MOVE_SPEED;
 
 		target.x += view.x * dt * MOVE_SPEED;
-		target.z += view.z * dt * MOVE_SPEED;
+		target.z += view.z * dt * MOVE_SPEED;*/
+
+		//for free y move
+		position += view * dt * MOVE_SPEED;
+		target += view * dt * MOVE_SPEED;
 	}
 	if (Application::IsKeyPressed('S'))
 	{
 		Vector3 view = (target - position).Normalized();
-		position.x -= view.x * dt * MOVE_SPEED;
+		/*position.x -= view.x * dt * MOVE_SPEED;
 		position.z -= view.z * dt * MOVE_SPEED;
 
 		target.x -= view.x * dt * MOVE_SPEED;
-		target.z -= view.z * dt * MOVE_SPEED;
+		target.z -= view.z * dt * MOVE_SPEED;*/
+
+		//for free y move
+		position -= view * dt * MOVE_SPEED;
+		target -= view * dt * MOVE_SPEED;
 	}
 
 	if (Application::IsKeyPressed(VK_UP))
@@ -131,7 +139,7 @@ void FPCamera::Update(double dt){
 		Reset();
 	}
 
-	if (((position.x > 490) || (position.z > 490)) || ((position.x < -240) || (position.z < -490))){
+	if (position.x > 499 || position.z > 499 || position.x < -499 || position.z < -499 || position.y > 499 || position.y < -499){
 		Reset();
 	}
 	

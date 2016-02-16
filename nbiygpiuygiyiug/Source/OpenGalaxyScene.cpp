@@ -20,6 +20,22 @@ void OpenGalaxyScene::Init()
 	//Definations
 	LSPEED = 10.0f;
 
+	land = false;
+
+	rotateTextX = 0;
+	rotateTextY = 0;
+	rotateTextZ = 0;
+
+	for (unsigned i = 0; i < 1000; i++){
+		randTranslateX[i] = Math::RandFloatMinMax(-1000, 1000);
+		randTranslateY[i] = Math::RandFloatMinMax(-1000, 1000);
+		randTranslateZ[i] = Math::RandFloatMinMax(-1000, 1000);
+
+		randScaleX[i] = Math::RandFloatMinMax(5, 10);
+		randScaleY[i] = Math::RandFloatMinMax(5, 7);
+		randScaleZ[i] = Math::RandFloatMinMax(5, 10);
+	}
+
 	Mtx44 projection;
 	projection.SetToPerspective(45.f, 4.f / 3.f, 0.1f, 1000.f);
 	projectionStack.LoadMatrix(projection);
@@ -58,7 +74,7 @@ void OpenGalaxyScene::Init()
 	light[0].type = Light::LIGHT_DIRECTIONAL;
 	light[0].position.Set(0, 500, 0);
 	light[0].color.Set(1, 1, 1);
-	light[0].power = 0.35;
+	light[0].power = 1;
 	light[0].kC = 1.0f;
 	light[0].kL = 1.0f;
 	light[0].kQ = 1.0f;
@@ -109,7 +125,11 @@ void OpenGalaxyScene::Init()
 	//Render wishlist
 	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("Axes", 1000, 1000, 1000);
 
-	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateSphere("LightSource", Color(1, 1, 1), 18, 36);
+	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateOBJ("LightSource", "OBJ//planet.obj");
+	meshList[GEO_LIGHTBALL]->textureID = LoadTGA("Image//planetSunTexture.tga");
+
+	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
+	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
 
 	//Skybox - Galaxy
 	meshList[SKYBOX_Xposv] = MeshBuilder::GenerateQuad("right", Color(1, 1, 1));
@@ -125,8 +145,21 @@ void OpenGalaxyScene::Init()
 	meshList[SKYBOX_Znega] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1));
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
 
+	//Cave Rocks
+	meshList[ASTEROIDS] = MeshBuilder::GenerateSphere("Asteroids", Color(0.2941, 0.2941, 0.2941), 5, 10); //75, 75, 75 in RGB (Grey)
+	meshList[ASTEROIDS]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
+	meshList[ASTEROIDS]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
+	meshList[ASTEROIDS]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
+	meshList[ASTEROIDS]->material.kShininess = 0.1f;
+
 	meshList[PLANET_A] = MeshBuilder::GenerateOBJ("PlanetA", "OBJ//planet.obj");
 	meshList[PLANET_A]->textureID = LoadTGA("Image//planetATexture.tga");
+
+	meshList[PLANET_B] = MeshBuilder::GenerateOBJ("PlanetB", "OBJ//planet.obj");
+	meshList[PLANET_B]->textureID = LoadTGA("Image//planetBTexture.tga");
+
+	meshList[PLANET_C] = MeshBuilder::GenerateOBJ("PlanetC", "OBJ//planet.obj");
+	meshList[PLANET_C]->textureID = LoadTGA("Image//planetCTexture.tga");
 
 }
 
@@ -155,7 +188,6 @@ void OpenGalaxyScene::Update(double dt)
 
 		camera.Update(dt);
 
-
 	//Light
 	if (Application::IsKeyPressed('8')){
 		light[0].type = Light::LIGHT_POINT;
@@ -168,6 +200,54 @@ void OpenGalaxyScene::Update(double dt)
 	if (Application::IsKeyPressed('0')){
 		light[0].type = Light::LIGHT_SPOT;
 		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
+	}
+
+	/*if (camera.position.x > 250){
+		rotateTextX += 1.0f;
+	}
+	if(camera.position.x < 250){
+		rotateTextX -= 1.0f;
+	}
+	else if (camera.position.y > 250){
+		rotateTextY += 1.0f;
+	}
+	else if (camera.position.y < 250){
+		rotateTextY -= 1.0f;
+	}
+	if (camera.position.z > 0){
+		if (camera.position.z > rotateTextY){
+			rotateTextY += 1.0f;
+		}
+	}
+	else if (camera.position.z < 0){
+		if (camera.position.z < rotateTextY){
+			rotateTextY -= 1.0f;
+		}
+	}*/
+
+	if (((camera.position - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
+		land = true;
+
+		if (Application::IsKeyPressed('E')){
+			//code to land onto planet A here
+		}
+	}
+	else if (((camera.position - (Vector3(250, 250, 0))).Length()) < 100){	//for planet B
+		land = true;
+
+		if (Application::IsKeyPressed('E')){
+			//code to land onto planet B here
+		}
+	}
+	else if (((camera.position - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C
+		land = true;
+
+		if (Application::IsKeyPressed('E')){
+			//code to land onto planet C here
+		}
+	}
+	else{
+		land = false;
 	}
 }
 
@@ -346,18 +426,53 @@ void OpenGalaxyScene::Render()
 
 	modelStack.PushMatrix();
 	modelStack.Translate(light[0].position.x, light[0].position.y, light[0].position.z);
+	modelStack.Scale(50, 50, 50);
 	RenderMesh(meshList[GEO_LIGHTBALL], false);
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
+	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);	//toggle for if skybox moves with skybox
 	generateSkybox();
 	modelStack.PopMatrix();
+
+	for (unsigned i = 0; i < 1000; i++){
+		modelStack.PushMatrix();
+		modelStack.Translate(randTranslateX[i], randTranslateY[i], randTranslateZ[i]);
+		modelStack.Scale(randScaleX[i], randScaleY[i], randScaleZ[i]);
+		RenderMesh(meshList[ASTEROIDS], true);
+		modelStack.PopMatrix();
+	}
 
 	modelStack.PushMatrix();
 	modelStack.Translate(250, 250, 0);
 	modelStack.Scale(50, 50, 50);
 	RenderMesh(meshList[PLANET_A], false);
+	modelStack.Translate(-1.5, 1, 0);
+	modelStack.Rotate(rotateTextX, 1, 0, 0);
+	modelStack.Rotate(rotateTextY, 0, 1, 0);
+	modelStack.Rotate(rotateTextZ, 0, 0, 1);
+	RenderText(meshList[GEO_TEXT], "Planet A", Color(1, 0, 0));
 	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(250, 0, 250);
+	modelStack.Scale(50, 50, 50);
+	RenderMesh(meshList[PLANET_B], false);
+	modelStack.Translate(-1.5, 1, 0);
+	RenderText(meshList[GEO_TEXT], "Planet B", Color(1, 0, 0));
+	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(-250, 0, -250);
+	modelStack.Scale(50, 50, 50);
+	RenderMesh(meshList[PLANET_C], false);
+	modelStack.Translate(-1.5, 1, 0);
+	RenderText(meshList[GEO_TEXT], "Planet C", Color(1, 0, 0));
+	modelStack.PopMatrix();
+
+	if (land){
+		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land", Color(1, 0, 0), 2, 0.5, 5);
+	}
 }
 
 void OpenGalaxyScene::Exit()
