@@ -6,6 +6,7 @@
 #include "MeshBuilder.h"
 #include "Utility.h"
 #include "LoadTGA.h"
+#include "Mtx44.h"
 
 OpenGalaxyScene::OpenGalaxyScene()
 {
@@ -30,7 +31,7 @@ void OpenGalaxyScene::Init()
 	shipAxisX = 0;
 	shipAxisY = 0;
 	shipAxisZ = 0;
-	noseOfShip = new Vector3(0, 0, 5);
+	noseOfShip = new Vector3(0, 0, 1);
 	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
 
 	for (unsigned i = 0; i < 1000; i++){
@@ -153,7 +154,7 @@ void OpenGalaxyScene::Init()
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
 
 	//Proxy SpaceShip
-	meshList[PROXY_SPACESHIP] = MeshBuilder::GenerateCube("Proxy spaceship", Color(1, 1, 1));
+	meshList[PROXY_SPACESHIP] = MeshBuilder::GeneratePyramid("Proxy spaceship", Color(1, 1, 1), 18, 36);
 	meshList[PROXY_SPACESHIP]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
 	meshList[PROXY_SPACESHIP]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
 	meshList[PROXY_SPACESHIP]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
@@ -200,10 +201,9 @@ void OpenGalaxyScene::Update(double dt)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
-	//camera.Update(dt);
+	camera.Update(dt);
 	//update Ship axes
-	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
-	noseOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ + 5);
+	
 
 	//Light
 	if (Application::IsKeyPressed('8')){
@@ -242,26 +242,38 @@ void OpenGalaxyScene::Update(double dt)
 		}
 	}*/
 
-	if (Application::IsKeyPressed('A')){
-		rotateShip -= 1.0f;
-	}
 
-	if (Application::IsKeyPressed('D')){
+	//Camera frozen, for ship movement
+	if (Application::IsKeyPressed('J')){
 		rotateShip += 1.0f;
+		Mtx44 rotate;
+		rotate.SetToRotation(1, 0, 1, 0);
+
+		(*noseOfShip) = rotate * (*noseOfShip);
+	}
+	if (Application::IsKeyPressed('L')){
+		rotateShip -= 1.0f;
+		Mtx44 rotate;
+		rotate.SetToRotation(-1, 0, 1, 0);
+
+		(*noseOfShip) = rotate * (*noseOfShip);
+	}
+	if (Application::IsKeyPressed('K')){
+		*middleOfShip -= *noseOfShip * 10 * dt;//SPEED VALUE
+	}
+	if (Application::IsKeyPressed('I')){
+		*middleOfShip += *noseOfShip * 50 * dt;//SPEED VALUE
+	}
+	if (Application::IsKeyPressed('U')){
+		middleOfShip->y += 0.5f;
+	}
+	if (Application::IsKeyPressed('O')){
+		middleOfShip->y -= 0.5f;
 	}
 
-	if (Application::IsKeyPressed('S')){
-		if ((shipAxisZ + 10) > 0){
-			shipAxisZ -= 1.0f;
-		}
-	}
 
-	if (Application::IsKeyPressed('W')){
-		if ((shipAxisZ + 10) > 0){
-			shipAxisZ += 1.0f;
-		}
-	}
 
+	//Planet interaction/docking
 	if (((camera.position - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
 		land = true;
 
@@ -482,9 +494,10 @@ void OpenGalaxyScene::Render()
 
 	modelStack.PushMatrix();
 	//modelStack.Translate(camera.position.x, camera.position.y - 10, camera.position.z - 20);
-	modelStack.Translate(shipAxisX, shipAxisY, shipAxisZ);
+	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);
 	modelStack.Rotate(rotateShip, 0, 1, 0);
-	modelStack.Scale(10, 5, 15);
+	modelStack.Rotate(90, 1, 0, 0);
+	modelStack.Scale(5, 5, 5);
 	RenderMesh(meshList[PROXY_SPACESHIP], true);
 	modelStack.PopMatrix();
 
