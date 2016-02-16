@@ -124,6 +124,10 @@ void OpenGalaxyScene::Init()
 	meshList[SKYBOX_Zposv]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy+Z.tga");
 	meshList[SKYBOX_Znega] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1));
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
+
+	meshList[PLANET_A] = MeshBuilder::GenerateOBJ("PlanetA", "OBJ//planet.obj");
+	meshList[PLANET_A]->textureID = LoadTGA("Image//planetATexture.tga");
+
 }
 
 void OpenGalaxyScene::Update(double dt)
@@ -348,6 +352,12 @@ void OpenGalaxyScene::Render()
 	modelStack.PushMatrix();
 	generateSkybox();
 	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(250, 250, 0);
+	modelStack.Scale(50, 50, 50);
+	RenderMesh(meshList[PLANET_A], false);
+	modelStack.PopMatrix();
 }
 
 void OpenGalaxyScene::Exit()
@@ -379,7 +389,7 @@ void OpenGalaxyScene::generateSkybox(){
 	//Back
 	modelStack.PushMatrix();
 	modelStack.Rotate(90, 1, 0, 0);
-	modelStack.Rotate(90, 0, 1, 0);
+	modelStack.Rotate(-180, 0, 1, 0);
 	modelStack.Translate(0, 500, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Znega], false);

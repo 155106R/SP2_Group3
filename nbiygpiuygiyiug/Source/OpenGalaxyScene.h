@@ -33,6 +33,10 @@ class OpenGalaxyScene : public Scene
 		SKYBOX_Zposv,
 		SKYBOX_Znega,
 
+		PLANET_A,
+		PLANET_B,
+		PLANET_C,
+
 		GEO_TEXT,
 
 		NUM_GEOMETRY,
