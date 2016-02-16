@@ -26,7 +26,7 @@ void OpenGalaxyScene::Init()
 	rotateTextY = 0;
 	rotateTextZ = 0;
 
-	for (unsigned i = 0; i < 1000; i++){
+	for (unsigned i = 0; i < 2000; i++){
 		randTranslateX[i] = Math::RandFloatMinMax(-1000, 1000);
 		randTranslateY[i] = Math::RandFloatMinMax(-1000, 1000);
 		randTranslateZ[i] = Math::RandFloatMinMax(-1000, 1000);
@@ -435,7 +435,7 @@ void OpenGalaxyScene::Render()
 	generateSkybox();
 	modelStack.PopMatrix();
 
-	for (unsigned i = 0; i < 1000; i++){
+	for (unsigned i = 0; i < 2000; i++){
 		modelStack.PushMatrix();
 		modelStack.Translate(randTranslateX[i], randTranslateY[i], randTranslateZ[i]);
 		modelStack.Scale(randScaleX[i], randScaleY[i], randScaleZ[i]);
@@ -473,6 +473,7 @@ void OpenGalaxyScene::Render()
 	if (land){
 		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land", Color(1, 0, 0), 2, 0.5, 5);
 	}
+
 }
 
 void OpenGalaxyScene::Exit()
