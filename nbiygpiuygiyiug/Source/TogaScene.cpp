@@ -58,7 +58,7 @@ void TogaScene::Init()
 	light[0].type = Light::LIGHT_DIRECTIONAL;
 	light[0].position.Set(0, 500, 0);
 	light[0].color.Set(1, 1, 1);
-	light[0].power = 0.35;
+	light[0].power = 1;
 	light[0].kC = 1.0f;
 	light[0].kL = 1.0f;
 	light[0].kQ = 1.0f;
@@ -111,22 +111,34 @@ void TogaScene::Init()
 
 	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateSphere("LightSource", Color(1, 1, 1), 18, 36);
 
-	//Skybox - Galaxy
+	//Skybox - TOGA
 	meshList[SKYBOX_Xposv] = MeshBuilder::GenerateQuad("right", Color(1, 1, 1));
-	meshList[SKYBOX_Xposv]->textureID = LoadTGA("Image//SkyboxToga//lakes_rt.tga");
+	meshList[SKYBOX_Xposv]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_rt.tga");
 	meshList[SKYBOX_Xnega] = MeshBuilder::GenerateQuad("left", Color(1, 1, 1));
-	meshList[SKYBOX_Xnega]->textureID = LoadTGA("Image//SkyboxToga//lakes_lf.tga");
+	meshList[SKYBOX_Xnega]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_lf.tga");
 	meshList[SKYBOX_Yposv] = MeshBuilder::GenerateQuad("top", Color(1, 1, 1));
-	meshList[SKYBOX_Yposv]->textureID = LoadTGA("Image//SkyboxToga//lakes_up.tga");
+	meshList[SKYBOX_Yposv]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_up.tga");
 	meshList[SKYBOX_Ynega] = MeshBuilder::GenerateQuad("bottom", Color(1, 1, 1));
-	meshList[SKYBOX_Ynega]->textureID = LoadTGA("Image//SkyboxToga//lakes_dn.tga");
+	meshList[SKYBOX_Ynega]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_dn.tga");
 	meshList[SKYBOX_Zposv] = MeshBuilder::GenerateQuad("front", Color(1, 1, 1));
-	meshList[SKYBOX_Zposv]->textureID = LoadTGA("Image//SkyboxToga//lakes_ft.tga");
+	meshList[SKYBOX_Zposv]->textureID = LoadTGA("Image/Skybox//SkyboxToga//lakes_ft.tga");
 	meshList[SKYBOX_Znega] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1));
-	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//SkyboxToga//lakes_bk.tga");
+	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_bk.tga");
 	meshList[GROUNDMESH] = MeshBuilder::GenerateQuad("floor", Color(1, 1, 1));
-	meshList[GROUNDMESH]->textureID = LoadTGA("Image//SkyboxToga//groundmeshtoga.tga");
+	meshList[GROUNDMESH]->textureID = LoadTGA("Image//Skybox//SkyboxToga//groundmeshtoga.tga");
+	
+	//mineral stuff
+	meshList[NPC_MINERAL_BODY] = MeshBuilder::GenerateOBJ("mineral merchant head","OBJ//merchantminerals_bodyA.obj");
+	meshList[NPC_MINERAL_BODY]->textureID = LoadTGA("Image//merchantmineral_textureA.tga");
+
+	meshList[NPC_MINERAL_HEAD] = MeshBuilder::GenerateOBJ("mineral merchant head", "OBJ//merchantminerals_headA.obj");
+	meshList[NPC_MINERAL_HEAD]->textureID = LoadTGA("Image//merchantmineral_textureA.tga");
+
+	meshList[MINERAL_SHOP] = MeshBuilder::GenerateOBJ("mineral merchant head", "OBJ//mineralshopA.obj");
+	meshList[MINERAL_SHOP]->textureID = LoadTGA("Image//mineralshop_textureA.tga");
+
 }
+
 
 void TogaScene::Update(double dt)
 {
@@ -354,11 +366,22 @@ void TogaScene::Render()
 	RenderMesh(meshList[GROUNDMESH], false);
 	modelStack.PopMatrix();
 
+
+	//skybox
 	modelStack.PushMatrix();
-	modelStack.Translate(0, +200, 0);
+	modelStack.Translate(camera.position.x, 0, camera.position.z);
+	modelStack.Translate(0, 200, 0);
 	generateSkybox();
 	modelStack.PopMatrix();
+
+	//Mineral merchant
+	modelStack.PushMatrix();
+	modelStack.Translate(-70, 0, -60);
+	modelStack.Rotate(35,0,1,0);
+	generateMineralmerchant();
+	modelStack.PopMatrix();
 }
+
 
 void TogaScene::Exit()
 {
@@ -424,4 +447,25 @@ void TogaScene::generateSkybox(){
 
 
 	
+}
+
+void TogaScene::generateMineralmerchant()
+{
+
+	//head
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_MINERAL_BODY], true);
+	modelStack.PopMatrix();
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_MINERAL_HEAD], true);
+	modelStack.PopMatrix();
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[MINERAL_SHOP], true);
+	modelStack.PopMatrix();
 }
