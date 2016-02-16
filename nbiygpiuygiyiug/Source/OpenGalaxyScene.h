@@ -41,7 +41,7 @@ class OpenGalaxyScene : public Scene
 
 		ASTEROIDS,
 
-		PROXY_SPACEHSHIP,
+		PROXY_SPACESHIP,
 
 		GEO_TEXT,
 
