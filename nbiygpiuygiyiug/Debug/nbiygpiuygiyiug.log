@@ -1,89 +1,31 @@
-﻿Build started 2/16/2016 5:09:52 PM.
-     1>Project "C:\Users\n1507\Desktop\ComG_Framework - Copy\nbiygpiuygiyiug\nbiygpiuygiyiug.vcxproj" on node 2 (Build target(s)).
+﻿Build started 2/16/2016 5:54:33 PM.
+     1>Project "C:\Users\n1507\Desktop\ComG_Framework\nbiygpiuygiyiug\nbiygpiuygiyiug.vcxproj" on node 2 (Build target(s)).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(388,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (nbiygpiuygiyiug.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
-         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"C:\Users\n1507\Desktop\ComG_Framework - Copy\\glew\include" /I"C:\Users\n1507\Desktop\ComG_Framework - Copy\\glfw\include" /I"C:\Users\n1507\Desktop\ComG_Framework - Copy\\Common\Source" /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\Common\Source\MatrixStack.cpp ..\Common\Source\Mtx44.cpp ..\Common\Source\timer.cpp ..\Common\Source\Vector3.cpp Source\Application.cpp Source\Camera.cpp Source\Camera2.cpp Source\FPCamera.cpp Source\LoadOBJ.cpp Source\LoadTGA.cpp Source\main.cpp Source\Mesh.cpp Source\MeshBuilder.cpp Source\OpenGalaxyScene.cpp Source\shader.cpp Source\TogaScene.cpp Source\Utlity.cpp
-         Utlity.cpp
-         TogaScene.cpp
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\togascene.h(161): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\togascene.h(172): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\togascene.cpp(252): warning C4305: '*=' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\togascene.cpp(307): warning C4305: '*=' : truncation from 'double' to 'float'
-         shader.cpp
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\Users\n1507\Desktop\ComG_Framework\\glew\include /IC:\Users\n1507\Desktop\ComG_Framework\\glfw\include /IC:\Users\n1507\Desktop\ComG_Framework\\Common\Source /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Source\Application.cpp Source\OpenGalaxyScene.cpp
          OpenGalaxyScene.cpp
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\opengalaxyscene.h(144): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\opengalaxyscene.h(155): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\opengalaxyscene.cpp(149): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\opengalaxyscene.cpp(283): warning C4305: '*=' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\opengalaxyscene.cpp(338): warning C4305: '*=' : truncation from 'double' to 'float'
-         MeshBuilder.cpp
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\meshbuilder.cpp(206): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\meshbuilder.cpp(211): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\meshbuilder.cpp(395): warning C4244: 'argument' : conversion from 'unsigned int' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\meshbuilder.cpp(397): warning C4244: 'argument' : conversion from 'unsigned int' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\meshbuilder.cpp(494): warning C4018: '<' : signed/unsigned mismatch
-         Mesh.cpp
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
-         main.cpp
-         LoadTGA.cpp
-         LoadOBJ.cpp
-         FPCamera.cpp
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\fpcamera.cpp(35): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\fpcamera.cpp(36): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\fpcamera.cpp(44): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\fpcamera.cpp(45): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\fpcamera.cpp(57): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\fpcamera.cpp(58): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\fpcamera.cpp(70): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\fpcamera.cpp(71): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-         Camera2.cpp
-         Camera.cpp
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.h(148): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.h(159): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.cpp(157): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.cpp(254): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.cpp(257): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.cpp(323): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.cpp(378): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.cpp(492): error C2065: 'PROXY_SPACESHIP' : undeclared identifier
          Application.cpp
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\opengalaxyscene.h(144): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\opengalaxyscene.h(155): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\togascene.h(161): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\n1507\desktop\comg_framework - copy\nbiygpiuygiyiug\source\togascene.h(172): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-         Vector3.cpp
-         timer.cpp
-         Mtx44.cpp
-         MatrixStack.cpp
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.h(148): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\opengalaxyscene.h(159): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.h(161): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.h(172): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
          Generating Code...
-       Link:
-         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\n1507\Desktop\ComG_Framework - Copy\Debug\ComG.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Users\n1507\Desktop\ComG_Framework - Copy\\glew\lib" /LIBPATH:"C:\Users\n1507\Desktop\ComG_Framework - Copy\\glfw\lib-msvc120" /LIBPATH:"C:\Users\n1507\Desktop\ComG_Framework - Copy\Debug" glew32.lib glfw3.lib opengl32.lib winmm.lib Common.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\n1507\Desktop\ComG_Framework - Copy\Debug\ComG.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\n1507\Desktop\ComG_Framework - Copy\Debug\ComG.lib" /MACHINE:X86 Debug\MatrixStack.obj
-         Debug\Mtx44.obj
-         Debug\timer.obj
-         Debug\Vector3.obj
-         Debug\Application.obj
-         Debug\Camera.obj
-         Debug\Camera2.obj
-         Debug\FPCamera.obj
-         Debug\LoadOBJ.obj
-         Debug\LoadTGA.obj
-         Debug\main.obj
-         Debug\Mesh.obj
-         Debug\MeshBuilder.obj
-         Debug\OpenGalaxyScene.obj
-         Debug\shader.obj
-         Debug\TogaScene.obj
-         Debug\Utlity.obj
-     1>LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-         nbiygpiuygiyiug.vcxproj -> C:\Users\n1507\Desktop\ComG_Framework - Copy\Debug\ComG.exe
-     1>Done Building Project "C:\Users\n1507\Desktop\ComG_Framework - Copy\nbiygpiuygiyiug\nbiygpiuygiyiug.vcxproj" (Build target(s)).
+     1>Done Building Project "C:\Users\n1507\Desktop\ComG_Framework\nbiygpiuygiyiug\nbiygpiuygiyiug.vcxproj" (Build target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:06.34
+Time Elapsed 00:00:01.42
