@@ -169,13 +169,9 @@ void TogaScene::Init()
 	meshList[UPGRADE_SHOP] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//upgradeshopA.obj");
 	meshList[UPGRADE_SHOP]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
 
-
-
-
-
-
-
-
+	//cave
+	meshList[CAVE] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//Cave_A.obj");
+	meshList[CAVE]->textureID = LoadTGA("Image//cave_textureA.tga");
 
 }
 
@@ -411,6 +407,12 @@ void TogaScene::Render()
 	modelStack.Translate(camera.position.x, 0, camera.position.z);
 	modelStack.Translate(0, 200, 0);
 	generateSkybox();
+	modelStack.PopMatrix();
+
+	//Cave
+	modelStack.PushMatrix();
+	modelStack.Translate(-0, 0, 0);
+	RenderMesh(meshList[CAVE], true);
 	modelStack.PopMatrix();
 
 	//Mineral merchant
