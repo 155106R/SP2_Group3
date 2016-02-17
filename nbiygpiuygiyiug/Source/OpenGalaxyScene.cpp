@@ -489,7 +489,7 @@ void OpenGalaxyScene::Render()
 	modelStack.Rotate(rotateShip, 0, 1, 0);
 	modelStack.Rotate(90, 1, 0, 0);
 	modelStack.Scale(5, 5, 5);
-	RenderMesh(meshList[PROXY_SPACESHIP], true);
+	//RenderMesh(meshList[PROXY_SPACESHIP], true);
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();

@@ -49,6 +49,12 @@ class TogaScene : public Scene
 		NPC_UPGRADE_HEAD,
 		UPGRADE_SHOP,
 
+		NPC_TOGAN_HEAD,
+		NPC_TOGAN_BODY,
+		NPC_TOGAN_ARM,
+		NPC_TOGAN_LEG,
+
+
 		CAVE,
 
 
@@ -121,6 +127,7 @@ private:
 	void generateMineralmerchant();
 	void generateDronemerchant();
 	void generateUpgrademerchant();
+	void generateTogan();
 
 	vector<string> fillWithFontData(string path){
 
@@ -193,6 +200,27 @@ private:
 	Light light[1];
 
 	Mesh *meshList[NUM_GEOMETRY];
+
+
+
+	//animationstuff
+	//mm (mineral merchant)
+	bool mm_y_max;
+	float mm_head_y;
+
+	//dm (droid merchant)
+	bool dm_y_max;
+	float dm_y;
+
+	bool dm_eye_rotate_max;
+	float dm_eye_rotate;
+
+
+	//um (upgrade merchant)
+	bool um_head_rotate_max;
+	float um_head_rotate;
+
+
 };
 
 #endif

@@ -19,6 +19,22 @@ void TogaScene::Init()
 {
 	//Definations
 	LSPEED = 10.0f;
+	//mm (mineral merchant)
+	mm_y_max = false;
+	mm_head_y = 0;
+
+	//dm drone merchant
+	dm_y_max = false;
+	dm_y = 0;
+
+	dm_eye_rotate_max = false;
+	dm_eye_rotate = 0;
+	
+	
+	//um upgrade merchant 
+	um_head_rotate_max = false;
+	um_head_rotate  = 0;
+
 
 	Mtx44 projection;
 	projection.SetToPerspective(45.f, 4.f / 3.f, 0.1f, 1000.f);
@@ -173,6 +189,22 @@ void TogaScene::Init()
 	meshList[CAVE] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//Cave_A.obj");
 	meshList[CAVE]->textureID = LoadTGA("Image//cave_textureA.tga");
 
+
+	//togan wandering npc
+	meshList[NPC_TOGAN_BODY] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_body.obj");
+	meshList[NPC_TOGAN_BODY]->textureID = LoadTGA("Image//toga_texture.tga");
+
+	meshList[NPC_TOGAN_HEAD] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_head.obj");
+	meshList[NPC_TOGAN_HEAD]->textureID = LoadTGA("Image//toga_texture.tga");
+
+	meshList[NPC_TOGAN_ARM] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_arm.obj");
+	meshList[NPC_TOGAN_ARM]->textureID = LoadTGA("Image//toga_texture.tga");
+
+
+	meshList[NPC_TOGAN_LEG] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_leg.obj");
+	meshList[NPC_TOGAN_LEG]->textureID = LoadTGA("Image//toga_texture.tga");
+
+
 }
 
 void TogaScene::Update(double dt)
@@ -213,6 +245,96 @@ void TogaScene::Update(double dt)
 	if (Application::IsKeyPressed('0')){
 		light[0].type = Light::LIGHT_SPOT;
 		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
+	}
+
+	//looping animations
+	//mm mineral merchant
+	if (mm_y_max == false)
+	{
+		if (mm_head_y < 1.5)
+		{
+			mm_head_y += 1 * dt;
+			if (mm_head_y >= 1.5)
+			{
+				mm_y_max = true;
+			}
+
+		}
+	}
+	else if (mm_y_max == true)
+	{
+
+		mm_head_y -= 1 * dt;
+		if (mm_head_y <= -0.5)
+		{
+			mm_y_max = false;
+		}
+
+
+	}
+
+	//dm drone merchant
+	if (dm_eye_rotate_max == false)
+	{
+
+		dm_eye_rotate += 100 * dt;
+		if (dm_eye_rotate >= 75)
+		{
+			dm_eye_rotate_max = true;
+		}
+
+	}
+	else if (dm_eye_rotate_max == true)
+	{
+
+		dm_eye_rotate -= 100 * dt;
+		if (dm_eye_rotate <= -75)
+		{
+			dm_eye_rotate_max = false;
+		}
+
+	}
+	/////
+	if (dm_y_max == false)
+	{
+		dm_y += 4 * dt;
+		if (dm_y > 5)
+		{
+			dm_y_max = true;
+		}
+
+	}
+	else if (dm_y_max == true)
+	{
+		dm_y -= 4 * dt;
+		if (dm_y < -3)
+		{
+			dm_y_max = false;
+		}
+
+	}
+
+	//um drone merchant
+	if (um_head_rotate_max == false)
+	{
+
+		um_head_rotate += 10 * dt;
+		if (um_head_rotate >= 15)
+		{
+			um_head_rotate_max = true;
+		}
+
+	}
+	else if (um_head_rotate_max == true)
+	{
+
+		um_head_rotate -= 10 * dt;
+		if (um_head_rotate <= -15)
+		{
+			um_head_rotate_max = false;
+		}
+
+
 	}
 }
 
@@ -407,11 +529,12 @@ void TogaScene::Render()
 	modelStack.Translate(camera.position.x, 0, camera.position.z);
 	modelStack.Translate(0, 200, 0);
 	generateSkybox();
-	modelStack.PopMatrix();
 
+	modelStack.PopMatrix();
 	//Cave
 	modelStack.PushMatrix();
-	modelStack.Translate(-0, 0, 0);
+	modelStack.Translate(0, 0, -500);
+	modelStack.Scale(150, 150, 150);
 	RenderMesh(meshList[CAVE], true);
 	modelStack.PopMatrix();
 
@@ -424,7 +547,7 @@ void TogaScene::Render()
 
 	//Drone merchant
 	modelStack.PushMatrix();
-	modelStack.Translate(60, -5, -80);
+	modelStack.Translate(60, dm_y-5, -80);
 	modelStack.Rotate(-75, 0, 1, 0);
 	generateDronemerchant();
 	modelStack.PopMatrix();
@@ -434,6 +557,12 @@ void TogaScene::Render()
 	modelStack.Translate(-40, -8, 410);
 	modelStack.Rotate(155, 0, 1, 0);
 	generateUpgrademerchant();
+	modelStack.PopMatrix();
+
+	//Upgrade merchant
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	generateTogan();
 	modelStack.PopMatrix();
 }
 
@@ -513,7 +642,7 @@ void TogaScene::generateMineralmerchant()
 	RenderMesh(meshList[NPC_MINERAL_BODY], true);
 	modelStack.PopMatrix();
 	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, 0);
+	modelStack.Translate(0, mm_head_y, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_MINERAL_HEAD], true);
 	modelStack.PopMatrix();
@@ -535,6 +664,7 @@ void TogaScene::generateDronemerchant()
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
+	modelStack.Rotate(dm_eye_rotate,0, 1, 0);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_DRONE_EYE], false);
@@ -547,7 +677,7 @@ void TogaScene::generateDronemerchant()
 	modelStack.PopMatrix();
 	
 	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, 0);
+	modelStack.Translate(0, 0-dm_y, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[DRONE_SHOP], true);
 	modelStack.PopMatrix();
@@ -566,6 +696,7 @@ void TogaScene::generateUpgrademerchant()
 
 	//head
 	modelStack.PushMatrix();
+	modelStack.Rotate(um_head_rotate,0, 1, 0);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_UPGRADE_HEAD], true);
@@ -591,5 +722,39 @@ void TogaScene::generateUpgrademerchant()
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[UPGRADE_SHOP], true);
 	modelStack.PopMatrix();
+
+}
+
+void TogaScene::generateTogan()
+{
+
+	//body
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_TOGAN_BODY], true);
+	modelStack.PopMatrix();
+
+	//head
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_TOGAN_HEAD], true);
+	modelStack.PopMatrix();
+
+	//legs
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_TOGAN_LEG], true);
+	modelStack.PopMatrix();
+
+	//arm
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_TOGAN_ARM], true);
+	modelStack.PopMatrix();
+
 
 }
