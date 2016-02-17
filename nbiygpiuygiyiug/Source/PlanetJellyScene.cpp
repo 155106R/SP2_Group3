@@ -189,7 +189,11 @@ void PlanetJellyScene::Update(double dt)
 			jelly.S_Y -= 1 * dt;
 			jelly.T_Y -= 1 * dt;
 		}
-		else jelly.state = 1;
+		else
+		{ 
+			jelly.state = 1;
+			jelly_jumping.state = 1;
+		}
 	}
 	else if (jelly.state == 1 && jelly_jumping.state == 1)
 	{
@@ -197,8 +201,18 @@ void PlanetJellyScene::Update(double dt)
 		{
 			jelly.S_Y += 1 * dt;
 			jelly.T_Y += 1 * dt;
+			jelly_jumping.T_Y += 2 * dt;
 		}
-		else jelly.state = 0;
+		else
+		{
+			jelly.state = 0;
+			jelly_jumping.state = 2;
+		}
+	}
+	else if (jelly_jumping.state == 2)
+	{
+		if (jelly_jumping.T_Y >= 0) jelly_jumping.T_Y -= 2 * dt;
+		else jelly_jumping.state = 0;
 	}
 	//jelly_jumping animation
 
@@ -504,7 +518,7 @@ void PlanetJellyScene::Render()
 	// render NPC
 	// NPC-NPC
 	modelStack.PushMatrix();
-	modelStack.Translate(10, -10 + jelly.T_Y, 10);
+	modelStack.Translate(10, -10 + jelly.T_Y + jelly_jumping.T_Y, 10);
 	modelStack.Scale(5, 5 + jelly.S_Y, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
