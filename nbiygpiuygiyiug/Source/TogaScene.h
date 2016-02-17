@@ -130,6 +130,20 @@ private:
 	void generateTogan();
 	void generateWanderers();
 
+	//ANIMATIONS
+	void droneAnimation(double dt);
+	void mineralAnimation(double dt);
+	void upgradeAnimation(double dt);
+
+
+	void toganwalk(double dt);
+	void getWalktarget(double dt);
+
+
+
+
+
+
 	vector<string> fillWithFontData(string path){
 
 		string line;
@@ -226,23 +240,26 @@ private:
 	float rotate_armL;
 	float rotate_legL;
 	float rotate_legR;
-	
-};
-
-struct Togan
-{
-public:
-	Togan(Vector3 cords);
-	~Togan();
-
 
 	bool armR_max;
 	bool armL_max;
 	bool legR_max;
 	bool legL_max;
-	float rotate_togan;
+	float targetxz;
 
-	Vector3 position;
+
+
+	struct Togan
+	{
+
+		float rotate_togan;
+
+		Vector3 position;
+
+	};
+
+	Togan togan1;
 
 };
+
 #endif

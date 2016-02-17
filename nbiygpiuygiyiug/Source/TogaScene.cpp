@@ -7,6 +7,10 @@
 #include "Utility.h"
 #include "LoadTGA.h"
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 TogaScene::TogaScene()
 {
 }
@@ -17,6 +21,12 @@ TogaScene::~TogaScene()
 
 void TogaScene::Init()
 {
+	//random
+	Math::InitRNG();
+	targetxz = 0;
+	//togan 1 npc
+	togan1.position = Vector3(0, 0, 0);
+
 	//Definations
 	LSPEED = 10.0f;
 	//mm (mineral merchant)
@@ -37,9 +47,14 @@ void TogaScene::Init()
 
 	//Togans
 	rotate_armR=0;
-	rotate_armL=0;
+	rotate_armL=35;
 	rotate_legL=0;
-	rotate_legR=0;
+	rotate_legR=40;
+
+	armR_max = 0;
+	armL_max = 0;
+	legR_max = 0;
+	legL_max = 0;
 
 
 	Mtx44 projection;
@@ -213,8 +228,21 @@ void TogaScene::Init()
 
 }
 
+float inc = 0;
 void TogaScene::Update(double dt)
 {
+
+	if (Application::IsKeyPressed('Z'))
+	{
+		inc += 50 * dt;
+		cout << targetxz << endl;
+	}
+	if (Application::IsKeyPressed('X'))
+	{
+		inc -= 50 * dt;
+		cout << togan1.position.x << endl;
+		cout << togan1.position.z << endl;
+	}
 	//Enable culling
 	if (Application::IsKeyPressed('1'))
 	{
@@ -253,96 +281,20 @@ void TogaScene::Update(double dt)
 		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
 	}
 
-	//looping animations
-	//mm mineral merchant
-	if (mm_y_max == false)
-	{
-		if (mm_head_y < 1.5)
-		{
-			mm_head_y += 1 * dt;
-			if (mm_head_y >= 1.5)
-			{
-				mm_y_max = true;
-			}
-
-		}
-	}
-	else if (mm_y_max == true)
-	{
-
-		mm_head_y -= 1 * dt;
-		if (mm_head_y <= -0.5)
-		{
-			mm_y_max = false;
-		}
+	
 
 
-	}
 
-	//dm drone merchant
-	if (dm_eye_rotate_max == false)
-	{
+	droneAnimation(dt);
+	mineralAnimation(dt);
+	upgradeAnimation(dt);
 
-		dm_eye_rotate += 100 * dt;
-		if (dm_eye_rotate >= 75)
-		{
-			dm_eye_rotate_max = true;
-		}
-
-	}
-	else if (dm_eye_rotate_max == true)
-	{
-
-		dm_eye_rotate -= 100 * dt;
-		if (dm_eye_rotate <= -75)
-		{
-			dm_eye_rotate_max = false;
-		}
-
-	}
-	/////
-	if (dm_y_max == false)
-	{
-		dm_y += 4 * dt;
-		if (dm_y > 5)
-		{
-			dm_y_max = true;
-		}
-
-	}
-	else if (dm_y_max == true)
-	{
-		dm_y -= 4 * dt;
-		if (dm_y < -3)
-		{
-			dm_y_max = false;
-		}
-
-	}
-
-	//um drone merchant
-	if (um_head_rotate_max == false)
-	{
-
-		um_head_rotate += 10 * dt;
-		if (um_head_rotate >= 15)
-		{
-			um_head_rotate_max = true;
-		}
-
-	}
-	else if (um_head_rotate_max == true)
-	{
-
-		um_head_rotate -= 10 * dt;
-		if (um_head_rotate <= -15)
-		{
-			um_head_rotate_max = false;
-		}
+	toganwalk(dt);
+	getWalktarget(dt);
 
 
-	}
 }
+
 
 void TogaScene::RenderText(Mesh* mesh, std::string text, Color color)
 {
@@ -568,6 +520,7 @@ void TogaScene::Render()
 	//Togans
 	modelStack.PushMatrix();
 	modelStack.Translate(0, 0, 0);
+	//RenderMesh(meshList[NPC_TOGAN_ARM], true);
 	generateWanderers();
 	modelStack.PopMatrix();
 }
@@ -752,15 +705,15 @@ void TogaScene::generateTogan()
 	//legs
 	//left leg
 	modelStack.PushMatrix();
-	modelStack.Rotate(rotate_legL, 1, 0, 0);
-	modelStack.Translate(0, 0, 0);
+	modelStack.Translate(0, 10, 3.5);
+	modelStack.Rotate(rotate_legL, 0, 0, 1);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_LEG], true);
 	modelStack.PopMatrix();
 	//right leg
-	modelStack.PushMatrix();
-	modelStack.Rotate(rotate_legR, 1, 0, 0);
-	modelStack.Translate(0, 0, -8);
+	modelStack.PushMatrix();	
+	modelStack.Translate(0, 10, -3.5);
+	modelStack.Rotate(rotate_legR, 0, 0, 1);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_LEG], true);
 	modelStack.PopMatrix();
@@ -768,15 +721,17 @@ void TogaScene::generateTogan()
 	//arms
 	//left arm
 	modelStack.PushMatrix();
-	modelStack.Rotate(rotate_armL, 1, 0, 0);
+	modelStack.Translate(2, 22, 8.5);	
+	modelStack.Rotate(rotate_armL, 0, 0, 1);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_ARM], true);
 	modelStack.PopMatrix();
 	//right arm
 	modelStack.PushMatrix();
-	modelStack.Rotate(rotate_armR, 1, 0, 0);
-	modelStack.Translate(0, 0, -17);
+	modelStack.Translate(2, 22, -8.5);
+	modelStack.Rotate(rotate_armR, 0, 0, 1);
+	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_ARM], true);
 	modelStack.PopMatrix();
@@ -787,9 +742,9 @@ void TogaScene::generateWanderers()
 {
 	//wanderer1
 
-	Togan togan1(Vector3(0,0,-100));
+	
 	modelStack.PushMatrix();
-	modelStack.Rotate(togan1.rotate_togan, 1, 1, 1);
+	modelStack.Rotate(togan1.rotate_togan, 1, 0, 0);
 	modelStack.Translate(togan1.position.x, 0, togan1.position.z);
 	generateTogan();
 	modelStack.PopMatrix();
@@ -798,24 +753,191 @@ void TogaScene::generateWanderers()
 
 }
 
-Togan::Togan(Vector3 cords)
+
+
+
+
+
+void TogaScene::droneAnimation(double dt)
 {
-	rotate_armR = 0;
-	rotate_armL = 0;
-	rotate_legL = 0;
-	rotate_legR = 0;
-	rotate_togan = 0;
+	//dm drone merchant
+	if (dm_eye_rotate_max == false)
+	{
 
-	armR_max = false;
-	armL_max = false;
-	legR_max = false;
-	legL_max = false;
+		dm_eye_rotate += 100 * dt;
+		if (dm_eye_rotate >= 75)
+		{
+			dm_eye_rotate_max = true;
+		}
 
-	position = cords;
+	}
+	else if (dm_eye_rotate_max == true)
+	{
+
+		dm_eye_rotate -= 100 * dt;
+		if (dm_eye_rotate <= -75)
+		{
+			dm_eye_rotate_max = false;
+		}
+
+	}
+	/////
+	if (dm_y_max == false)
+	{
+		dm_y += 4 * dt;
+		if (dm_y > 5)
+		{
+			dm_y_max = true;
+		}
+
+	}
+	else if (dm_y_max == true)
+	{
+		dm_y -= 4 * dt;
+		if (dm_y < -3)
+		{
+			dm_y_max = false;
+		}
+
+	}
+}
+
+void TogaScene::mineralAnimation(double dt)
+{
+	//looping animations
+	//mm mineral merchant
+	if (mm_y_max == false)
+	{
+		if (mm_head_y < 0.5)
+		{
+			mm_head_y += 1 * dt;
+			if (mm_head_y >= 0.5)
+			{
+				mm_y_max = true;
+			}
+
+		}
+	}
+	else if (mm_y_max == true)
+	{
+
+		mm_head_y -= 1 * dt;
+		if (mm_head_y <= -0.5)
+		{
+			mm_y_max = false;
+		}
+
+
+	}
 
 }
 
-Togan::~Togan()
+void TogaScene::upgradeAnimation(double dt)
 {
+	//um upgrade merchant
+	if (um_head_rotate_max == false)
+	{
+
+		um_head_rotate += 10 * dt;
+		if (um_head_rotate >= 15)
+		{
+			um_head_rotate_max = true;
+		}
+
+	}
+	else if (um_head_rotate_max == true)
+	{
+
+		um_head_rotate -= 10 * dt;
+		if (um_head_rotate <= -15)
+		{
+			um_head_rotate_max = false;
+		}
+
+
+	}
 
 }
+
+void TogaScene::toganwalk(double dt)
+{
+	if (armR_max ==0 )
+	{
+		rotate_armR += 7 * dt;
+			if(rotate_armR > 35)
+			{
+				armR_max = 1;
+			}
+	}
+	else if(armR_max == 1)
+	{
+		rotate_armR -= 7 * dt ;
+		if (rotate_armR < -3)
+		{
+			armR_max = 0;
+		}
+	}
+
+	if (armL_max == 0)
+	{
+		rotate_armL += 7 * dt;
+		if (rotate_armL > 35)
+		{
+			armL_max = 1;
+		}
+	}
+	else if (armL_max == 1)
+	{
+		rotate_armL -= 7 * dt;
+		if (rotate_armL < -3)
+		{
+			armL_max = 0;
+		}
+	}
+
+
+	if (legR_max == 0)
+	{
+		rotate_legR += 7 * dt;
+		if (rotate_legR > 40)
+		{
+			legR_max = 1;
+		}
+	}
+	else if (legR_max == 1)
+	{
+		rotate_legR -= 7 * dt;
+		if (rotate_legR < -5)
+		{
+			legR_max = 0;
+		}
+	}
+
+	if (legL_max == 0)
+	{
+		rotate_legL += 7 * dt;
+		if (rotate_legL > 40)
+		{
+			legL_max = 1;
+		}
+	}
+	else if (legL_max == 1)
+	{
+		rotate_legL -= 7 * dt;
+		if (rotate_legL < -5)
+		{
+			legL_max = 0;
+		}
+	}
+
+
+}
+
+void TogaScene::getWalktarget(double dt)
+{
+	
+
+		targetxz = Math::RandFloatMinMax(0, 150);
+	
+}
+
