@@ -1,4 +1,4 @@
-﻿Build started 2/17/2016 10:55:04 AM.
+﻿Build started 2/17/2016 1:46:09 PM.
      1>Project "C:\Users\n1507\Desktop\ComG_Framework\nbiygpiuygiyiug\nbiygpiuygiyiug.vcxproj" on node 2 (Build target(s)).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(388,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (nbiygpiuygiyiug.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
@@ -7,8 +7,8 @@
      1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
      1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
      1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.h(168): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.h(179): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.h(169): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.h(180): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
      1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.cpp(256): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
      1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.cpp(267): warning C4244: '-=' : conversion from 'double' to 'float', possible loss of data
      1>c:\users\n1507\desktop\comg_framework\nbiygpiuygiyiug\source\togascene.cpp(280): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
@@ -42,4 +42,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.85
+Time Elapsed 00:00:00.89

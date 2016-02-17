@@ -35,6 +35,12 @@ void TogaScene::Init()
 	um_head_rotate_max = false;
 	um_head_rotate  = 0;
 
+	//Togans
+	rotate_armR=0;
+	rotate_armL=0;
+	rotate_legL=0;
+	rotate_legR=0;
+
 
 	Mtx44 projection;
 	projection.SetToPerspective(45.f, 4.f / 3.f, 0.1f, 1000.f);
@@ -559,10 +565,10 @@ void TogaScene::Render()
 	generateUpgrademerchant();
 	modelStack.PopMatrix();
 
-	//Upgrade merchant
+	//Togans
 	modelStack.PushMatrix();
 	modelStack.Translate(0, 0, 0);
-	generateTogan();
+	generateWanderers();
 	modelStack.PopMatrix();
 }
 
@@ -737,24 +743,79 @@ void TogaScene::generateTogan()
 
 	//head
 	modelStack.PushMatrix();
+	modelStack.Rotate(0, 1, 1, 1);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_HEAD], true);
 	modelStack.PopMatrix();
 
 	//legs
+	//left leg
 	modelStack.PushMatrix();
+	modelStack.Rotate(rotate_legL, 1, 0, 0);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_LEG], true);
 	modelStack.PopMatrix();
-
-	//arm
+	//right leg
 	modelStack.PushMatrix();
+	modelStack.Rotate(rotate_legR, 1, 0, 0);
+	modelStack.Translate(0, 0, -8);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_TOGAN_LEG], true);
+	modelStack.PopMatrix();
+	
+	//arms
+	//left arm
+	modelStack.PushMatrix();
+	modelStack.Rotate(rotate_armL, 1, 0, 0);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_ARM], true);
 	modelStack.PopMatrix();
+	//right arm
+	modelStack.PushMatrix();
+	modelStack.Rotate(rotate_armR, 1, 0, 0);
+	modelStack.Translate(0, 0, -17);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_TOGAN_ARM], true);
+	modelStack.PopMatrix();
 
+}
+
+void TogaScene::generateWanderers()
+{
+	//wanderer1
+
+	Togan togan1(Vector3(0,0,-100));
+	modelStack.PushMatrix();
+	modelStack.Rotate(togan1.rotate_togan, 1, 1, 1);
+	modelStack.Translate(togan1.position.x, 0, togan1.position.z);
+	generateTogan();
+	modelStack.PopMatrix();
+
+
+
+}
+
+Togan::Togan(Vector3 cords)
+{
+	rotate_armR = 0;
+	rotate_armL = 0;
+	rotate_legL = 0;
+	rotate_legR = 0;
+	rotate_togan = 0;
+
+	armR_max = false;
+	armL_max = false;
+	legR_max = false;
+	legL_max = false;
+
+	position = cords;
+
+}
+
+Togan::~Togan()
+{
 
 }

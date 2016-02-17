@@ -128,6 +128,7 @@ private:
 	void generateDronemerchant();
 	void generateUpgrademerchant();
 	void generateTogan();
+	void generateWanderers();
 
 	vector<string> fillWithFontData(string path){
 
@@ -220,7 +221,28 @@ private:
 	bool um_head_rotate_max;
 	float um_head_rotate;
 
-
+	//Togans
+	float rotate_armR;
+	float rotate_armL;
+	float rotate_legL;
+	float rotate_legR;
+	
 };
 
+struct Togan
+{
+public:
+	Togan(Vector3 cords);
+	~Togan();
+
+
+	bool armR_max;
+	bool armL_max;
+	bool legR_max;
+	bool legL_max;
+	float rotate_togan;
+
+	Vector3 position;
+
+};
 #endif
