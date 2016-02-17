@@ -74,7 +74,10 @@
     <ClCompile Include="Source\OpenGalaxyScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TogaScene.cpp">
+    <ClCompile Include="Source\PlanetJellyScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Camera_Mouse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -139,7 +142,10 @@
     <ClInclude Include="Source\OpenGalaxyScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\TogaScene.h">
+    <ClInclude Include="Source\PlanetJellyScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Camera_Mouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

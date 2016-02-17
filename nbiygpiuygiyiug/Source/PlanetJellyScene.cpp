@@ -1,4 +1,4 @@
-#include "OpenGalaxyScene.h"
+#include "PlanetJellyScene.h"
 #include "GL\glew.h"
 #include "MatrixStack.h"
 #include "shader.hpp"
@@ -6,43 +6,19 @@
 #include "MeshBuilder.h"
 #include "Utility.h"
 #include "LoadTGA.h"
-#include "Mtx44.h"
 
-OpenGalaxyScene::OpenGalaxyScene()
+PlanetJellyScene::PlanetJellyScene()
 {
 }
 
-OpenGalaxyScene::~OpenGalaxyScene()
+PlanetJellyScene::~PlanetJellyScene()
 {
 }
 
-void OpenGalaxyScene::Init()
+void PlanetJellyScene::Init()
 {
 	//Definations
 	LSPEED = 10.0f;
-
-	land = false;
-
-	rotateTextX = 0;
-	rotateTextY = 0;
-	rotateTextZ = 0;
-
-	rotateShip = 0;
-	shipAxisX = 0;
-	shipAxisY = 0;
-	shipAxisZ = 0;
-	noseOfShip = new Vector3(0, 0, 1);
-	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
-
-	for (unsigned i = 0; i < 1000; i++){
-		randTranslateX[i] = Math::RandFloatMinMax(-1000, 1000);
-		randTranslateY[i] = Math::RandFloatMinMax(-1000, 1000);
-		randTranslateZ[i] = Math::RandFloatMinMax(-1000, 1000);
-
-		randScaleX[i] = Math::RandFloatMinMax(5, 10);
-		randScaleY[i] = Math::RandFloatMinMax(5, 10);
-		randScaleZ[i] = Math::RandFloatMinMax(5, 10);
-	}
 
 	Mtx44 projection;
 	projection.SetToPerspective(45.f, 4.f / 3.f, 0.1f, 1000.f);
@@ -50,6 +26,8 @@ void OpenGalaxyScene::Init()
 
 	//Init VBO here
 	glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
 
 	//Enable blending
 	glEnable(GL_BLEND);
@@ -58,8 +36,8 @@ void OpenGalaxyScene::Init()
 	//Enable depth test
 	glEnable(GL_DEPTH_TEST);
 
-	//Camera
-	camera.Init(Vector3(30, 30, 30), Vector3(0, 0, 0), Vector3(0, 10, 0));
+	//Camera 
+	camera.Init(Vector3(0, 0, 1), Vector3(0, 0, 0), Vector3(0, 1, 0)); //if using Camera_Mouse
 	camera.Reset();
 
 	glGenVertexArrays(1, &m_vertexArrayID);
@@ -79,13 +57,13 @@ void OpenGalaxyScene::Init()
 	m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
 
 	//Light
-	light[0].type = Light::LIGHT_DIRECTIONAL;
-	light[0].position.Set(0, 500, 0);
+	light[0].type = Light::LIGHT_SPOT;
+	light[0].position.Set(0, 20, 0);
 	light[0].color.Set(1, 1, 1);
 	light[0].power = 1;
 	light[0].kC = 1.0f;
-	light[0].kL = 1.0f;
-	light[0].kQ = 1.0f;
+	light[0].kL = 0.01f;
+	light[0].kQ = 0.001f;
 	light[0].cosCutoff = cos(Math::DegreeToRadian(45));
 	light[0].cosInner = cos(Math::DegreeToRadian(30));
 	light[0].exponenet = 3.0f;
@@ -130,56 +108,117 @@ void OpenGalaxyScene::Init()
 	//light toggle shit
 	enableLight = true;
 
+	//light toggle mode
+	if (light[0].type == Light::LIGHT_DIRECTIONAL)
+	{
+		Vector3 lightDir(light[0].position.x, light[0].position.y, light[0].position.z);
+		Vector3 lightDirection_cameraspace = viewStack.Top() * lightDir;
+		glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightDirection_cameraspace.x);
+	}
+	else if (light[0].type == Light::LIGHT_SPOT)
+	{
+
+		Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
+		glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
+		Vector3 spotDirection_cameraspace = viewStack.Top() * light[0].spotDirection;
+		glUniform3fv(m_parameters[U_LIGHT0_SPOTDIRECTION], 1, &spotDirection_cameraspace.x);
+	}
+	else
+	{
+		Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
+		glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
+	}
+
 	//Render wishlist
 	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("Axes", 1000, 1000, 1000);
 
-	meshList[PLANET_SUN] = MeshBuilder::GenerateOBJ("LightSource", "OBJ//planet.obj");
-	meshList[PLANET_SUN]->textureID = LoadTGA("Image//planetSunTexture.tga");
+	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateSphere("LightSource", Color(1, 1, 1), 18, 36);
 
-	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
-	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
-
-	//Skybox - Galaxy
+	//Skybox - Planet JELLY
 	meshList[SKYBOX_Xposv] = MeshBuilder::GenerateQuad("right", Color(1, 1, 1));
-	meshList[SKYBOX_Xposv]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy+X.tga");
+	meshList[SKYBOX_Xposv]->textureID = LoadTGA("Image//Skybox//jelly_planet//jelly-Z.tga");
 	meshList[SKYBOX_Xnega] = MeshBuilder::GenerateQuad("left", Color(1, 1, 1));
-	meshList[SKYBOX_Xnega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-X.tga");
+	meshList[SKYBOX_Xnega]->textureID = LoadTGA("Image//Skybox//jelly_planet//jelly+Z.tga");
 	meshList[SKYBOX_Yposv] = MeshBuilder::GenerateQuad("top", Color(1, 1, 1));
-	meshList[SKYBOX_Yposv]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy+Y.tga");
+	meshList[SKYBOX_Yposv]->textureID = LoadTGA("Image//Skybox//jelly_planet//jelly+Y.tga");
 	meshList[SKYBOX_Ynega] = MeshBuilder::GenerateQuad("bottom", Color(1, 1, 1));
-	meshList[SKYBOX_Ynega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Y.tga");
+	meshList[SKYBOX_Ynega]->textureID = LoadTGA("Image//Skybox//jelly_planet//jelly-Y.tga");
 	meshList[SKYBOX_Zposv] = MeshBuilder::GenerateQuad("front", Color(1, 1, 1));
-	meshList[SKYBOX_Zposv]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy+Z.tga");
+	meshList[SKYBOX_Zposv]->textureID = LoadTGA("Image//Skybox//jelly_planet//jelly+X.tga");
 	meshList[SKYBOX_Znega] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1));
-	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
+	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//jelly_planet//jelly-X.tga");
 
-	//Proxy SpaceShip
-	meshList[PROXY_SPACESHIP] = MeshBuilder::GeneratePyramid("Proxy spaceship", Color(1, 1, 1), 18, 36);
-	meshList[PROXY_SPACESHIP]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
-	meshList[PROXY_SPACESHIP]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
-	meshList[PROXY_SPACESHIP]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
-	meshList[PROXY_SPACESHIP]->material.kShininess = 0.1f;
+	//Render ground mesh
+	meshList[GROUND_MESH] = MeshBuilder::GenerateOBJ("ground", "OBJ//jelly_house.obj");
+	meshList[GROUND_MESH]->textureID = LoadTGA("Image//jelly_house_texture.tga");
 
-	//Asteroids
-	meshList[ASTEROIDS] = MeshBuilder::GenerateSphere("Asteroids", Color(0.2941, 0.2941, 0.2941), 5, 10); //75, 75, 75 in RGB (Grey)
-	meshList[ASTEROIDS]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
-	meshList[ASTEROIDS]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
-	meshList[ASTEROIDS]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
-	meshList[ASTEROIDS]->material.kShininess = 0.1f;
+	//render Cave(mine mineral)
+	meshList[CAVE] = MeshBuilder::GenerateOBJ("cave", "OBJ//jelly_cave.obj");
+	meshList[CAVE]->textureID = LoadTGA("Image//jelly_cave_texture.tga");
 
-	meshList[PLANET_A] = MeshBuilder::GenerateOBJ("PlanetA", "OBJ//planet.obj");
-	meshList[PLANET_A]->textureID = LoadTGA("Image//planetATexture.tga");
+	//Render shops
+	meshList[SHOP_MINERAL] = MeshBuilder::GenerateOBJ("mineral shop", "OBJ//jelly_shop.obj");
+	meshList[SHOP_MINERAL]->textureID = LoadTGA("Image//jelly_shop_texture.tga");
+	meshList[SHOP_DRONE] = MeshBuilder::GenerateOBJ("drone shop", "OBJ//drone_shopA.obj");
+	meshList[SHOP_DRONE]->textureID = LoadTGA("Image//droneshop_textureA.tga");
+	meshList[SHOP_UPGRADE] = MeshBuilder::GenerateOBJ("upgrade shop", "OBJ//upgradeshopA.obj");
+	meshList[SHOP_UPGRADE]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
 
-	meshList[PLANET_B] = MeshBuilder::GenerateOBJ("PlanetB", "OBJ//planet.obj");
-	meshList[PLANET_B]->textureID = LoadTGA("Image//planetBTexture.tga");
+	//Render NCP
+	meshList[NPC_1] = MeshBuilder::GenerateOBJ("npc", "OBJ//jelly.obj");
+	meshList[NPC_1]->textureID = LoadTGA("Image//jelly_texture.tga");
 
-	meshList[PLANET_C] = MeshBuilder::GenerateOBJ("PlanetC", "OBJ//planet.obj");
-	meshList[PLANET_C]->textureID = LoadTGA("Image//planetCTexture.tga");
+	// jelly animation
+	jelly.T_Y = 0;
+	jelly.S_Y = 0;
+	jelly.state = 0;
+
+	// jelly_jumping animation
+	jelly_jumping.T_Y = 0;
+	jelly_jumping.state = 0;
 
 }
 
-void OpenGalaxyScene::Update(double dt)
+void PlanetJellyScene::Update(double dt)
 {
+	// jelly animation
+	if (jelly.state == 0 && jelly_jumping.state == 0)
+	{
+		if (jelly.S_Y >= -1)
+		{
+			jelly.S_Y -= 1 * dt;
+			jelly.T_Y -= 1 * dt;
+		}
+		else
+		{ 
+			jelly.state = 1;
+			jelly_jumping.state = 1;
+		}
+	}
+	else if (jelly.state == 1 && jelly_jumping.state == 1)
+	{
+		if (jelly.S_Y <= 0)
+		{
+			jelly.S_Y += 1 * dt;
+			jelly.T_Y += 1 * dt;
+			jelly_jumping.T_Y += 2 * dt;
+		}
+		else
+		{
+			jelly.state = 0;
+			jelly_jumping.state = 2;
+		}
+	}
+	else if (jelly_jumping.state == 2)
+	{
+		if (jelly_jumping.T_Y >= 0) jelly_jumping.T_Y -= 2 * dt;
+		else jelly_jumping.state = 0;
+	}
+	//jelly_jumping animation
+
+
+
+
 	//Enable culling
 	if (Application::IsKeyPressed('1'))
 	{
@@ -201,8 +240,40 @@ void OpenGalaxyScene::Update(double dt)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
+	if (Application::IsKeyPressed('Z'))
+	{
+		enableLight = false;
+	}
+	if (Application::IsKeyPressed('X'))
+	{
+		enableLight = true;
+	}
+	if (Application::IsKeyPressed('I'))
+	{
+		light[0].position.z -= (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('K'))
+	{
+		light[0].position.z += (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('J'))
+	{
+		light[0].position.x -= (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('L'))
+	{
+		light[0].position.x += (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('O'))
+	{
+		light[0].position.y -= (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('P'))
+	{
+		light[0].position.y += (float)(LSPEED*dt);
+	}
+
 	camera.Update(dt);
-	//update Ship axes
 
 
 	//Light
@@ -218,87 +289,9 @@ void OpenGalaxyScene::Update(double dt)
 		light[0].type = Light::LIGHT_SPOT;
 		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
 	}
-
-	/*if (camera.position.x > 250){
-	rotateTextX += 1.0f;
-	}
-	if(camera.position.x < 250){
-	rotateTextX -= 1.0f;
-	}
-	else if (camera.position.y > 250){
-	rotateTextY += 1.0f;
-	}
-	else if (camera.position.y < 250){
-	rotateTextY -= 1.0f;
-	}
-	if (camera.position.z > 0){
-	if (camera.position.z > rotateTextY){
-	rotateTextY += 1.0f;
-	}
-	}
-	else if (camera.position.z < 0){
-	if (camera.position.z < rotateTextY){
-	rotateTextY -= 1.0f;
-	}
-	}*/
-
-	//Camera frozen, for ship movement
-	if (Application::IsKeyPressed('J')){
-		rotateShip += 1.0f;
-		Mtx44 rotate;
-		rotate.SetToRotation(1, 0, 1, 0);
-
-		(*noseOfShip) = rotate * (*noseOfShip);
-	}
-	if (Application::IsKeyPressed('L')){
-		rotateShip -= 1.0f;
-		Mtx44 rotate;
-		rotate.SetToRotation(-1, 0, 1, 0);
-
-		(*noseOfShip) = rotate * (*noseOfShip);
-	}
-	if (Application::IsKeyPressed('K')){
-		*middleOfShip -= *noseOfShip * 10 * dt;
-	}
-	if (Application::IsKeyPressed('I')){
-		*middleOfShip += *noseOfShip * 50 * dt;
-	}
-	if (Application::IsKeyPressed('U')){
-		middleOfShip->y += 0.5f;
-	}
-	if (Application::IsKeyPressed('O')){
-		middleOfShip->y -= 0.5f;
-	}
-
-
-	//Planet interaction/docking
-	if (((camera.position - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
-		land = true;
-
-		if (Application::IsKeyPressed('E')){
-			//code to land onto planet A here
-		}
-	}
-	else if (((camera.position - (Vector3(250, 250, 0))).Length()) < 100){	//for planet B
-		land = true;
-
-		if (Application::IsKeyPressed('E')){
-			//code to land onto planet B here
-		}
-	}
-	else if (((camera.position - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C
-		land = true;
-
-		if (Application::IsKeyPressed('E')){
-			//code to land onto planet C here
-		}
-	}
-	else{
-		land = false;
-	}
 }
 
-void OpenGalaxyScene::RenderText(Mesh* mesh, std::string text, Color color)
+void PlanetJellyScene::RenderText(Mesh* mesh, std::string text, Color color)
 {
 	if (!mesh || mesh->textureID <= 0) //Proper error check
 		return;
@@ -341,7 +334,7 @@ void OpenGalaxyScene::RenderText(Mesh* mesh, std::string text, Color color)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void OpenGalaxyScene::RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y)
+void PlanetJellyScene::RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y)
 {
 	if (!mesh || mesh->textureID <= 0) //Proper error check
 		return;
@@ -400,7 +393,7 @@ void OpenGalaxyScene::RenderTextOnScreen(Mesh* mesh, std::string text, Color col
 	glEnable(GL_DEPTH_TEST);
 }
 
-void OpenGalaxyScene::RenderMesh(Mesh *mesh, bool enableLight)
+void PlanetJellyScene::RenderMesh(Mesh *mesh, bool enableLight)
 {
 	Mtx44 MVP, modelView, modelView_inverse_transpose;
 	MVP = projectionStack.Top() * viewStack.Top() * modelStack.Top();
@@ -443,7 +436,7 @@ void OpenGalaxyScene::RenderMesh(Mesh *mesh, bool enableLight)
 
 }
 
-void OpenGalaxyScene::Render()
+void PlanetJellyScene::Render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -464,75 +457,95 @@ void OpenGalaxyScene::Render()
 	viewStack.LookAt(camera.position.x, camera.position.y, camera.position.z,
 		camera.target.x, camera.target.y, camera.target.z,
 		camera.up.x, camera.up.y, camera.up.z);
-
 	modelStack.LoadIdentity();
-	Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
+
+	Position lightPosition_cameraspace = viewStack.Top()*light[0].position;
 	glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
+	Vector3 spotDirection_cameraspace = viewStack.Top()*light[0].spotDirection;
+	glUniform3fv(m_parameters[U_LIGHT0_SPOTDIRECTION], 1, &spotDirection_cameraspace.x);
 
 	RenderMesh(meshList[GEO_AXES], false);
 
+	//render light
 	modelStack.PushMatrix();
 	modelStack.Translate(light[0].position.x, light[0].position.y, light[0].position.z);
-	modelStack.Scale(50, 50, 50);
-	RenderMesh(meshList[PLANET_SUN], false);
+	RenderMesh(meshList[GEO_LIGHTBALL], false);
 	modelStack.PopMatrix();
 
+	// render skybox
 	modelStack.PushMatrix();
-	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);	//toggle for if skybox moves with skybox
 	generateSkybox();
 	modelStack.PopMatrix();
 
-	for (unsigned i = 0; i < 1000; i++){
-		modelStack.PushMatrix();
-		modelStack.Translate(randTranslateX[i], randTranslateY[i], randTranslateZ[i]);
-		modelStack.Scale(randScaleX[i], randScaleY[i], randScaleZ[i]);
-		RenderMesh(meshList[ASTEROIDS], true);
-		modelStack.PopMatrix();
-	}
+	// render ground
+	modelStack.PushMatrix();
+	modelStack.Translate(100, -70, 1000);
+	modelStack.Scale(500, 50, 500);
+	RenderMesh(meshList[GROUND_MESH], enableLight);
+	modelStack.PopMatrix();
+
+	//render cave
+	modelStack.PushMatrix();
+	modelStack.Translate(200, 43, 0);
+	modelStack.Rotate(-90, 0, 1, 0);
+	modelStack.Scale(40, 40, 40);
+	RenderMesh(meshList[CAVE], enableLight);
+	modelStack.PopMatrix();
+
+	// render shop
+	modelStack.PushMatrix();
+	modelStack.Translate(100, -12, -100);
+	modelStack.Rotate(180, 0, 1, 0);
+	modelStack.Scale(20, 20, 20);
+	RenderMesh(meshList[SHOP_MINERAL], enableLight);
+	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
-	//modelStack.Translate(camera.position.x, camera.position.y - 10, camera.position.z - 20);
-	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);
-	modelStack.Rotate(rotateShip, 0, 1, 0);
-	modelStack.Rotate(90, 1, 0, 0);
+	modelStack.Translate(-100, -20, 0);
+	modelStack.Rotate(90, 0, 1, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[SHOP_DRONE], enableLight);
+	modelStack.PopMatrix();
+
+
+	modelStack.PushMatrix();
+	modelStack.Translate(100, -21, 100);
+	modelStack.Rotate(180, 0, 1, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[SHOP_UPGRADE], enableLight);
+	modelStack.PopMatrix();
+
+	// render NPC
+	// NPC-NPC
+	modelStack.PushMatrix();
+	modelStack.Translate(10, -10 + jelly.T_Y + jelly_jumping.T_Y, 10);
+	modelStack.Scale(5, 5 + jelly.S_Y, 5);
+	RenderMesh(meshList[NPC_1], enableLight);
+	modelStack.PopMatrix();
+	// NPC-DRONE
+	modelStack.PushMatrix();
+	modelStack.Translate(-115, -10, -15);
+	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Scale(5, 5, 5);
-	//RenderMesh(meshList[PROXY_SPACESHIP], true);
+	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
-
+	// NPC-UPGRADE
 	modelStack.PushMatrix();
-	modelStack.Translate(250, 250, 0);
-	modelStack.Scale(50, 50, 50);
-	RenderMesh(meshList[PLANET_A], false);
-	modelStack.Translate(-1.5, 1, 0);
-	modelStack.Rotate(rotateTextX, 1, 0, 0);
-	modelStack.Rotate(rotateTextY, 0, 1, 0);
-	modelStack.Rotate(rotateTextZ, 0, 0, 1);
-	RenderText(meshList[GEO_TEXT], "Planet A", Color(1, 0, 0));
+	modelStack.Translate(100, -10, 100);
+	modelStack.Rotate(180, 0, 1, 0);
+	modelStack.Scale(5, 5, 5);
+	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
-
+	// NPC-MINERAL
 	modelStack.PushMatrix();
-	modelStack.Translate(250, 0, 250);
-	modelStack.Scale(50, 50, 50);
-	RenderMesh(meshList[PLANET_B], false);
-	modelStack.Translate(-1.5, 1, 0);
-	RenderText(meshList[GEO_TEXT], "Planet B", Color(1, 0, 0));
+	modelStack.Translate(110, -5, -90);
+	modelStack.Scale(5, 5, 5);
+	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
-
-	modelStack.PushMatrix();
-	modelStack.Translate(-250, 0, -250);
-	modelStack.Scale(50, 50, 50);
-	RenderMesh(meshList[PLANET_C], false);
-	modelStack.Translate(-1.5, 1, 0);
-	RenderText(meshList[GEO_TEXT], "Planet C", Color(1, 0, 0));
-	modelStack.PopMatrix();
-
-	if (land){
-		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land", Color(1, 0, 0), 2, 0.5, 5);
-	}
 
 }
 
-void OpenGalaxyScene::Exit()
+void PlanetJellyScene::Exit()
 {
 	// Cleanup VBO here
 	glDeleteBuffers(NUM_GEOMETRY, &m_vertexBuffer[0]);
@@ -541,25 +554,29 @@ void OpenGalaxyScene::Exit()
 	glDeleteProgram(m_programID);
 }
 
-void OpenGalaxyScene::generateSkybox(){
-	//Front - done
+void PlanetJellyScene::generateSkybox(){
+	//Front 
 	modelStack.PushMatrix();
+	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
 	modelStack.Rotate(-90, 1, 0, 0);
 	modelStack.Translate(0, 500, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Zposv], false);
 	modelStack.PopMatrix();
 
-	//Top - done
+	//Top 
 	modelStack.PushMatrix();
+	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
 	modelStack.Translate(0, 500, 0);
 	modelStack.Rotate(90, 0, 1, 0);
+	modelStack.Rotate(-90, 0, 1, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Yposv], false);
 	modelStack.PopMatrix();
 
 	//Back
 	modelStack.PushMatrix();
+	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
 	modelStack.Rotate(90, 1, 0, 0);
 	modelStack.Rotate(-180, 0, 1, 0);
 	modelStack.Translate(0, 500, 0);
@@ -569,24 +586,27 @@ void OpenGalaxyScene::generateSkybox(){
 
 	//Left
 	modelStack.PushMatrix();
+	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
 	modelStack.Rotate(90, 0, 0, 1);
-	//modelStack.Rotate(-90, 0, 1, 0);
+	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Translate(0, 500, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Xnega], false);
 	modelStack.PopMatrix();
 
-	//Right - done
+	//Right 
 	modelStack.PushMatrix();
+	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
 	modelStack.Rotate(-90, 0, 0, 1);
-	modelStack.Rotate(180, 0, 1, 0);
+	modelStack.Rotate(-90, 0, 1, 0);
 	modelStack.Translate(0, 500, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Xposv], false);
 	modelStack.PopMatrix();
 
-	//Bottom - done
+	//Bottom 
 	modelStack.PushMatrix();
+	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
 	modelStack.Translate(0, -500, 0);
 	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Scale(1000, 1000, 1000);

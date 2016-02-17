@@ -1,5 +1,5 @@
-#ifndef OPEN_GALAXY_SCENE_H
-#define OPEN_GALAXY_SCENE_H
+#ifndef PLANET_JELLY_SCENE_H
+#define PLANET_JELLY_SCENE_H
 
 #include <vector>
 #include <string>
@@ -10,12 +10,12 @@ using std::vector;
 using std::ifstream;
 
 #include "Scene.h"
-#include "FPCamera.h"
+#include "Camera_Mouse.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
 
-class OpenGalaxyScene : public Scene
+class PlanetJellyScene : public Scene
 {
 	enum GEOMETRY_TYPE
 	{
@@ -33,15 +33,15 @@ class OpenGalaxyScene : public Scene
 		SKYBOX_Zposv,
 		SKYBOX_Znega,
 
-		PLANET_A,
-		PLANET_B,
-		PLANET_C,
+		GROUND_MESH,
 
-		PLANET_SUN,
+		NPC_1,
 
-		ASTEROIDS,
+		CAVE,	//Cave(mine mineral)
 
-		PROXY_SPACESHIP,
+		SHOP_MINERAL,
+		SHOP_DRONE,
+		SHOP_UPGRADE,
 
 		GEO_TEXT,
 
@@ -81,8 +81,8 @@ class OpenGalaxyScene : public Scene
 	};
 
 public:
-	OpenGalaxyScene();
-	~OpenGalaxyScene();
+	PlanetJellyScene();
+	~PlanetJellyScene();
 
 	float LSPEED;
 
@@ -118,87 +118,62 @@ private:
 		if (myfile.is_open())
 		{
 			std::cout << "File Opened" << std::endl;
-			while (!myfile.eof()) {
-				while (getline(myfile, line, '\n'))
-				{
-					data.push_back(line);
-				}
-			}
+			while (!myfile.eof()) while (getline(myfile, line, '\n')) data.push_back(line);
 			myfile.close();
 		}
-		else
-		{
-			std::cout << "Cannot open .csv file" << std::endl;
-		}
-
+		else std::cout << "Cannot open .csv file" << std::endl;
 		return data;
-
 	}
 	std::vector<std::string> fontData = fillWithFontData("PixelFontData.csv");
-	float getFontOffset(char text){
+
+	float getFontOffset(char text)
+	{
 		std::string whatIWantHolder;
 		std::string whatIWantInt;
 
 		float FINAL;
-
 		bool store = false;
-
 		whatIWantHolder = fontData[static_cast<int>(text)];
-
 		for (int i = 0; i < whatIWantHolder.size(); i++)
 		{
-			if (whatIWantHolder[i] == ','){
-				store = true;
-			}
-			else if (store){
-				whatIWantInt += whatIWantHolder[i];
-			}
-			else{}
+			if (whatIWantHolder[i] == ',') store = true;
+			else if (store) whatIWantInt += whatIWantHolder[i];
 		}
 
 		FINAL = std::stoi(whatIWantInt, nullptr, 0);
 		//std::cout << FINAL << std::endl;
-		if (FINAL == 28){
-			FINAL += 14;
-		}
-		if (FINAL == 21){
-			FINAL += 21;
-		}
-		if (FINAL == 35){
-			FINAL += 7;
-		}
-		if (FINAL == 14){
-			FINAL += 26;
-		}
-
+		if (FINAL == 28) FINAL += 14;
+		if (FINAL == 21) FINAL += 21;
+		if (FINAL == 35) FINAL += 7;
+		if (FINAL == 14) FINAL += 26;
 		return FINAL;
 	}
-
-	bool land;
-	float rotateTextX, rotateTextY, rotateTextZ;
-
-	Vector3 *noseOfShip;
-	Vector3 *middleOfShip;
-	float shipAxisX, shipAxisY, shipAxisZ;
-	float rotateShip;
-	float translateShip;
-
-	float randScaleX[1000];
-	float randScaleY[1000];
-	float randScaleZ[1000];
-	float randTranslateX[1000];
-	float randTranslateY[1000];
-	float randTranslateZ[1000];
-
 	//For Light
 	bool enableLight;
 
-	FPCamera camera;
+	//animation
+	struct animation {
+		int state;
+		//translate
+		float T_X;
+		float T_Z;
+		float T_Y;
+		//sacle
+		float S_X;
+		float S_Z;
+		float S_Y;
+		//rotate
+		float R_X;
+		float R_Z;
+		float R_Y;
+	};
+	animation jelly;
+	animation jelly_jumping;
+
+	Camera_Mouse camera;
 	Light light[1];
 
 	Mesh *meshList[NUM_GEOMETRY];
 };
 
 #endif
-
-//Author: Randall (155106R)

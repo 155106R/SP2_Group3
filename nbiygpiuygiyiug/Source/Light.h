@@ -26,7 +26,7 @@ public:
 	float exponenet;
 	Light()
 	{
-		position.Set(0, 0, 0);
+		position.Set(1, 1, 1);
 		color.Set(0, 0, 0);
 		power = 1.f;
 		kC = 1.f;
