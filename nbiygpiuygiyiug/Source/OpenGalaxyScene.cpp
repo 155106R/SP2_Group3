@@ -33,6 +33,7 @@ void OpenGalaxyScene::Init()
 	shipAxisZ = 0;
 	noseOfShip = new Vector3(0, 0, 1);
 	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
+	accelerateShip = 0;
 
 	for (unsigned i = 0; i < 1000; i++){
 		randTranslateX[i] = Math::RandFloatMinMax(-1000, 1000);
@@ -78,7 +79,7 @@ void OpenGalaxyScene::Init()
 	m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
 	m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
 
-	//Light
+	//Light settings
 	light[0].type = Light::LIGHT_DIRECTIONAL;
 	light[0].position.Set(0, 500, 0);
 	light[0].color.Set(1, 1, 1);
@@ -91,6 +92,18 @@ void OpenGalaxyScene::Init()
 	light[0].exponenet = 3.0f;
 	light[0].spotDirection.Set(0.f, 1.f, 0.f);
 
+	light[1].type = Light::LIGHT_SPOT;
+	light[1].position.Set(0, 10, 0);
+	light[1].color.Set(1, 1, 1);
+	light[1].power = 10;
+	light[1].kC = 1.0f;
+	light[1].kL = 1.0f;
+	light[1].kQ = 1.0f;
+	light[1].cosCutoff = cos(Math::DegreeToRadian(45));
+	light[1].cosInner = cos(Math::DegreeToRadian(30));
+	light[1].exponenet = 1.0f;
+	light[1].spotDirection.Set(0.f, 0.f, 1.f);
+
 	//Get a handle for our "MVP" uniform
 	m_parameters[U_MVP] = glGetUniformLocation(m_programID, "MVP");
 	m_parameters[U_MODELVIEW] = glGetUniformLocation(m_programID, "MV");
@@ -99,23 +112,39 @@ void OpenGalaxyScene::Init()
 	m_parameters[U_MATERIAL_DIFFUSE] = glGetUniformLocation(m_programID, "material.kDiffuse");
 	m_parameters[U_MATERIAL_SPECULAR] = glGetUniformLocation(m_programID, "material.kSpecular");
 	m_parameters[U_MATERIAL_SHININESS] = glGetUniformLocation(m_programID, "material.kShininess");
+
+	//Light Stuff
 	m_parameters[U_LIGHT0_POSITION] = glGetUniformLocation(m_programID, "lights[0].position_cameraspace");
 	m_parameters[U_LIGHT0_COLOR] = glGetUniformLocation(m_programID, "lights[0].color");
 	m_parameters[U_LIGHT0_POWER] = glGetUniformLocation(m_programID, "lights[0].power");
 	m_parameters[U_LIGHT0_KC] = glGetUniformLocation(m_programID, "lights[0].kC");
 	m_parameters[U_LIGHT0_KL] = glGetUniformLocation(m_programID, "lights[0].kL");
 	m_parameters[U_LIGHT0_KQ] = glGetUniformLocation(m_programID, "lights[0].kQ");
-	m_parameters[U_LIGHTENABLED] = glGetUniformLocation(m_programID, "lightEnabled");
-	m_parameters[U_NUMLIGHTS] = glGetUniformLocation(m_programID, "numLights");
 	m_parameters[U_LIGHT0_TYPE] = glGetUniformLocation(m_programID, "lights[0].type");
 	m_parameters[U_LIGHT0_SPOTDIRECTION] = glGetUniformLocation(m_programID, "lights[0].spotDirection");
 	m_parameters[U_LIGHT0_COSCUTOFF] = glGetUniformLocation(m_programID, "lights[0].cosCutOff");
 	m_parameters[U_LIGHT0_COSINNER] = glGetUniformLocation(m_programID, "lights[0].cosInner");
 	m_parameters[U_LIGHT0_EXPONENT] = glGetUniformLocation(m_programID, "lights[0].exponenet");
+
+	m_parameters[U_LIGHT1_POSITION] = glGetUniformLocation(m_programID, "lights[1].position_cameraspace");
+	m_parameters[U_LIGHT1_COLOR] = glGetUniformLocation(m_programID, "lights[1].color");
+	m_parameters[U_LIGHT1_POWER] = glGetUniformLocation(m_programID, "lights[1].power");
+	m_parameters[U_LIGHT1_KC] = glGetUniformLocation(m_programID, "lights[1].kC");
+	m_parameters[U_LIGHT1_KL] = glGetUniformLocation(m_programID, "lights[1].kL");
+	m_parameters[U_LIGHT1_KQ] = glGetUniformLocation(m_programID, "lights[1].kQ");
+	m_parameters[U_LIGHT1_TYPE] = glGetUniformLocation(m_programID, "lights[1].type");
+	m_parameters[U_LIGHT1_SPOTDIRECTION] = glGetUniformLocation(m_programID, "lights[1].spotDirection");
+	m_parameters[U_LIGHT1_COSCUTOFF] = glGetUniformLocation(m_programID, "lights[1].cosCutOff");
+	m_parameters[U_LIGHT1_COSINNER] = glGetUniformLocation(m_programID, "lights[1].cosInner");
+	m_parameters[U_LIGHT1_EXPONENT] = glGetUniformLocation(m_programID, "lights[1].exponenet");
+
+	m_parameters[U_LIGHTENABLED] = glGetUniformLocation(m_programID, "lightEnabled");
+	m_parameters[U_NUMLIGHTS] = glGetUniformLocation(m_programID, "numLights");
+
 	glUseProgram(m_programID);
 
 	//Uniform parameter
-	glUniform1i(m_parameters[U_NUMLIGHTS], 1);
+	glUniform1i(m_parameters[U_NUMLIGHTS], 2);
 
 	glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
 	glUniform3fv(m_parameters[U_LIGHT0_COLOR], 1, &light[0].color.r);
@@ -127,11 +156,23 @@ void OpenGalaxyScene::Init()
 	glUniform1f(m_parameters[U_LIGHT0_COSINNER], light[0].cosInner);
 	glUniform1f(m_parameters[U_LIGHT0_EXPONENT], light[0].exponenet);
 
+	glUniform1i(m_parameters[U_LIGHT1_TYPE], light[1].type);
+	glUniform3fv(m_parameters[U_LIGHT1_COLOR], 1, &light[1].color.r);
+	glUniform1f(m_parameters[U_LIGHT1_POWER], light[1].power);
+	glUniform1f(m_parameters[U_LIGHT1_KC], light[1].kC);
+	glUniform1f(m_parameters[U_LIGHT1_KL], light[1].kL);
+	glUniform1f(m_parameters[U_LIGHT1_KQ], light[1].kQ);
+	glUniform1f(m_parameters[U_LIGHT1_COSCUTOFF], light[1].cosCutoff);
+	glUniform1f(m_parameters[U_LIGHT1_COSINNER], light[1].cosInner);
+	glUniform1f(m_parameters[U_LIGHT1_EXPONENT], light[1].exponenet);
+
 	//light toggle shit
 	enableLight = true;
 
 	//Render wishlist
 	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("Axes", 1000, 1000, 1000);
+
+	meshList[GEO_LIGHTCUBE] = MeshBuilder::GenerateCube("Light Cube", Color(0, 1, 0));
 
 	meshList[PLANET_SUN] = MeshBuilder::GenerateOBJ("LightSource", "OBJ//planet.obj");
 	meshList[PLANET_SUN]->textureID = LoadTGA("Image//planetSunTexture.tga");
@@ -154,7 +195,7 @@ void OpenGalaxyScene::Init()
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
 
 	//Proxy SpaceShip
-	meshList[PROXY_SPACESHIP] = MeshBuilder::GeneratePyramid("Proxy spaceship", Color(1, 1, 1), 18, 36);
+	meshList[PROXY_SPACESHIP] = MeshBuilder::GeneratePyramid("Proxy spaceship", Color(0.5, 0.5, 0.5), 18, 36);
 	meshList[PROXY_SPACESHIP]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
 	meshList[PROXY_SPACESHIP]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
 	meshList[PROXY_SPACESHIP]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
@@ -167,6 +208,7 @@ void OpenGalaxyScene::Init()
 	meshList[ASTEROIDS]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
 	meshList[ASTEROIDS]->material.kShininess = 0.1f;
 
+	//Planets
 	meshList[PLANET_A] = MeshBuilder::GenerateOBJ("PlanetA", "OBJ//planet.obj");
 	meshList[PLANET_A]->textureID = LoadTGA("Image//planetATexture.tga");
 
@@ -201,23 +243,22 @@ void OpenGalaxyScene::Update(double dt)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
+	//Camera Movement
 	camera.Update(dt);
-	//update Ship axes
 
-
-	//Light
-	if (Application::IsKeyPressed('8')){
-		light[0].type = Light::LIGHT_POINT;
-		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
-	}
-	if (Application::IsKeyPressed('9')){
-		light[0].type = Light::LIGHT_DIRECTIONAL;
-		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
-	}
-	if (Application::IsKeyPressed('0')){
-		light[0].type = Light::LIGHT_SPOT;
-		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
-	}
+	////Light
+	//if (Application::IsKeyPressed('8')){
+	//	light[1].type = Light::LIGHT_POINT;
+	//	glUniform1i(m_parameters[U_LIGHT1_TYPE], light[1].type);
+	//}
+	//if (Application::IsKeyPressed('9')){
+	//	light[1].type = Light::LIGHT_DIRECTIONAL;
+	//	glUniform1i(m_parameters[U_LIGHT1_TYPE], light[1].type);
+	//}
+	//if (Application::IsKeyPressed('0')){
+	//	light[1].type = Light::LIGHT_SPOT;
+	//	glUniform1i(m_parameters[U_LIGHT1_TYPE], light[1].type);
+	//}
 
 	/*if (camera.position.x > 250){
 	rotateTextX += 1.0f;
@@ -242,51 +283,35 @@ void OpenGalaxyScene::Update(double dt)
 	}
 	}*/
 
-	//Camera frozen, for ship movement
-	if (Application::IsKeyPressed('J')){
-		rotateShip += 1.0f;
-		Mtx44 rotate;
-		rotate.SetToRotation(1, 0, 1, 0);
 
-		(*noseOfShip) = rotate * (*noseOfShip);
-	}
-	if (Application::IsKeyPressed('L')){
-		rotateShip -= 1.0f;
-		Mtx44 rotate;
-		rotate.SetToRotation(-1, 0, 1, 0);
 
-		(*noseOfShip) = rotate * (*noseOfShip);
-	}
-	if (Application::IsKeyPressed('K')){
-		*middleOfShip -= *noseOfShip * 10 * dt;
-	}
-	if (Application::IsKeyPressed('I')){
-		*middleOfShip += *noseOfShip * 50 * dt;
-	}
-	if (Application::IsKeyPressed('U')){
-		middleOfShip->y += 0.5f;
-	}
-	if (Application::IsKeyPressed('O')){
-		middleOfShip->y -= 0.5f;
-	}
+	//Update ship movement
+	*middleOfShip += *noseOfShip * accelerateShip * dt;
 
+	light[1].position.x = middleOfShip->x;
+	light[1].position.y = middleOfShip->y;
+	light[1].position.z = middleOfShip->z + 10;
+
+	updateShipMovement();
+
+	std::cout << middleOfShip->x;
 
 	//Planet interaction/docking
-	if (((camera.position - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
+	if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
 			//code to land onto planet A here
 		}
 	}
-	else if (((camera.position - (Vector3(250, 250, 0))).Length()) < 100){	//for planet B
+	else if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){	//for planet B
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
 			//code to land onto planet B here
 		}
 	}
-	else if (((camera.position - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C
+	else if (((*middleOfShip - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
@@ -465,23 +490,39 @@ void OpenGalaxyScene::Render()
 		camera.target.x, camera.target.y, camera.target.z,
 		camera.up.x, camera.up.y, camera.up.z);
 
-	modelStack.LoadIdentity();
-	Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
-	glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
+	//Disabled Sun Directional light first to test ship spotliht
+	//modelStack.LoadIdentity();
+	//Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
+	//glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
 
+	//Ship spotlight
+	modelStack.LoadIdentity();
+	Position lightPosition1_cameraspace = viewStack.Top() * light[1].position;
+	glUniform3fv(m_parameters[U_LIGHT1_POSITION], 1, &lightPosition1_cameraspace.x);
+
+	//Axes
 	RenderMesh(meshList[GEO_AXES], false);
 
+	//Sun
 	modelStack.PushMatrix();
 	modelStack.Translate(light[0].position.x, light[0].position.y, light[0].position.z);
 	modelStack.Scale(50, 50, 50);
 	RenderMesh(meshList[PLANET_SUN], false);
 	modelStack.PopMatrix();
 
+	//Test Lightcube
+	modelStack.PushMatrix();
+	modelStack.Translate(noseOfShip->x, noseOfShip->y, noseOfShip->z);
+	RenderMesh(meshList[GEO_LIGHTCUBE], false);
+	modelStack.PopMatrix();
+
+	//Skybox
 	modelStack.PushMatrix();
 	modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);	//toggle for if skybox moves with skybox
 	generateSkybox();
 	modelStack.PopMatrix();
 
+	//Render Asteroids
 	for (unsigned i = 0; i < 1000; i++){
 		modelStack.PushMatrix();
 		modelStack.Translate(randTranslateX[i], randTranslateY[i], randTranslateZ[i]);
@@ -490,15 +531,17 @@ void OpenGalaxyScene::Render()
 		modelStack.PopMatrix();
 	}
 
+	//Proxy Spaceship
 	modelStack.PushMatrix();
-	//modelStack.Translate(camera.position.x, camera.position.y - 10, camera.position.z - 20);
 	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);
 	modelStack.Rotate(rotateShip, 0, 1, 0);
 	modelStack.Rotate(90, 1, 0, 0);
 	modelStack.Scale(5, 5, 5);
-	//RenderMesh(meshList[PROXY_SPACESHIP], true);
+	RenderMesh(meshList[PROXY_SPACESHIP], true);
 	modelStack.PopMatrix();
 
+	//Planets
+	//Planet A
 	modelStack.PushMatrix();
 	modelStack.Translate(250, 250, 0);
 	modelStack.Scale(50, 50, 50);
@@ -510,6 +553,7 @@ void OpenGalaxyScene::Render()
 	RenderText(meshList[GEO_TEXT], "Planet A", Color(1, 0, 0));
 	modelStack.PopMatrix();
 
+	//Planet B
 	modelStack.PushMatrix();
 	modelStack.Translate(250, 0, 250);
 	modelStack.Scale(50, 50, 50);
@@ -518,6 +562,7 @@ void OpenGalaxyScene::Render()
 	RenderText(meshList[GEO_TEXT], "Planet B", Color(1, 0, 0));
 	modelStack.PopMatrix();
 
+	//Planet C
 	modelStack.PushMatrix();
 	modelStack.Translate(-250, 0, -250);
 	modelStack.Scale(50, 50, 50);
@@ -526,6 +571,7 @@ void OpenGalaxyScene::Render()
 	RenderText(meshList[GEO_TEXT], "Planet C", Color(1, 0, 0));
 	modelStack.PopMatrix();
 
+	//Text if ship is within range of landing on planet
 	if (land){
 		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land", Color(1, 0, 0), 2, 0.5, 5);
 	}
@@ -592,4 +638,48 @@ void OpenGalaxyScene::generateSkybox(){
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Ynega], false);
 	modelStack.PopMatrix();
+}
+
+void OpenGalaxyScene::updateShipMovement(){
+	//For ship movement
+	if (Application::IsKeyPressed('J')){
+		rotateShip += 1.0f;
+		Mtx44 rotate;
+		rotate.SetToRotation(1, 0, 1, 0);
+
+		(*noseOfShip) = rotate * (*noseOfShip);
+	}
+	if (Application::IsKeyPressed('L')){
+		rotateShip -= 1.0f;
+		Mtx44 rotate;
+		rotate.SetToRotation(-1, 0, 1, 0);
+
+		(*noseOfShip) = rotate * (*noseOfShip);
+	}
+	if (Application::IsKeyPressed('K')){
+		if (accelerateShip > -10.0f){
+			accelerateShip -= 1.0f;		//deceleration capped at -10.0f
+		}
+	}
+	if (Application::IsKeyPressed('I')){
+		if (accelerateShip < 100.0f){	//acceleration capped at 100.0f
+			accelerateShip += 1.0f;
+		}
+	}
+	if (Application::IsKeyPressed('U')){
+		middleOfShip->y += 0.5f;
+	}
+	if (Application::IsKeyPressed('O')){
+		middleOfShip->y -= 0.5f;
+	}
+	if (Application::IsKeyPressed('P')){	//break acceleration to 0
+		if (accelerateShip != 0){
+			if (accelerateShip > 0){
+				accelerateShip -= 0.5f;
+			}
+			else{
+				accelerateShip += 0.5f;
+			}
+		}
+	}
 }
