@@ -89,9 +89,6 @@ void Application::Init()
 	//Create a window and create its OpenGL context
 	m_window = glfwCreateWindow(800, 600, "Computer Graphics", NULL, NULL);
 
-	//full screen with cursor hidden
-	//m_window = glfwCreateWindow(glfwGetVideoMode(glfwGetPrimaryMonitor())->width, glfwGetVideoMode(glfwGetPrimaryMonitor())->height, "Computer Graphics", glfwGetPrimaryMonitor(), NULL);
-	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwSetWindowSizeCallback(m_window, resize_callback);
 
 	//If the window couldn't be created
@@ -123,7 +120,7 @@ void Application::Init()
 void Application::Run()
 {
 	//Main Loop
-	Scene *scene = new PlanetJellyScene();
+	Scene *scene = new OpenGalaxyScene();
 	scene->Init();
 
 	m_timer.startTimer();    // Start timer to calculate how long it takes to render this frame
