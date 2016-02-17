@@ -182,16 +182,16 @@ void PlanetJellyScene::Init()
 void PlanetJellyScene::Update(double dt)
 {
 	// jelly animation
-	if (jelly.state == 0)
+	if (jelly.state == 0 && jelly_jumping.state == 0)
 	{
 		if (jelly.S_Y >= -1)
 		{
 			jelly.S_Y -= 1 * dt;
 			jelly.T_Y -= 1 * dt;
-		} 
+		}
 		else jelly.state = 1;
 	}
-	else if (jelly.state == 1 && jelly_jumping.state == 0)
+	else if (jelly.state == 1 && jelly_jumping.state == 1)
 	{
 		if (jelly.S_Y <= 0)
 		{
@@ -493,7 +493,7 @@ void PlanetJellyScene::Render()
 	RenderMesh(meshList[SHOP_DRONE], enableLight);
 	modelStack.PopMatrix();
 
-	
+
 	modelStack.PushMatrix();
 	modelStack.Translate(100, -21, 100);
 	modelStack.Rotate(180, 0, 1, 0);
@@ -528,7 +528,7 @@ void PlanetJellyScene::Render()
 	modelStack.Scale(5, 5, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
-	
+
 }
 
 void PlanetJellyScene::Exit()
