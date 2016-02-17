@@ -77,6 +77,9 @@
     <ClCompile Include="Source\PlanetJellyScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Camera_Mouse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Application.h">
@@ -140,6 +143,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\PlanetJellyScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Camera_Mouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,4 @@
-﻿Build started 2/16/2016 6:04:23 PM.
+﻿Build started 2/17/2016 11:22:58 AM.
      1>Project "C:\Users\Otaku\Desktop\SP2_Group3\nbiygpiuygiyiug\nbiygpiuygiyiug.vcxproj" on node 2 (Build target(s)).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(381,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (nbiygpiuygiyiug.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
@@ -7,11 +7,14 @@
      1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\material.h(27): warning C4305: 'argument' : truncation from 'double' to 'float'
      1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\material.h(28): warning C4305: 'argument' : truncation from 'double' to 'float'
      1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\material.h(29): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.h(148): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.h(159): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(61): warning C4305: '=' : truncation from 'double' to 'float'
-     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(220): warning C4305: '*=' : truncation from 'double' to 'float'
-     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(275): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.h(137): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.h(143): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(189): warning C4244: '-=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(190): warning C4244: '-=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(198): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(199): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(309): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>c:\users\otaku\desktop\sp2_group3\nbiygpiuygiyiug\source\planetjellyscene.cpp(364): warning C4305: '*=' : truncation from 'double' to 'float'
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Otaku\Desktop\SP2_Group3\Debug\ComG.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\Otaku\Desktop\SP2_Group3\\glew\lib /LIBPATH:"C:\Users\Otaku\Desktop\SP2_Group3\\glfw\lib-msvc120" /LIBPATH:C:\Users\Otaku\Desktop\SP2_Group3\Debug glew32.lib glfw3.lib opengl32.lib winmm.lib Common.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Otaku\Desktop\SP2_Group3\Debug\ComG.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Otaku\Desktop\SP2_Group3\Debug\ComG.lib" /MACHINE:X86 Debug\MatrixStack.obj
          Debug\Mtx44.obj
@@ -20,6 +23,7 @@
          Debug\Application.obj
          Debug\Camera.obj
          Debug\Camera2.obj
+         Debug\Camera_Mouse.obj
          Debug\FPCamera.obj
          Debug\LoadOBJ.obj
          Debug\LoadTGA.obj
@@ -35,4 +39,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.86
+Time Elapsed 00:00:01.07

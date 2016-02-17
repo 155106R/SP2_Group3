@@ -26,6 +26,8 @@ void PlanetJellyScene::Init()
 
 	//Init VBO here
 	glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
 
 	//Enable blending
 	glEnable(GL_BLEND);
@@ -34,8 +36,8 @@ void PlanetJellyScene::Init()
 	//Enable depth test
 	glEnable(GL_DEPTH_TEST);
 
-	//Camera
-	camera.Init(Vector3(30, 30, 30), Vector3(0, 0, 0), Vector3(0, 10, 0));
+	//Camera 
+	camera.Init(Vector3(0, 0, 1), Vector3(0, 0, 0), Vector3(0, 1, 0)); //if using Camera_Mouse
 	camera.Reset();
 
 	glGenVertexArrays(1, &m_vertexArrayID);
@@ -55,13 +57,13 @@ void PlanetJellyScene::Init()
 	m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
 
 	//Light
-	light[0].type = Light::LIGHT_DIRECTIONAL;
-	light[0].position.Set(0, 500, 0);
+	light[0].type = Light::LIGHT_SPOT;
+	light[0].position.Set(0, 20, 0);
 	light[0].color.Set(1, 1, 1);
-	light[0].power = 0.35;
+	light[0].power = 1;
 	light[0].kC = 1.0f;
-	light[0].kL = 1.0f;
-	light[0].kQ = 1.0f;
+	light[0].kL = 0.01f;
+	light[0].kQ = 0.001f;
 	light[0].cosCutoff = cos(Math::DegreeToRadian(45));
 	light[0].cosInner = cos(Math::DegreeToRadian(30));
 	light[0].exponenet = 3.0f;
@@ -106,6 +108,27 @@ void PlanetJellyScene::Init()
 	//light toggle shit
 	enableLight = true;
 
+	//light toggle mode
+	if (light[0].type == Light::LIGHT_DIRECTIONAL)
+	{
+		Vector3 lightDir(light[0].position.x, light[0].position.y, light[0].position.z);
+		Vector3 lightDirection_cameraspace = viewStack.Top() * lightDir;
+		glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightDirection_cameraspace.x);
+	}
+	else if (light[0].type == Light::LIGHT_SPOT)
+	{
+
+		Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
+		glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
+		Vector3 spotDirection_cameraspace = viewStack.Top() * light[0].spotDirection;
+		glUniform3fv(m_parameters[U_LIGHT0_SPOTDIRECTION], 1, &spotDirection_cameraspace.x);
+	}
+	else
+	{
+		Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
+		glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
+	}
+
 	//Render wishlist
 	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("Axes", 1000, 1000, 1000);
 
@@ -145,10 +168,43 @@ void PlanetJellyScene::Init()
 	meshList[NPC_1] = MeshBuilder::GenerateOBJ("npc", "OBJ//jelly.obj");
 	meshList[NPC_1]->textureID = LoadTGA("Image//jelly_texture.tga");
 
+	// jelly animation
+	jelly.T_Y = 0;
+	jelly.S_Y = 0;
+	jelly.state = 0;
+
+	// jelly_jumping animation
+	jelly_jumping.T_Y = 0;
+	jelly_jumping.state = 0;
+
 }
 
 void PlanetJellyScene::Update(double dt)
 {
+	// jelly animation
+	if (jelly.state == 0)
+	{
+		if (jelly.S_Y >= -1)
+		{
+			jelly.S_Y -= 1 * dt;
+			jelly.T_Y -= 1 * dt;
+		} 
+		else jelly.state = 1;
+	}
+	else if (jelly.state == 1 && jelly_jumping.state == 0)
+	{
+		if (jelly.S_Y <= 0)
+		{
+			jelly.S_Y += 1 * dt;
+			jelly.T_Y += 1 * dt;
+		}
+		else jelly.state = 0;
+	}
+	//jelly_jumping animation
+
+
+
+
 	//Enable culling
 	if (Application::IsKeyPressed('1'))
 	{
@@ -168,6 +224,39 @@ void PlanetJellyScene::Update(double dt)
 	if (Application::IsKeyPressed('4'))
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
+	if (Application::IsKeyPressed('Z'))
+	{
+		enableLight = false;
+	}
+	if (Application::IsKeyPressed('X'))
+	{
+		enableLight = true;
+	}
+	if (Application::IsKeyPressed('I'))
+	{
+		light[0].position.z -= (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('K'))
+	{
+		light[0].position.z += (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('J'))
+	{
+		light[0].position.x -= (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('L'))
+	{
+		light[0].position.x += (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('O'))
+	{
+		light[0].position.y -= (float)(LSPEED*dt);
+	}
+	if (Application::IsKeyPressed('P'))
+	{
+		light[0].position.y += (float)(LSPEED*dt);
 	}
 
 	camera.Update(dt);
@@ -354,13 +443,16 @@ void PlanetJellyScene::Render()
 	viewStack.LookAt(camera.position.x, camera.position.y, camera.position.z,
 		camera.target.x, camera.target.y, camera.target.z,
 		camera.up.x, camera.up.y, camera.up.z);
-
 	modelStack.LoadIdentity();
-	Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
+
+	Position lightPosition_cameraspace = viewStack.Top()*light[0].position;
 	glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
+	Vector3 spotDirection_cameraspace = viewStack.Top()*light[0].spotDirection;
+	glUniform3fv(m_parameters[U_LIGHT0_SPOTDIRECTION], 1, &spotDirection_cameraspace.x);
 
 	RenderMesh(meshList[GEO_AXES], false);
 
+	//render light
 	modelStack.PushMatrix();
 	modelStack.Translate(light[0].position.x, light[0].position.y, light[0].position.z);
 	RenderMesh(meshList[GEO_LIGHTBALL], false);
@@ -380,7 +472,7 @@ void PlanetJellyScene::Render()
 
 	//render cave
 	modelStack.PushMatrix();
-	modelStack.Translate(350, 42, 0);
+	modelStack.Translate(200, 43, 0);
 	modelStack.Rotate(-90, 0, 1, 0);
 	modelStack.Scale(40, 40, 40);
 	RenderMesh(meshList[CAVE], enableLight);
@@ -390,52 +482,53 @@ void PlanetJellyScene::Render()
 	modelStack.PushMatrix();
 	modelStack.Translate(100, -12, -100);
 	modelStack.Rotate(180, 0, 1, 0);
-	modelStack.Scale(40, 40, 40);
+	modelStack.Scale(20, 20, 20);
 	RenderMesh(meshList[SHOP_MINERAL], enableLight);
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
 	modelStack.Translate(-100, -20, 0);
 	modelStack.Rotate(90, 0, 1, 0);
-	modelStack.Scale(20, 20, 20);
+	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[SHOP_DRONE], enableLight);
 	modelStack.PopMatrix();
 
 	
 	modelStack.PushMatrix();
-	modelStack.Translate(100, -28, 100);
+	modelStack.Translate(100, -21, 100);
 	modelStack.Rotate(180, 0, 1, 0);
-	modelStack.Scale(20, 20, 20);
+	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[SHOP_UPGRADE], enableLight);
 	modelStack.PopMatrix();
 
 	// render NPC
+	// NPC-NPC
 	modelStack.PushMatrix();
-	modelStack.Translate(10, -6, 10);
-	modelStack.Scale(10, 10, 10);
+	modelStack.Translate(10, -10 + jelly.T_Y, 10);
+	modelStack.Scale(5, 5 + jelly.S_Y, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
-
+	// NPC-DRONE
 	modelStack.PushMatrix();
-	modelStack.Translate(-135, -6, 0);
+	modelStack.Translate(-115, -10, -15);
 	modelStack.Rotate(90, 0, 1, 0);
-	modelStack.Scale(10, 10, 10);
+	modelStack.Scale(5, 5, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
-
+	// NPC-UPGRADE
 	modelStack.PushMatrix();
-	modelStack.Translate(100, -6, 100);
+	modelStack.Translate(100, -10, 100);
 	modelStack.Rotate(180, 0, 1, 0);
-	modelStack.Scale(10, 10, 10);
+	modelStack.Scale(5, 5, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
-
+	// NPC-MINERAL
 	modelStack.PushMatrix();
-	modelStack.Translate(120, 5, -80);
-	modelStack.Scale(10, 10, 10);
+	modelStack.Translate(110, -5, -90);
+	modelStack.Scale(5, 5, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
-
+	
 }
 
 void PlanetJellyScene::Exit()

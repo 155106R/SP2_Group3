@@ -10,7 +10,7 @@ using std::vector;
 using std::ifstream;
 
 #include "Scene.h"
-#include "FPCamera.h"
+#include "Camera_Mouse.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
@@ -118,65 +118,59 @@ private:
 		if (myfile.is_open())
 		{
 			std::cout << "File Opened" << std::endl;
-			while (!myfile.eof()) {
-				while (getline(myfile, line, '\n'))
-				{
-					data.push_back(line);
-				}
-			}
+			while (!myfile.eof()) while (getline(myfile, line, '\n')) data.push_back(line);
 			myfile.close();
 		}
-		else
-		{
-			std::cout << "Cannot open .csv file" << std::endl;
-		}
-
+		else std::cout << "Cannot open .csv file" << std::endl;
 		return data;
-
 	}
 	std::vector<std::string> fontData = fillWithFontData("PixelFontData.csv");
-	float getFontOffset(char text){
+
+	float getFontOffset(char text)
+	{
 		std::string whatIWantHolder;
 		std::string whatIWantInt;
 
 		float FINAL;
-
 		bool store = false;
-
 		whatIWantHolder = fontData[static_cast<int>(text)];
-
 		for (int i = 0; i < whatIWantHolder.size(); i++)
 		{
-			if (whatIWantHolder[i] == ','){
-				store = true;
-			}
-			else if (store){
-				whatIWantInt += whatIWantHolder[i];
-			}
-			else{}
+			if (whatIWantHolder[i] == ',') store = true;
+			else if (store) whatIWantInt += whatIWantHolder[i];
 		}
 
 		FINAL = std::stoi(whatIWantInt, nullptr, 0);
 		//std::cout << FINAL << std::endl;
-		if (FINAL == 28){
-			FINAL += 14;
-		}
-		if (FINAL == 21){
-			FINAL += 21;
-		}
-		if (FINAL == 35){
-			FINAL += 7;
-		}
-		if (FINAL == 14){
-			FINAL += 26;
-		}
-
+		if (FINAL == 28) FINAL += 14;
+		if (FINAL == 21) FINAL += 21;
+		if (FINAL == 35) FINAL += 7;
+		if (FINAL == 14) FINAL += 26;
 		return FINAL;
 	}
 	//For Light
 	bool enableLight;
 
-	FPCamera camera;
+	//animation
+	struct animation {
+		int state;
+		//translate
+		float T_X;
+		float T_Z;
+		float T_Y;
+		//sacle
+		float S_X;
+		float S_Z;
+		float S_Y;
+		//rotate
+		float R_X;
+		float R_Z;
+		float R_Y;
+	};
+	animation jelly;
+	animation jelly_jumping;
+
+	Camera_Mouse camera;
 	Light light[1];
 
 	Mesh *meshList[NUM_GEOMETRY];
