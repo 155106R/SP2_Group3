@@ -58,7 +58,7 @@ void TogaScene::Init()
 	light[0].type = Light::LIGHT_DIRECTIONAL;
 	light[0].position.Set(0, 500, 0);
 	light[0].color.Set(1, 1, 1);
-	light[0].power = 0.35;
+	light[0].power = 1;
 	light[0].kC = 1.0f;
 	light[0].kL = 1.0f;
 	light[0].kQ = 1.0f;
@@ -111,21 +111,68 @@ void TogaScene::Init()
 
 	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateSphere("LightSource", Color(1, 1, 1), 18, 36);
 
-	//Skybox - Galaxy
+	//Skybox - TOGA
 	meshList[SKYBOX_Xposv] = MeshBuilder::GenerateQuad("right", Color(1, 1, 1));
-	meshList[SKYBOX_Xposv]->textureID = LoadTGA("Image//SkyboxToga//lakes_rt.tga");
+	meshList[SKYBOX_Xposv]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_rt.tga");
 	meshList[SKYBOX_Xnega] = MeshBuilder::GenerateQuad("left", Color(1, 1, 1));
-	meshList[SKYBOX_Xnega]->textureID = LoadTGA("Image//SkyboxToga//lakes_lf.tga");
+	meshList[SKYBOX_Xnega]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_lf.tga");
 	meshList[SKYBOX_Yposv] = MeshBuilder::GenerateQuad("top", Color(1, 1, 1));
-	meshList[SKYBOX_Yposv]->textureID = LoadTGA("Image//SkyboxToga//lakes_up.tga");
+	meshList[SKYBOX_Yposv]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_up.tga");
 	meshList[SKYBOX_Ynega] = MeshBuilder::GenerateQuad("bottom", Color(1, 1, 1));
-	meshList[SKYBOX_Ynega]->textureID = LoadTGA("Image//SkyboxToga//lakes_dn.tga");
+	meshList[SKYBOX_Ynega]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_dn.tga");
 	meshList[SKYBOX_Zposv] = MeshBuilder::GenerateQuad("front", Color(1, 1, 1));
-	meshList[SKYBOX_Zposv]->textureID = LoadTGA("Image//SkyboxToga//lakes_ft.tga");
+	meshList[SKYBOX_Zposv]->textureID = LoadTGA("Image/Skybox//SkyboxToga//lakes_ft.tga");
 	meshList[SKYBOX_Znega] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1));
-	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//SkyboxToga//lakes_bk.tga");
+	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_bk.tga");
 	meshList[GROUNDMESH] = MeshBuilder::GenerateQuad("floor", Color(1, 1, 1));
-	meshList[GROUNDMESH]->textureID = LoadTGA("Image//SkyboxToga//groundmeshtoga.tga");
+	meshList[GROUNDMESH]->textureID = LoadTGA("Image//Skybox//SkyboxToga//groundmeshtoga.tga");
+	
+	//mineral stuff
+	meshList[NPC_MINERAL_BODY] = MeshBuilder::GenerateOBJ("mineral merchant head","OBJ//merchantminerals_bodyA.obj");
+	meshList[NPC_MINERAL_BODY]->textureID = LoadTGA("Image//merchantmineral_textureA.tga");
+
+	meshList[NPC_MINERAL_HEAD] = MeshBuilder::GenerateOBJ("mineral merchant head", "OBJ//merchantminerals_headA.obj");
+	meshList[NPC_MINERAL_HEAD]->textureID = LoadTGA("Image//merchantmineral_textureA.tga");
+
+	meshList[MINERAL_SHOP] = MeshBuilder::GenerateOBJ("mineral merchant head", "OBJ//mineralshopA.obj");
+	meshList[MINERAL_SHOP]->textureID = LoadTGA("Image//mineralshop_textureA.tga");
+
+
+	//Drone stuff
+	meshList[NPC_DRONE_BODY] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantdrone_bodyA.obj");
+	meshList[NPC_DRONE_BODY]->textureID = LoadTGA("Image//merchantdrone_textureA.tga");
+
+	meshList[NPC_DRONE_EYE] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantdrone_eyeA.obj");
+	meshList[NPC_DRONE_EYE]->textureID = LoadTGA("Image//merchantdrone_textureA.tga");
+
+	meshList[NPC_DRONE_ARMS] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantdrone_armsA.obj");
+	meshList[NPC_DRONE_ARMS]->textureID = LoadTGA("Image//merchantdrone_textureA.tga");
+
+	meshList[DRONE_SHOP] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//drone_shopA.obj");
+	meshList[DRONE_SHOP]->textureID = LoadTGA("Image//droneshop_textureA.tga");
+
+
+
+	//Upgrade stuff
+	meshList[NPC_UPGRADE_BODY] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantupgrade_bodyA.obj");
+	meshList[NPC_UPGRADE_BODY]->textureID = LoadTGA("Image//merchantupgrade_textureA.tga");
+
+	meshList[NPC_UPGRADE_HEAD] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantupgrade_headA.obj");
+	meshList[NPC_UPGRADE_HEAD]->textureID = LoadTGA("Image//merchantupgrade_textureA.tga");
+
+	meshList[NPC_UPGRADE_ARML ] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantupgrade_armleftA.obj");
+	meshList[NPC_UPGRADE_ARML]->textureID = LoadTGA("Image//merchantupgrade_textureA.tga");
+
+	meshList[NPC_UPGRADE_ARMR] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//merchantupgrade_armrightA.obj");
+	meshList[NPC_UPGRADE_ARMR]->textureID = LoadTGA("Image//merchantupgrade_textureA.tga");
+
+	meshList[UPGRADE_SHOP] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//upgradeshopA.obj");
+	meshList[UPGRADE_SHOP]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
+
+	//cave
+	meshList[CAVE] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//Cave_A.obj");
+	meshList[CAVE]->textureID = LoadTGA("Image//cave_textureA.tga");
+
 }
 
 void TogaScene::Update(double dt)
@@ -354,9 +401,39 @@ void TogaScene::Render()
 	RenderMesh(meshList[GROUNDMESH], false);
 	modelStack.PopMatrix();
 
+
+	//skybox
 	modelStack.PushMatrix();
-	modelStack.Translate(0, +200, 0);
+	modelStack.Translate(camera.position.x, 0, camera.position.z);
+	modelStack.Translate(0, 200, 0);
 	generateSkybox();
+	modelStack.PopMatrix();
+
+	//Cave
+	modelStack.PushMatrix();
+	modelStack.Translate(-0, 0, 0);
+	RenderMesh(meshList[CAVE], true);
+	modelStack.PopMatrix();
+
+	//Mineral merchant
+	modelStack.PushMatrix();
+	modelStack.Translate(-70, 0, -60);
+	modelStack.Rotate(35,0,1,0);
+	generateMineralmerchant();
+	modelStack.PopMatrix();
+
+	//Drone merchant
+	modelStack.PushMatrix();
+	modelStack.Translate(60, -5, -80);
+	modelStack.Rotate(-75, 0, 1, 0);
+	generateDronemerchant();
+	modelStack.PopMatrix();
+
+	//Upgrade merchant
+	modelStack.PushMatrix();
+	modelStack.Translate(-40, -8, 410);
+	modelStack.Rotate(155, 0, 1, 0);
+	generateUpgrademerchant();
 	modelStack.PopMatrix();
 }
 
@@ -424,4 +501,95 @@ void TogaScene::generateSkybox(){
 
 
 	
+}
+
+void TogaScene::generateMineralmerchant()
+{
+
+	//head
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_MINERAL_BODY], true);
+	modelStack.PopMatrix();
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_MINERAL_HEAD], true);
+	modelStack.PopMatrix();
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[MINERAL_SHOP], true);
+	modelStack.PopMatrix();
+}
+
+void TogaScene::generateDronemerchant()
+{
+
+	//head
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_DRONE_BODY], true);
+	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_DRONE_EYE], false);
+	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_DRONE_ARMS], true);
+	modelStack.PopMatrix();
+	
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[DRONE_SHOP], true);
+	modelStack.PopMatrix();
+}
+
+void TogaScene::generateUpgrademerchant()
+{
+
+	//hbody
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_UPGRADE_BODY], true);
+	modelStack.PopMatrix();
+
+
+	//head
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_UPGRADE_HEAD], true);
+	modelStack.PopMatrix();
+
+	//Larm
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_UPGRADE_ARML], true);
+	modelStack.PopMatrix();
+
+	//Rarm
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[NPC_UPGRADE_ARMR], true);
+	modelStack.PopMatrix();
+
+	//ashop
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(10, 10, 10);
+	RenderMesh(meshList[UPGRADE_SHOP], true);
+	modelStack.PopMatrix();
+
 }

@@ -33,7 +33,27 @@ class TogaScene : public Scene
 		SKYBOX_Zposv,
 		SKYBOX_Znega,
 		GROUNDMESH,
+		
+		NPC_MINERAL_HEAD,
+		NPC_MINERAL_BODY,
+		MINERAL_SHOP,
+
+		NPC_DRONE_BODY,
+		NPC_DRONE_ARMS,
+		NPC_DRONE_EYE,
+		DRONE_SHOP,
+
+		NPC_UPGRADE_BODY,
+		NPC_UPGRADE_ARMR,
+		NPC_UPGRADE_ARML,
+		NPC_UPGRADE_HEAD,
+		UPGRADE_SHOP,
+
+		CAVE,
+
+
 		GEO_TEXT,
+
 
 		NUM_GEOMETRY,
 	};
@@ -98,6 +118,9 @@ private:
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 
 	void generateSkybox();
+	void generateMineralmerchant();
+	void generateDronemerchant();
+	void generateUpgrademerchant();
 
 	vector<string> fillWithFontData(string path){
 

@@ -32,6 +32,7 @@
     <ClCompile Include="Source\OpenGalaxyScene.cpp" />
     <ClCompile Include="Source\PlanetJellyScene.cpp" />
     <ClCompile Include="Source\shader.cpp" />
+    <ClCompile Include="Source\TogaScene.cpp" />
     <ClCompile Include="Source\Utlity.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +56,7 @@
     <ClInclude Include="Source\PlanetJellyScene.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\shader.hpp" />
+    <ClInclude Include="Source\TogaScene.h" />
     <ClInclude Include="Source\Utility.h" />
     <ClInclude Include="Source\Vertex.h" />
   </ItemGroup>
