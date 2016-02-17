@@ -154,6 +154,13 @@ void OpenGalaxyScene::Init()
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
 
 	//Proxy SpaceShip
+	meshList[PROXY_SPACESHIP] = MeshBuilder::GeneratePyramid("Proxy spaceship", Color(1, 1, 1), 18, 36);
+	meshList[PROXY_SPACESHIP]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
+	meshList[PROXY_SPACESHIP]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
+	meshList[PROXY_SPACESHIP]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
+	meshList[PROXY_SPACESHIP]->material.kShininess = 0.1f;
+
+	//Asteroids
 	meshList[ASTEROIDS] = MeshBuilder::GenerateSphere("Asteroids", Color(0.2941, 0.2941, 0.2941), 5, 10); //75, 75, 75 in RGB (Grey)
 	meshList[ASTEROIDS]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
 	meshList[ASTEROIDS]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
@@ -196,7 +203,7 @@ void OpenGalaxyScene::Update(double dt)
 
 	camera.Update(dt);
 	//update Ship axes
-	
+
 
 	//Light
 	if (Application::IsKeyPressed('8')){
@@ -213,26 +220,26 @@ void OpenGalaxyScene::Update(double dt)
 	}
 
 	/*if (camera.position.x > 250){
-		rotateTextX += 1.0f;
+	rotateTextX += 1.0f;
 	}
 	if(camera.position.x < 250){
-		rotateTextX -= 1.0f;
+	rotateTextX -= 1.0f;
 	}
 	else if (camera.position.y > 250){
-		rotateTextY += 1.0f;
+	rotateTextY += 1.0f;
 	}
 	else if (camera.position.y < 250){
-		rotateTextY -= 1.0f;
+	rotateTextY -= 1.0f;
 	}
 	if (camera.position.z > 0){
-		if (camera.position.z > rotateTextY){
-			rotateTextY += 1.0f;
-		}
+	if (camera.position.z > rotateTextY){
+	rotateTextY += 1.0f;
+	}
 	}
 	else if (camera.position.z < 0){
-		if (camera.position.z < rotateTextY){
-			rotateTextY -= 1.0f;
-		}
+	if (camera.position.z < rotateTextY){
+	rotateTextY -= 1.0f;
+	}
 	}*/
 
 	//Camera frozen, for ship movement
@@ -565,7 +572,7 @@ void OpenGalaxyScene::generateSkybox(){
 	modelStack.Rotate(90, 0, 0, 1);
 	//modelStack.Rotate(-90, 0, 1, 0);
 	modelStack.Translate(0, 500, 0);
-	modelStack.Scale(1000, 1000, 1000);	
+	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Xnega], false);
 	modelStack.PopMatrix();
 
