@@ -10,7 +10,9 @@ using std::vector;
 using std::ifstream;
 
 #include "Scene.h"
-#include "FPCamera.h"
+//#include "FPCamera.h"
+//#include "Camera_Mouse.h"
+#include "OpenGalaxyCamera.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
@@ -20,7 +22,7 @@ class OpenGalaxyScene : public Scene
 	enum GEOMETRY_TYPE
 	{
 		GEO_AXES,
-		GEO_LIGHTBALL,
+		GEO_LIGHTCUBE,
 		GEO_TEXTBOX,
 
 		U_TEXT_ENABLED,
@@ -73,6 +75,18 @@ class OpenGalaxyScene : public Scene
 		U_LIGHT0_COSINNER,
 		U_LIGHT0_EXPONENT,
 
+		U_LIGHT1_POSITION,
+		U_LIGHT1_COLOR,
+		U_LIGHT1_POWER,
+		U_LIGHT1_KC,
+		U_LIGHT1_KL,
+		U_LIGHT1_KQ,
+		U_LIGHT1_TYPE,
+		U_LIGHT1_SPOTDIRECTION,
+		U_LIGHT1_COSCUTOFF,
+		U_LIGHT1_COSINNER,
+		U_LIGHT1_EXPONENT,
+
 		U_NUMLIGHTS,
 		U_COLOR_TEXTURE_ENABLED,
 		U_COLOR_TEXTURE,
@@ -108,6 +122,7 @@ private:
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 
 	void generateSkybox();
+	void updateShipMovement();
 
 	vector<string> fillWithFontData(string path){
 
@@ -179,9 +194,12 @@ private:
 
 	Vector3 *noseOfShip;
 	Vector3 *middleOfShip;
-	float shipAxisX, shipAxisY, shipAxisZ;
+	float shipAxisX, shipAxisY, shipAxisZ; 
+	float rotateShipZ;
+	bool isTransltingY;
 	float rotateShip;
 	float translateShip;
+	float accelerateShip;
 
 	float randScaleX[1000];
 	float randScaleY[1000];
@@ -193,8 +211,9 @@ private:
 	//For Light
 	bool enableLight;
 
-	FPCamera camera;
-	Light light[1];
+	//Camera_Mouse camera;
+	OpenGalaxyCamera camera;
+	Light light[2];
 
 	Mesh *meshList[NUM_GEOMETRY];
 };

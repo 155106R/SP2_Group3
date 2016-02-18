@@ -155,20 +155,16 @@ private:
 	struct animation {
 		int state;
 		//translate
-		float T_X;
-		float T_Z;
-		float T_Y;
+		Vector3 position;
 		//sacle
-		float S_X;
-		float S_Z;
 		float S_Y;
 		//rotate
 		float R_X;
-		float R_Z;
-		float R_Y;
 	};
+
 	animation jelly;
 	animation jelly_jumping;
+	animation jelly_NPC_Loop;
 
 	Camera_Mouse camera;
 	Light light[1];
