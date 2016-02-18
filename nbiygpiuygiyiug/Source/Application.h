@@ -2,6 +2,7 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include "SharedData.h"
 #include "timer.h"
 
 class Application

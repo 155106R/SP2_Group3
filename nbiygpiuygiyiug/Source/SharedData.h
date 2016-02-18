@@ -1,50 +1,46 @@
 #ifndef SHARED_DATA_H
 #define SHARED_DATA_H
+
 #include <map>
 
 using std::map;
 
+enum Minerals{
+	ADAMANTIUM,
+	ROCK2,
+
+	NUM_ROCKS
+};
+
+enum onPlanet{
+	OPENGALAXY,
+	TOGAPLANET,
+	JELLYPLANET,
+
+	NUM_PLANETS
+};
 
 class SharedData{
 
-private:
-	SharedData();
-
 public:
 
-	enum Minerals{
-		Adamantium,
-		rock2,
-
-		num_rocks
-	};
-
-	map<Minerals, int> inventory;
-
-	SharedData* Getinstance()
+	static SharedData* GetInstance()
 	{
 		static SharedData data;
-		//inventory[rock1] += 10;
-
 		return &data;
 	}
 
+	map<Minerals, int> inventory;
+
 	int SD_hullintegrity;
-	
 	int SD_bitcoins;
 
+	unsigned location = 0;
 
-
+private:
+	//SharedData(){};
 
 };
-
-
-
-
-
-
-
-
 
 
 #endif

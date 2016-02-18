@@ -20,6 +20,7 @@ OpenGalaxyScene::~OpenGalaxyScene()
 
 void OpenGalaxyScene::Init()
 {
+
 	//Definations
 	LSPEED = 10.0f;
 
@@ -249,6 +250,7 @@ void OpenGalaxyScene::Update(double dt)
 	//Camera Movement
 	camera.target = *middleOfShip;
 	camera.Update(dt);
+	
 	//camera.position = camera.target + Vector3(20, 20, 20);
 
 	////Light
@@ -306,28 +308,26 @@ void OpenGalaxyScene::Update(double dt)
 
 	updateShipMovement();
 
-	std::cout << middleOfShip->x;
-
 	//Planet interaction/docking
 	if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
-			//code to land onto planet A here
+			SharedData::GetInstance()->location = TOGAPLANET;
 		}
 	}
 	else if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){	//for planet B
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
-			//code to land onto planet B here
+			SharedData::GetInstance()->location = TOGAPLANET;
 		}
 	}
 	else if (((*middleOfShip - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
-			//code to land onto planet C here
+			SharedData::GetInstance()->location = TOGAPLANET;
 		}
 	}
 	else{
