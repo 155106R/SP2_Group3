@@ -6,6 +6,7 @@
 #include "MeshBuilder.h"
 #include "Utility.h"
 #include "LoadTGA.h"
+#include "Mtx44.h"
 
 PlanetJellyScene::PlanetJellyScene()
 {
@@ -169,25 +170,31 @@ void PlanetJellyScene::Init()
 	meshList[NPC_1]->textureID = LoadTGA("Image//jelly_texture.tga");
 
 	// jelly animation
-	jelly.T_Y = 0;
+	jelly.position = Vector3(0, 0, 0);
 	jelly.S_Y = 0;
 	jelly.state = 0;
 
 	// jelly_jumping animation
-	jelly_jumping.T_Y = 0;
+	jelly_jumping.position = Vector3(0, 0, 0);
 	jelly_jumping.state = 0;
+
+	// jelly npc animation
+	jelly_NPC_Loop.position = Vector3(0, 0, 0);
+	jelly_NPC_Loop.R_X = 0;
+	jelly_NPC_Loop.state = 3;
 
 }
 
 void PlanetJellyScene::Update(double dt)
 {
-	// jelly animation
-	if (jelly.state == 0 && jelly_jumping.state == 0)
+	// jelly animation && jelly_jumping animation
+
+	if (jelly.state == 0 && jelly_jumping.state == 0) 
 	{
 		if (jelly.S_Y >= -1)
 		{
-			jelly.S_Y -= 1 * dt;
-			jelly.T_Y -= 1 * dt;
+			jelly.S_Y -= 4 * dt;
+			jelly.position.y -= 4 * dt;
 		}
 		else
 		{ 
@@ -195,26 +202,42 @@ void PlanetJellyScene::Update(double dt)
 			jelly_jumping.state = 1;
 		}
 	}
-	else if (jelly.state == 1 && jelly_jumping.state == 1)
+	else if (jelly.state == 1 && jelly_jumping.state == 1) //jumping up
 	{
 		if (jelly.S_Y <= 0)
 		{
-			jelly.S_Y += 1 * dt;
-			jelly.T_Y += 1 * dt;
-			jelly_jumping.T_Y += 2 * dt;
+			jelly.S_Y += 4 * dt;
+			jelly.position.y += 4 * dt;
+			jelly_jumping.position.y += 10* dt;
 		}
 		else
 		{
+			jelly.S_Y = 0;
+			jelly.position.y = 0;
 			jelly.state = 0;
 			jelly_jumping.state = 2;
 		}
 	}
-	else if (jelly_jumping.state == 2)
+	else if (jelly_jumping.state == 2) //jumping down
 	{
-		if (jelly_jumping.T_Y >= 0) jelly_jumping.T_Y -= 2 * dt;
+		if (jelly_jumping.position.y >= 0) jelly_jumping.position.y -= 10 * dt;
 		else jelly_jumping.state = 0;
 	}
-	//jelly_jumping animation
+	
+	// jelly npc animation
+	if (jelly_NPC_Loop.state == 1 && jelly_jumping.state != 0) // move forward
+	{
+		jelly_NPC_Loop.position.x += sin(DegreeToRadian(jelly_NPC_Loop.R_X)) * 5.f* dt;
+		jelly_NPC_Loop.position.z += cos(DegreeToRadian(jelly_NPC_Loop.R_X)) * 5.f* dt;
+	}
+	if (jelly_NPC_Loop.state == 2 && jelly_jumping.state != 0) // trun right
+	{
+		jelly_NPC_Loop.R_X -= 18 * dt;
+	}
+	if (jelly_NPC_Loop.state == 3 && jelly_jumping.state != 0) // turn left
+	{
+		jelly_NPC_Loop.R_X += 18 * dt;
+	}
 
 
 
@@ -479,8 +502,8 @@ void PlanetJellyScene::Render()
 
 	// render ground
 	modelStack.PushMatrix();
-	modelStack.Translate(100, -70, 1000);
-	modelStack.Scale(500, 50, 500);
+	modelStack.Translate(100, -463, 1000);
+	modelStack.Scale(500, 400, 500);
 	RenderMesh(meshList[GROUND_MESH], enableLight);
 	modelStack.PopMatrix();
 
@@ -518,28 +541,31 @@ void PlanetJellyScene::Render()
 	// render NPC
 	// NPC-NPC
 	modelStack.PushMatrix();
-	modelStack.Translate(10, -10 + jelly.T_Y + jelly_jumping.T_Y, 10);
+	glBlendFunc(1,1);
+	modelStack.Translate(10 + jelly_NPC_Loop.position.x, -10 + jelly.position.y + jelly_jumping.position.y, 10 + jelly_NPC_Loop.position.z);
+	modelStack.Rotate(jelly_NPC_Loop.R_X , 0, 1, 0);
 	modelStack.Scale(5, 5 + jelly.S_Y, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	modelStack.PopMatrix();
 	// NPC-DRONE
 	modelStack.PushMatrix();
-	modelStack.Translate(-115, -10, -15);
+	modelStack.Translate(-115, -10 + jelly.position.y + jelly_jumping.position.y, -15);
 	modelStack.Rotate(90, 0, 1, 0);
-	modelStack.Scale(5, 5, 5);
+	modelStack.Scale(5, 5 + jelly.S_Y, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
 	// NPC-UPGRADE
 	modelStack.PushMatrix();
-	modelStack.Translate(100, -10, 100);
+	modelStack.Translate(100, -10 + jelly.position.y + jelly_jumping.position.y, 100);
 	modelStack.Rotate(180, 0, 1, 0);
-	modelStack.Scale(5, 5, 5);
+	modelStack.Scale(5, 5 + jelly.S_Y , 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
 	// NPC-MINERAL
 	modelStack.PushMatrix();
-	modelStack.Translate(110, -5, -90);
-	modelStack.Scale(5, 5, 5);
+	modelStack.Translate(110, -5 + jelly.position.y + jelly_jumping.position.y, -90);
+	modelStack.Scale(5, 5 + jelly.S_Y, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
 
