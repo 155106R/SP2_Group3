@@ -10,10 +10,12 @@
 
 OpenGalaxyScene::OpenGalaxyScene()
 {
+
 }
 
 OpenGalaxyScene::~OpenGalaxyScene()
 {
+
 }
 
 void OpenGalaxyScene::Init()
@@ -31,6 +33,7 @@ void OpenGalaxyScene::Init()
 	shipAxisX = 0;
 	shipAxisY = 0;
 	shipAxisZ = 0;
+	rotateShipZ = 0;
 	noseOfShip = new Vector3(0, 0, 1);
 	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
 	accelerateShip = 0;
@@ -244,7 +247,9 @@ void OpenGalaxyScene::Update(double dt)
 	}
 
 	//Camera Movement
+	camera.target = *middleOfShip;
 	camera.Update(dt);
+	//camera.position = camera.target + Vector3(20, 20, 20);
 
 	////Light
 	//if (Application::IsKeyPressed('8')){
@@ -287,10 +292,17 @@ void OpenGalaxyScene::Update(double dt)
 
 	//Update ship movement
 	*middleOfShip += *noseOfShip * accelerateShip * dt;
-
+	if (rotateShipZ && !Application::IsKeyPressed('U') && !Application::IsKeyPressed('O')){	//to "stabilize" ship
+		if (rotateShipZ > 0){
+			rotateShipZ -= 0.05f;
+		}
+		else if(rotateShipZ < 0){
+			rotateShipZ += 0.05f;
+		}
+	}
 	light[1].position.x = middleOfShip->x;
 	light[1].position.y = middleOfShip->y;
-	light[1].position.z = middleOfShip->z + 10;
+	light[1].position.z = middleOfShip->z + 15;
 
 	updateShipMovement();
 
@@ -536,6 +548,7 @@ void OpenGalaxyScene::Render()
 	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);
 	modelStack.Rotate(rotateShip, 0, 1, 0);
 	modelStack.Rotate(90, 1, 0, 0);
+	modelStack.Rotate(rotateShipZ, 1, 0, 0);
 	modelStack.Scale(5, 5, 5);
 	RenderMesh(meshList[PROXY_SPACESHIP], true);
 	modelStack.PopMatrix();
@@ -667,10 +680,16 @@ void OpenGalaxyScene::updateShipMovement(){
 		}
 	}
 	if (Application::IsKeyPressed('U')){
-		middleOfShip->y += 0.5f;
+		middleOfShip->y += 0.015f;
+		if (rotateShipZ > -5.0f){
+			rotateShipZ -= 0.05f;
+		}
 	}
 	if (Application::IsKeyPressed('O')){
-		middleOfShip->y -= 0.5f;
+		middleOfShip->y -= 0.015f;
+		if (rotateShipZ < 5.0f){
+			rotateShipZ += 0.05f;
+		}
 	}
 	if (Application::IsKeyPressed('P')){	//break acceleration to 0
 		if (accelerateShip != 0){

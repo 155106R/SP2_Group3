@@ -10,7 +10,9 @@ using std::vector;
 using std::ifstream;
 
 #include "Scene.h"
-#include "FPCamera.h"
+//#include "FPCamera.h"
+//#include "Camera_Mouse.h"
+#include "OpenGalaxyCamera.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
@@ -192,7 +194,9 @@ private:
 
 	Vector3 *noseOfShip;
 	Vector3 *middleOfShip;
-	float shipAxisX, shipAxisY, shipAxisZ;
+	float shipAxisX, shipAxisY, shipAxisZ; 
+	float rotateShipZ;
+	bool isTransltingY;
 	float rotateShip;
 	float translateShip;
 	float accelerateShip;
@@ -207,7 +211,8 @@ private:
 	//For Light
 	bool enableLight;
 
-	FPCamera camera;
+	//Camera_Mouse camera;
+	OpenGalaxyCamera camera;
 	Light light[2];
 
 	Mesh *meshList[NUM_GEOMETRY];
