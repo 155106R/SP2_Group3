@@ -64,7 +64,7 @@ void OpenGalaxyScene::Init()
 	glEnable(GL_DEPTH_TEST);
 
 	//Camera
-	camera.Init(Vector3(30, 30, 30), Vector3(0, 0, 0), Vector3(0, 10, 0));
+	camera.Init(Vector3(30, 30, 30), *middleOfShip, Vector3(0, 10, 0));
 	camera.Reset();
 
 	glGenVertexArrays(1, &m_vertexArrayID);
@@ -248,7 +248,10 @@ void OpenGalaxyScene::Update(double dt)
 	}
 
 	//Camera Movement
-	//camera.target = *middleOfShip;
+	camera.target = *middleOfShip;
+	camera.target.y =( middleOfShip->y ) + 15;
+	//camera.target.x = middleOfShip->x;
+	//camera.target.z = middleOfShip->z;
 	camera.Update(dt);
 	
 	if (SharedData::GetInstance()->SD_location != OPEN_GALAXY){
@@ -287,6 +290,7 @@ void OpenGalaxyScene::Update(double dt)
 
 	updateShipMovement();
 
+	//
 	//Planet interaction/docking
 	if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){	//for planet A
 		land = true;
@@ -570,6 +574,8 @@ void OpenGalaxyScene::Render()
 	if (land){
 		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 2, 0.5, 5);
 	}
+	
+	
 
 	RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoins:" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 3, 0.5, 18);
 	RenderTextOnScreen(meshList[GEO_TEXT], "Hull Integrity:" + std::to_string(SharedData::GetInstance()->SD_hullIntegrity), Color(1, 0, 0), 3, 0.5, 19);
@@ -691,4 +697,6 @@ void OpenGalaxyScene::updateShipMovement(){
 			}
 		}
 	}
+
+	camera.shiprotate = rotateShip;
 }

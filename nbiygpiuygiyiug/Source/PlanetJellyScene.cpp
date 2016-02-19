@@ -166,6 +166,14 @@ void PlanetJellyScene::Init()
 	meshList[SHOP_UPGRADE]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
 
 	//Render NCP
+	Init_animation_NPC();
+
+	Math::InitRNG();
+}
+
+void PlanetJellyScene::Init_animation_NPC()
+{
+	//Render NCP
 	meshList[NPC_1] = MeshBuilder::GenerateOBJ("npc", "OBJ//jelly.obj");
 	meshList[NPC_1]->textureID = LoadTGA("Image//jelly_texture.tga");
 
@@ -178,18 +186,23 @@ void PlanetJellyScene::Init()
 	jelly_jumping.position = Vector3(0, 0, 0);
 	jelly_jumping.state = 0;
 
-	// jelly npc animation
-	jelly_NPC_Loop.position = Vector3(0, 0, 0);
-	jelly_NPC_Loop.R_X = 0;
-	jelly_NPC_Loop.state = 3;
 
+	//jelly npc animation
+	for (int i = 0; i <= 1; i++)
+	{
+		animation newjelly;
+		newjelly.position = Vector3(0, 0, 0);
+		newjelly.tempposition = Vector3(0, 0, 0);
+		newjelly.R_X = 0;
+		newjelly.state = 0;
+		newjelly.tempR = 0;
+		jelly_NPC_Loop.push_back(newjelly);
+	}
 }
-
-void PlanetJellyScene::Update(double dt)
+void PlanetJellyScene::Update_animation_NPC(double dt)
 {
 	// jelly animation && jelly_jumping animation
-
-	if (jelly.state == 0 && jelly_jumping.state == 0) 
+	if (jelly.state == 0 && jelly_jumping.state == 0)
 	{
 		if (jelly.S_Y >= -1)
 		{
@@ -197,7 +210,7 @@ void PlanetJellyScene::Update(double dt)
 			jelly.position.y -= 4 * dt;
 		}
 		else
-		{ 
+		{
 			jelly.state = 1;
 			jelly_jumping.state = 1;
 		}
@@ -208,7 +221,7 @@ void PlanetJellyScene::Update(double dt)
 		{
 			jelly.S_Y += 4 * dt;
 			jelly.position.y += 4 * dt;
-			jelly_jumping.position.y += 10* dt;
+			jelly_jumping.position.y += 10 * dt;
 		}
 		else
 		{
@@ -223,24 +236,118 @@ void PlanetJellyScene::Update(double dt)
 		if (jelly_jumping.position.y >= 0) jelly_jumping.position.y -= 10 * dt;
 		else jelly_jumping.state = 0;
 	}
-	
+
 	// jelly npc animation
-	if (jelly_NPC_Loop.state == 1 && jelly_jumping.state != 0) // move forward
+	for (int i = 0; i <= 1; i++)
 	{
-		jelly_NPC_Loop.position.x += sin(DegreeToRadian(jelly_NPC_Loop.R_X)) * 5.f* dt;
-		jelly_NPC_Loop.position.z += cos(DegreeToRadian(jelly_NPC_Loop.R_X)) * 5.f* dt;
-	}
-	if (jelly_NPC_Loop.state == 2 && jelly_jumping.state != 0) // trun right
-	{
-		jelly_NPC_Loop.R_X -= 18 * dt;
-	}
-	if (jelly_NPC_Loop.state == 3 && jelly_jumping.state != 0) // turn left
-	{
-		jelly_NPC_Loop.R_X += 18 * dt;
-	}
+		if (jelly_NPC_Loop[i].state == 0 && jelly_jumping.state != 0)
+		{
+			if (jelly_NPC_Loop[i].tempposition.x == 0 && jelly_NPC_Loop[i].tempposition.z == 0)
+			{
+				jelly_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-50, 50);
+				jelly_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-50, 50);
+			}
+			else if (jelly_NPC_Loop[i].tempR == 0)
+			{
+				if (sqrt(pow((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x), 2) + pow((jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z), 2)) > 5)
+				{
+					jelly_NPC_Loop[i].tempR = Math::RadianToDegree(atan((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x) / (jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z)));
+					std::cout << i << "X " << jelly_NPC_Loop[i].tempposition.x << std::endl;
+					std::cout << i << "Z " << jelly_NPC_Loop[i].tempposition.z << std::endl;
+					std::cout << i << "R " << jelly_NPC_Loop[i].tempR << std::endl;
+				}
+				else
+				{
+					jelly_NPC_Loop[i].tempposition.x = 0;
+					jelly_NPC_Loop[i].tempposition.z = 0;
+				}
+			}
+			else if (jelly_NPC_Loop[i].tempR != 0)
+			{
+				if (((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x) < 0) && ((jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z) > 0)) jelly_NPC_Loop[i].tempR -= jelly_NPC_Loop[i].R_X; /*(z,-x) C*/
+				else if (((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x) < 0) && ((jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z) < 0)) jelly_NPC_Loop[i].tempR -= (jelly_NPC_Loop[i].R_X + 180); /*(-z,-x) T*/
+				else if (((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x) > 0) && ((jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z) > 0)) jelly_NPC_Loop[i].tempR -= jelly_NPC_Loop[i].R_X; /*(z,x) A*/
+				else if (((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x) > 0) && ((jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z) < 0)) jelly_NPC_Loop[i].tempR -= (jelly_NPC_Loop[i].R_X - 180); /*(-z,x) S*/
+				if (jelly_NPC_Loop[i].tempR < 0) // trun right
+				{
+					jelly_NPC_Loop[i].state = 2;
+				}
+				else if (jelly_NPC_Loop[i].tempR > 0) // trun left
+				{
+					jelly_NPC_Loop[i].state = 3;
+				}
 
+			}
+			else jelly_NPC_Loop[i].state = 1;
+		}
 
+		if (jelly_NPC_Loop[i].state == 1 && jelly_jumping.state != 0) // move forward
+		{
+			if (sqrt(pow((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x), 2) + pow((jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z), 2)) > 5)
+			{
+				jelly_NPC_Loop[i].position.x += sin(DegreeToRadian(jelly_NPC_Loop[i].R_X)) * 5.f* dt;
+				jelly_NPC_Loop[i].position.z += cos(DegreeToRadian(jelly_NPC_Loop[i].R_X)) * 5.f* dt;
+			}
+			else
+			{
+				jelly_NPC_Loop[i].tempposition.x = 0;
+				jelly_NPC_Loop[i].tempposition.z = 0;
+				jelly_NPC_Loop[i].state = 0;
+			}
+		}
+		if (jelly_NPC_Loop[i].state == 2 && jelly_jumping.state != 0)
+		{
+			if (jelly_NPC_Loop[i].tempR < -180)
+			{
+				jelly_NPC_Loop[i].tempR = 360 + jelly_NPC_Loop[i].tempR;
+				std::cout << i << "R " << jelly_NPC_Loop[i].tempR << std::endl;
+				jelly_NPC_Loop[i].state = 3;
+			}
+			else if (jelly_NPC_Loop[i].tempR < 0) //turn right
+			{
+				jelly_NPC_Loop[i].tempR += 18 * dt;
+				jelly_NPC_Loop[i].R_X -= 18 * dt;
+			}
+			else if (jelly_NPC_Loop[i].tempR != 0)
+			{
 
+				jelly_NPC_Loop[i].R_X += jelly_NPC_Loop[i].tempR;
+				jelly_NPC_Loop[i].tempR = 0;
+
+			}
+			else jelly_NPC_Loop[i].state = 1;
+
+		}
+		if (jelly_NPC_Loop[i].state == 3 && jelly_jumping.state != 0)
+		{
+
+			if (jelly_NPC_Loop[i].tempR>180)
+			{
+				jelly_NPC_Loop[i].tempR = 0 - 360 + jelly_NPC_Loop[i].tempR;
+				std::cout << i << "R " << jelly_NPC_Loop[i].tempR << std::endl;
+				jelly_NPC_Loop[i].state = 2;
+			}
+			else if (jelly_NPC_Loop[i].tempR > 0) //turn left
+			{
+				jelly_NPC_Loop[i].tempR -= 18 * dt;
+				jelly_NPC_Loop[i].R_X += 18 * dt;
+			}
+			else if (jelly_NPC_Loop[i].tempR != 0)
+			{
+
+				jelly_NPC_Loop[i].R_X += jelly_NPC_Loop[i].tempR;
+				jelly_NPC_Loop[i].tempR = 0;
+
+			}
+			else jelly_NPC_Loop[i].state = 1;
+		}
+	}
+}
+
+void PlanetJellyScene::Update(double dt)
+{
+	// jelly animation
+	Update_animation_NPC(dt);
 
 	//Enable culling
 	if (Application::IsKeyPressed('1'))
@@ -539,15 +646,18 @@ void PlanetJellyScene::Render()
 	modelStack.PopMatrix();
 
 	// render NPC
-	// NPC-NPC
-	modelStack.PushMatrix();
-	glBlendFunc(1,1);
-	modelStack.Translate(10 + jelly_NPC_Loop.position.x, -10 + jelly.position.y + jelly_jumping.position.y, 10 + jelly_NPC_Loop.position.z);
-	modelStack.Rotate(jelly_NPC_Loop.R_X , 0, 1, 0);
-	modelStack.Scale(5, 5 + jelly.S_Y, 5);
-	RenderMesh(meshList[NPC_1], enableLight);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	modelStack.PopMatrix();
+	//NPC-NPC
+	for (int i = 0; i <= 1; i++)
+	{
+		modelStack.PushMatrix();
+		glBlendFunc(1, 1);
+		modelStack.Translate(0 + jelly_NPC_Loop[i].position.x, -10 + jelly.position.y + jelly_jumping.position.y, 0 + jelly_NPC_Loop[i].position.z);
+		modelStack.Rotate(jelly_NPC_Loop[i].R_X, 0, 1, 0);
+		modelStack.Scale(5, 5 + jelly.S_Y, 5);
+		RenderMesh(meshList[NPC_1], enableLight);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		modelStack.PopMatrix();
+	}
 	// NPC-DRONE
 	modelStack.PushMatrix();
 	modelStack.Translate(-115, -10 + jelly.position.y + jelly_jumping.position.y, -15);
