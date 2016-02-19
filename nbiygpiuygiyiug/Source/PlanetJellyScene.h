@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 using std::string;
 using std::vector;
@@ -14,6 +15,7 @@ using std::ifstream;
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
+
 
 class PlanetJellyScene : public Scene
 {
@@ -106,8 +108,9 @@ private:
 
 	void RenderText(Mesh* mesh, std::string text, Color color);
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
-
 	void generateSkybox();
+	void Init_animation_NPC();
+	void Update_animation_NPC(double dt);
 
 	vector<string> fillWithFontData(string path){
 
@@ -152,19 +155,25 @@ private:
 	bool enableLight;
 
 	//animation
+
+	
+
 	struct animation {
 		int state;
 		//translate
 		Vector3 position;
+		Vector3 tempposition;
 		//sacle
 		float S_Y;
 		//rotate
 		float R_X;
+		float tempR;
 	};
 
+	vector<animation> jelly_NPC_Loop;
 	animation jelly;
 	animation jelly_jumping;
-	animation jelly_NPC_Loop;
+	/*animation jelly_NPC_Loop;*/
 
 	Camera_Mouse camera;
 	Light light[1];
