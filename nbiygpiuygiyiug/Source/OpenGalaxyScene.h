@@ -10,9 +10,9 @@ using std::vector;
 using std::ifstream;
 
 #include "Scene.h"
-//#include "FPCamera.h"
+#include "FPCamera.h"
 //#include "Camera_Mouse.h"
-#include "OpenGalaxyCamera.h"
+//#include "OpenGalaxyCamera.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
@@ -107,8 +107,6 @@ public:
 	virtual void Render();
 	virtual void Exit();
 
-
-
 private:
 	unsigned m_vertexArrayID;
 	unsigned m_vertexBuffer[NUM_GEOMETRY];
@@ -190,6 +188,7 @@ private:
 	}
 
 	bool land;
+	string nameOfPlanet;
 	float rotateTextX, rotateTextY, rotateTextZ;
 
 	Vector3 *noseOfShip;
@@ -212,7 +211,7 @@ private:
 	bool enableLight;
 
 	//Camera_Mouse camera;
-	OpenGalaxyCamera camera;
+	FPCamera camera;
 	Light light[2];
 
 	Mesh *meshList[NUM_GEOMETRY];

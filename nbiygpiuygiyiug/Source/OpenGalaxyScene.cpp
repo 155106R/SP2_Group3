@@ -20,6 +20,7 @@ OpenGalaxyScene::~OpenGalaxyScene()
 
 void OpenGalaxyScene::Init()
 {
+
 	//Definations
 	LSPEED = 10.0f;
 
@@ -252,6 +253,11 @@ void OpenGalaxyScene::Update(double dt)
 	//camera.target.x = middleOfShip->x;
 	//camera.target.z = middleOfShip->z;
 	camera.Update(dt);
+	
+	if (SharedData::GetInstance()->SD_location != OPEN_GALAXY){
+		accelerateShip = 0;
+	}
+
 	//camera.position = camera.target + Vector3(20, 20, 20);
 
 	////Light
@@ -267,31 +273,6 @@ void OpenGalaxyScene::Update(double dt)
 	//	light[1].type = Light::LIGHT_SPOT;
 	//	glUniform1i(m_parameters[U_LIGHT1_TYPE], light[1].type);
 	//}
-
-	/*if (camera.position.x > 250){
-	rotateTextX += 1.0f;
-	}
-	if(camera.position.x < 250){
-	rotateTextX -= 1.0f;
-	}
-	else if (camera.position.y > 250){
-	rotateTextY += 1.0f;
-	}
-	else if (camera.position.y < 250){
-	rotateTextY -= 1.0f;
-	}
-	if (camera.position.z > 0){
-	if (camera.position.z > rotateTextY){
-	rotateTextY += 1.0f;
-	}
-	}
-	else if (camera.position.z < 0){
-	if (camera.position.z < rotateTextY){
-	rotateTextY -= 1.0f;
-	}
-	}*/
-
-
 
 	//Update ship movement
 	*middleOfShip += *noseOfShip * accelerateShip * dt;
@@ -311,25 +292,28 @@ void OpenGalaxyScene::Update(double dt)
 
 	//
 	//Planet interaction/docking
-	if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
+	if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){	//for planet A
 		land = true;
+		nameOfPlanet = "sean's planet";
 
 		if (Application::IsKeyPressed('E')){
-			//code to land onto planet A here
+			//SharedData::GetInstance()->location = 69; //Does not exist yet
 		}
 	}
-	else if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){	//for planet B
+	else if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet B
 		land = true;
+		nameOfPlanet = "Toga";
 
 		if (Application::IsKeyPressed('E')){
-			//code to land onto planet B here
+			SharedData::GetInstance()->SD_location = PLANET_TOGA;
 		}
 	}
 	else if (((*middleOfShip - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C
 		land = true;
+		nameOfPlanet = "Jelly Planet";
 
 		if (Application::IsKeyPressed('E')){
-			//code to land onto planet C here
+			SharedData::GetInstance()->SD_location = PLANET_JELLY;
 		}
 	}
 	else{
@@ -586,12 +570,20 @@ void OpenGalaxyScene::Render()
 	RenderText(meshList[GEO_TEXT], "Planet C", Color(1, 0, 0));
 	modelStack.PopMatrix();
 
-	//Text if ship is within range of landing on planet
+	//Text if ship is within range of landing on planetS
 	if (land){
-		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land", Color(1, 0, 0), 2, 0.5, 5);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 2, 0.5, 5);
 	}
 	
 	
+
+	RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoins:" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 3, 0.5, 18);
+	RenderTextOnScreen(meshList[GEO_TEXT], "Hull Integrity:" + std::to_string(SharedData::GetInstance()->SD_hullIntegrity), Color(1, 0, 0), 3, 0.5, 19);
+
+	RenderTextOnScreen(meshList[GEO_TEXT], "X:" + std::to_string(middleOfShip->x), Color(1, 0, 0), 3, 17, 4);
+	RenderTextOnScreen(meshList[GEO_TEXT], "Y:" + std::to_string(middleOfShip->y), Color(1, 0, 0), 3, 17, 3);
+	RenderTextOnScreen(meshList[GEO_TEXT], "Z:" + std::to_string(middleOfShip->z), Color(1, 0, 0), 3, 17, 2);
+	RenderTextOnScreen(meshList[GEO_TEXT], "Speed:" + std::to_string(accelerateShip), Color(1, 0, 0), 3, 17, 1);
 
 }
 
