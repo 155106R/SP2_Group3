@@ -13,9 +13,9 @@ enum Minerals{
 };
 
 enum onPlanet{
-	OPENGALAXY,
-	TOGAPLANET,
-	JELLYPLANET,
+	OPEN_GALAXY,
+	PLANET_TOGA,
+	PLANET_JELLY,
 
 	NUM_PLANETS
 };
@@ -32,10 +32,14 @@ public:
 
 	map<Minerals, int> inventory;
 
-	int SD_hullintegrity;
-	int SD_bitcoins;
+	int SD_hullIntegrity = 100;
+	int SD_bitcoins = 100;
 
-	unsigned location = 0;
+	unsigned SD_location;
+
+	void SD_generateHUD(){
+
+	}
 
 private:
 	//SharedData(){};
