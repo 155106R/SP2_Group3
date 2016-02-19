@@ -8,7 +8,7 @@
 #include "LoadTGA.h"
 #include "MyMath.h"
 #include "Mtx44.h"
-
+#include "Camera_Mouse.h"
 
 #include <iostream>
 using std::cout;
@@ -24,15 +24,13 @@ TogaScene::~TogaScene()
 
 void TogaScene::Init()
 {
+
+	//npc togan spawning
+	Init_getWalktarget();
+
 	//random
 	Math::InitRNG();
 	targetxz = 0;
-	//togan 1 npc
-	togan1.position = Vector3(0, 0, 0);
-	togan1.rotate_togan = 0;
-
-
-
 
 	//Definations
 	boxRange = 200;
@@ -80,7 +78,7 @@ void TogaScene::Init()
 	glEnable(GL_DEPTH_TEST);
 
 	//Camera
-	camera.Init(Vector3(30, 30, 30), Vector3(0, 0, 0), Vector3(0, 10, 0));
+	camera.Init(Vector3(30, 15, 1), Vector3(30, 15, 0), Vector3(0, 1, 0));
 	camera.Reset();
 
 	glGenVertexArrays(1, &m_vertexArrayID);
@@ -243,13 +241,12 @@ void TogaScene::Update(double dt)
 	if (Application::IsKeyPressed('Z'))
 	{
 		inc += 50 * dt;
-		cout << targetxz << endl;
+	
 	}
 	if (Application::IsKeyPressed('X'))
 	{
 		inc -= 50 * dt;
-		cout << togan1.position.x << endl;
-		cout << togan1.position.z << endl;
+	
 	}
 	//Enable culling
 	if (Application::IsKeyPressed('1'))
@@ -296,9 +293,8 @@ void TogaScene::Update(double dt)
 	droneAnimation(dt);
 	mineralAnimation(dt);
 	upgradeAnimation(dt);
-
 	toganwalk(dt);
-	//getWalktarget(dt);
+	getWalktarget(dt);
 
 
 }
@@ -525,12 +521,17 @@ void TogaScene::Render()
 	generateUpgrademerchant();
 	modelStack.PopMatrix();
 
-	//Togans
-	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, 0);
-	//RenderMesh(meshList[NPC_TOGAN_ARM], true);
-	generateWanderers();
-	modelStack.PopMatrix();
+	// render NPC
+	//NPC-NPC
+	for (int i = 0; i <= 1; i++)
+	{
+		modelStack.PushMatrix();
+		modelStack.Translate(togan_NPC_Loop[i].position.x, togan_NPC_Loop[i].position.y, 0);
+		modelStack.Rotate(togan_NPC_Loop[i].rotate_togan, 0, 1, 0);
+		generateTogan();
+		modelStack.PopMatrix();
+	}
+	
 }
 
 void TogaScene::Exit()
@@ -750,17 +751,8 @@ void TogaScene::generateWanderers()
 {
 	//wanderer1
 
-	
-	modelStack.PushMatrix();
-	modelStack.Rotate(togan1.rotate_togan, 0, 1, 0);
-	modelStack.Translate(togan1.position.x, 0, togan1.position.z);
-	generateTogan();
-	modelStack.PopMatrix();
-
-
 
 }
-
 
 void TogaScene::droneAnimation(double dt)
 {
@@ -939,40 +931,120 @@ void TogaScene::toganwalk(double dt)
 
 void TogaScene::getWalktarget(double dt)
 {
-	togan1.position.x += sin(DegreeToRadian(togan1.rotate_togan)) * dt;
-	togan1.position.z += cos(DegreeToRadian(togan1.rotate_togan)) * dt;
-
-	if (boxRangecheck(togan1.position.x) == true || boxRangecheck(togan1.position.z) == true)
+	for (int i = 0; i <= 0; i++)
 	{
-		togan1.rotate_togan = generateRotation();
+		if (togan_NPC_Loop[i].state == 0)
+		{
+			if (togan_NPC_Loop[i].tempposition.x == 0)
+			{
+				togan_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-50, 50);
+				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-50, 50);
+			}
+			else if (togan_NPC_Loop[i].tempR == 0)
+			{
+				if (sqrt(pow((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x), 2) + pow((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z), 2)) > 5)
+				{
+					togan_NPC_Loop[i].tempR = Math::RadianToDegree(atan((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) / (togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z)));
+				}
+				else
+				{
+					togan_NPC_Loop[i].tempposition.x = 0;
+					togan_NPC_Loop[i].tempposition.z = 0;
+				}
+			}
+
+			else if (togan_NPC_Loop[i].tempR != 0)
+			{
+				if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) < 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) > 0)) togan_NPC_Loop[i].tempR -= togan_NPC_Loop[i].rotate_togan;
+				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) < 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) < 0)) togan_NPC_Loop[i].tempR -= (togan_NPC_Loop[i].rotate_togan + 180);
+				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) > 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) > 0)) togan_NPC_Loop[i].tempR -= togan_NPC_Loop[i].rotate_togan;
+				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) > 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) < 0)) togan_NPC_Loop[i].tempR -= (togan_NPC_Loop[i].rotate_togan - 180);
+				if (togan_NPC_Loop[i].tempR < 0)
+				{
+					togan_NPC_Loop[i].state = 2;
+				}
+				else if (togan_NPC_Loop[i].tempR > 0)
+				{
+					togan_NPC_Loop[i].state = 3;
+				}
+
+			}
+			else togan_NPC_Loop[i].state = 1;
+		}
+
+		if (togan_NPC_Loop[i].state == 1)//foward
+		{
+			if (sqrt(pow((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x), 2) + pow((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z), 2)) > 5)
+			{
+				togan_NPC_Loop[i].position.x += sin(DegreeToRadian(togan_NPC_Loop[i].rotate_togan)) * 5.f* dt;
+				togan_NPC_Loop[i].position.z += cos(DegreeToRadian(togan_NPC_Loop[i].rotate_togan)) * 5.f* dt;
+			}
+			else
+			{
+				togan_NPC_Loop[i].tempposition.x = 0;
+				togan_NPC_Loop[i].tempposition.z = 0;
+				togan_NPC_Loop[i].state = 0;
+			}
+		}
+		if (togan_NPC_Loop[i].state == 2)
+		{
+			if (togan_NPC_Loop[i].tempR < -180)
+			{
+				togan_NPC_Loop[i].tempR = 360 + togan_NPC_Loop[i].tempR;
+				togan_NPC_Loop[i].state = 3;
+			}
+			else if (togan_NPC_Loop[i].tempR < 0)//turinging right
+			{
+				togan_NPC_Loop[i].tempR += 18 * dt;
+				togan_NPC_Loop[i].rotate_togan -= 18 * dt;
+			}
+			else if (togan_NPC_Loop[i].tempR != 0)
+			{
+				togan_NPC_Loop[i].rotate_togan += togan_NPC_Loop[i].tempR;
+				togan_NPC_Loop[i].tempR = 0;
+			}
+			else togan_NPC_Loop[i].state = 1;
+		}
+		if (togan_NPC_Loop[i].state == 3)
+		{
+			if (togan_NPC_Loop[i].tempR > 180)
+			{
+				togan_NPC_Loop[i].tempR = 0 - 360 + togan_NPC_Loop[i].tempR;
+				togan_NPC_Loop[i].state = 2;
+			}
+			else if (togan_NPC_Loop[i].tempR > 0)//turn left
+			{
+				togan_NPC_Loop[i].tempR -= 18 * dt;
+				togan_NPC_Loop[i].rotate_togan += 18 * dt;
+			}
+			else if (togan_NPC_Loop[i].tempR != 0)
+			{
+				togan_NPC_Loop[i].rotate_togan += togan_NPC_Loop[i].tempR;
+				togan_NPC_Loop[i].state = 1;
+			}
+			else togan_NPC_Loop[i].state = 1;
+
+		}
 	}
-	
-
-
-
-
-
 }
 
-bool TogaScene::boxRangecheck(float pos)
+void TogaScene::Init_getWalktarget()
 {
-	if (pos > boxRange)
-	{
-		return true;//out of limit
-	}
-	if (pos < -boxRange)
-	{
-		return true;//out of limit
-	}
-	else
-	{
-		return false;//within limit
-	}
-}
 
-float TogaScene::generateRotation()
-{
-	float rotation = Math::RandFloatMinMax(45, 175);
-	return rotation;
 
+	// init togan pos and state
+	togan.position = Vector3(0, 0, 0);
+	togan.state = 0;
+
+	//togan npc animation instances
+	for (int i = 0; i <= 1; i++)
+	{
+		Togan newtogan;
+		newtogan.position = Vector3(0, 0, 0);
+		newtogan.tempposition = Vector3(0, 0, 0);
+		newtogan.rotate_togan = 0;
+		newtogan.state = 0;
+		newtogan.tempR = 0;
+		togan_NPC_Loop.push_back(newtogan);
+	}
 }
