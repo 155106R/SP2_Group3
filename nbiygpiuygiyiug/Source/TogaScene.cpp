@@ -6,6 +6,9 @@
 #include "MeshBuilder.h"
 #include "Utility.h"
 #include "LoadTGA.h"
+#include "MyMath.h"
+#include "Mtx44.h"
+
 
 #include <iostream>
 using std::cout;
@@ -26,8 +29,13 @@ void TogaScene::Init()
 	targetxz = 0;
 	//togan 1 npc
 	togan1.position = Vector3(0, 0, 0);
+	togan1.rotate_togan = 0;
+
+
+
 
 	//Definations
+	boxRange = 200;
 	LSPEED = 10.0f;
 	//mm (mineral merchant)
 	mm_y_max = false;
@@ -290,7 +298,7 @@ void TogaScene::Update(double dt)
 	upgradeAnimation(dt);
 
 	toganwalk(dt);
-	getWalktarget(dt);
+	//getWalktarget(dt);
 
 
 }
@@ -744,7 +752,7 @@ void TogaScene::generateWanderers()
 
 	
 	modelStack.PushMatrix();
-	modelStack.Rotate(togan1.rotate_togan, 1, 0, 0);
+	modelStack.Rotate(togan1.rotate_togan, 0, 1, 0);
 	modelStack.Translate(togan1.position.x, 0, togan1.position.z);
 	generateTogan();
 	modelStack.PopMatrix();
@@ -752,10 +760,6 @@ void TogaScene::generateWanderers()
 
 
 }
-
-
-
-
 
 
 void TogaScene::droneAnimation(double dt)
@@ -935,9 +939,40 @@ void TogaScene::toganwalk(double dt)
 
 void TogaScene::getWalktarget(double dt)
 {
+	togan1.position.x += sin(DegreeToRadian(togan1.rotate_togan)) * dt;
+	togan1.position.z += cos(DegreeToRadian(togan1.rotate_togan)) * dt;
+
+	if (boxRangecheck(togan1.position.x) == true || boxRangecheck(togan1.position.z) == true)
+	{
+		togan1.rotate_togan = generateRotation();
+	}
 	
 
-		targetxz = Math::RandFloatMinMax(0, 150);
-	
+
+
+
+
 }
 
+bool TogaScene::boxRangecheck(float pos)
+{
+	if (pos > boxRange)
+	{
+		return true;//out of limit
+	}
+	if (pos < -boxRange)
+	{
+		return true;//out of limit
+	}
+	else
+	{
+		return false;//within limit
+	}
+}
+
+float TogaScene::generateRotation()
+{
+	float rotation = Math::RandFloatMinMax(45, 175);
+	return rotation;
+
+}

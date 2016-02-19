@@ -14,6 +14,7 @@ using std::ifstream;
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
+#include "Camera_Mouse.h"
 
 class TogaScene : public Scene
 {
@@ -129,6 +130,10 @@ private:
 	void generateUpgrademerchant();
 	void generateTogan();
 	void generateWanderers();
+
+	bool boxRangecheck(float pos);
+
+	float generateRotation();
 
 	//ANIMATIONS
 	void droneAnimation(double dt);
@@ -246,6 +251,8 @@ private:
 	bool legR_max;
 	bool legL_max;
 	float targetxz;
+
+	float boxRange;
 
 
 
