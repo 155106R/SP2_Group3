@@ -20,7 +20,6 @@ OpenGalaxyScene::~OpenGalaxyScene()
 
 void OpenGalaxyScene::Init()
 {
-
 	//Definations
 	LSPEED = 10.0f;
 
@@ -64,7 +63,7 @@ void OpenGalaxyScene::Init()
 	glEnable(GL_DEPTH_TEST);
 
 	//Camera
-	camera.Init(Vector3(30, 30, 30), Vector3(0, 0, 0), Vector3(0, 10, 0));
+	camera.Init(Vector3(30, 30, 30), *middleOfShip, Vector3(0, 10, 0));
 	camera.Reset();
 
 	glGenVertexArrays(1, &m_vertexArrayID);
@@ -249,8 +248,10 @@ void OpenGalaxyScene::Update(double dt)
 
 	//Camera Movement
 	camera.target = *middleOfShip;
+	camera.target.y =( middleOfShip->y ) + 15;
+	//camera.target.x = middleOfShip->x;
+	//camera.target.z = middleOfShip->z;
 	camera.Update(dt);
-	
 	//camera.position = camera.target + Vector3(20, 20, 20);
 
 	////Light
@@ -308,26 +309,27 @@ void OpenGalaxyScene::Update(double dt)
 
 	updateShipMovement();
 
+	//
 	//Planet interaction/docking
 	if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet A
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
-			SharedData::GetInstance()->location = TOGAPLANET;
+			//code to land onto planet A here
 		}
 	}
 	else if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){	//for planet B
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
-			SharedData::GetInstance()->location = TOGAPLANET;
+			//code to land onto planet B here
 		}
 	}
 	else if (((*middleOfShip - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C
 		land = true;
 
 		if (Application::IsKeyPressed('E')){
-			SharedData::GetInstance()->location = TOGAPLANET;
+			//code to land onto planet C here
 		}
 	}
 	else{
@@ -588,6 +590,8 @@ void OpenGalaxyScene::Render()
 	if (land){
 		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land", Color(1, 0, 0), 2, 0.5, 5);
 	}
+	
+	
 
 }
 
@@ -701,4 +705,6 @@ void OpenGalaxyScene::updateShipMovement(){
 			}
 		}
 	}
+
+	camera.shiprotate = rotateShip;
 }
