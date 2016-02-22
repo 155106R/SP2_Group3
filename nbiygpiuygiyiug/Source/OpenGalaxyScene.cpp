@@ -25,12 +25,8 @@ OpenGalaxyScene::~OpenGalaxyScene()
 void OpenGalaxyScene::Init()
 {
 	//Collision 
-	//Box
-	testBox.m_vecMin = Vector3(-10, -10, -10);
-	testBox.m_vecMax = Vector3(10, 10, 10);
-	//Box1
-	testBox1.m_vecMin = Vector3(-10, 20, -10);
-	testBox1.m_vecMax = Vector3(10, 40, 10);
+
+	//Test box from origin
 
 	//Definations
 	LSPEED = 10.0f;
@@ -46,24 +42,32 @@ void OpenGalaxyScene::Init()
 	shipAxisY = 0;
 	shipAxisZ = 0;
 	rotateShipZ = 0;
-	noseOfShip = new Vector3(0, 0, 1);
+	noseOfShip = new Vector3(1, 0, 0);
 	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
 	accelerateShip = 0;
 
+	spaceshipHitbox = AABB::generateAABB(*middleOfShip, 40, 10, 35);
+	testBox1 = AABB::generateAABB(Vector3(0, 0, 0), 5, 5, 5);	//using overloaded
+	testBox2 = AABB::generateAABB(Vector3(0, 0, 15), 5, 5, 5); //using overloaded
+
+	testBox1 = AABB::generateAABB(-5, 5);	//using overloaded
+	testBox2 = AABB::generateAABB(-10, 10); //using overloaded
+
 	for (unsigned i = 0; i < 1000; i++){
 		randTranslateX[i] = Math::RandFloatMinMax(-1000, 1000);
-		randTranslateY[i] = Math::RandFloatMinMax(-1000, 1000);
+		randTranslateY[i] = 0;//Math::RandFloatMinMax(-1000, 1000);
 		randTranslateZ[i] = Math::RandFloatMinMax(-1000, 1000);
 
 		asteroidTranslateX[i] = Math::RandFloatMinMax(-0.1f, 0.1f);
 		asteroidTranslateY[i] = Math::RandFloatMinMax(-0.1f, 0.1f);
 		asteroidTranslateZ[i] = Math::RandFloatMinMax(-0.1f, 0.1f);
 
-		randScaleX[i] = Math::RandFloatMinMax(5, 10);
-		randScaleY[i] = Math::RandFloatMinMax(5, 10);
-		randScaleZ[i] = Math::RandFloatMinMax(5, 10);
+		randScaleX[i] = Math::RandFloatMinMax(1, 10);
+		randScaleY[i] = Math::RandFloatMinMax(1, 10);
+		randScaleZ[i] = Math::RandFloatMinMax(1, 10);
 
-		AABBboxForAsteroid.push_back(AABB::generateAABB(Vector3(randTranslateX[i] - randScaleX[i], randTranslateY[i] - randScaleY[i], randTranslateZ[i] - randScaleZ[i]), Vector3(randTranslateX[i] + randScaleX[i], randTranslateY[i] + randScaleY[i], randTranslateZ[i] + randScaleZ[i])));
+		AABBboxForAsteroid.push_back(AABB::generateAABB(Vector3(randTranslateX[i], randTranslateY[i], randTranslateZ[i]), 
+			randScaleX[i], randScaleY[i], randScaleZ[i]));
 	}
 
 	Mtx44 projection;
@@ -222,6 +226,10 @@ void OpenGalaxyScene::Init()
 	meshList[PROXY_SPACESHIP]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
 	meshList[PROXY_SPACESHIP]->material.kShininess = 0.1f;
 
+	//Spaceship
+	meshList[SPACESHIP] = MeshBuilder::GenerateOBJ("Spaceship", "OBJ//ship.obj");
+	meshList[SPACESHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
+		
 	//Asteroids
 	meshList[ASTEROIDS] = MeshBuilder::GenerateSphere("Asteroids", Color(0.2941, 0.2941, 0.2941), 5, 10); //75, 75, 75 in RGB (Grey)
 	meshList[ASTEROIDS]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
@@ -243,9 +251,26 @@ void OpenGalaxyScene::Init()
 
 void OpenGalaxyScene::Update(double dt)
 {
-	if (collision(testBox, camera.position)){
+	if (collision(spaceshipHitbox, camera.position)){
 		camera.position = camera.tempPos;
 	}
+	
+	//update hitbox
+	testBox1.m_origin += Vector3(0, 0, 0.05);
+	testBox1.m_vecMin = Vector3((testBox1.m_origin.x - testBox1.m_length), (testBox1.m_origin.y - testBox1.m_height), (testBox1.m_origin.z - testBox1.m_width));
+	testBox1.m_vecMax = Vector3((testBox1.m_origin.x + testBox1.m_length), (testBox1.m_origin.y + testBox1.m_height), (testBox1.m_origin.z + testBox1.m_width));
+
+	if (collision(testBox1, testBox2)){
+		std::cout << "AABB to AABB works" << std::endl;
+		ynowerk = true;
+	}
+	else{
+		std::cout << "AABB to AABB no work" << std::endl;
+		ynowerk = false;
+	}
+
+	//std::cout << "Testbox1 coords: " << testBox1.m_origin << ", " << testBox1.m_vecMin << ", " << testBox1.m_vecMax << std::endl;
+	//std::cout << "Testbox2 coords: " << testBox2.m_origin << ", " << testBox2.m_vecMin << ", " << testBox2.m_vecMax << std::endl;
 
 	/*for (int i = 0; i < 1000; i++){
 		randTranslateX[i] += asteroidTranslateX[i];
@@ -253,13 +278,12 @@ void OpenGalaxyScene::Update(double dt)
 		randTranslateZ[i] += asteroidTranslateZ[i];
 	}*/
 
-	//if (collision(testBox, testBox1Location))
-	//{
-	//	//std::cout << "ARGHHHH FUCK FJAIRJGAIGJERIGJIAER" << std::endl;
-	//}
+	spaceshipHitbox.m_origin = *middleOfShip;
+	spaceshipHitbox.m_vecMin = Vector3((spaceshipHitbox.m_origin.x - spaceshipHitbox.m_length), (spaceshipHitbox.m_origin.y - spaceshipHitbox.m_height), (spaceshipHitbox.m_origin.z - spaceshipHitbox.m_width));
+	spaceshipHitbox.m_vecMax = Vector3((spaceshipHitbox.m_origin.x + spaceshipHitbox.m_length), (spaceshipHitbox.m_origin.y + spaceshipHitbox.m_height), (spaceshipHitbox.m_origin.z + spaceshipHitbox.m_width));
 
-	for (int i = 0; i < 1000; i++){
-		if (collision(AABBboxForAsteroid[i], camera.position)){
+	for (int i = 0; i < AABBboxForAsteroid.size(); i++){
+		if (collision(spaceshipHitbox, AABBboxForAsteroid[i])){
 			std::cout << "YOU RAN INTO AN ASTEROID DIPSHIT " << i << std::endl;
 			SharedData::GetInstance()->SD_hullIntegrity-- ;
 			SharedData::GetInstance()->SD_bitcoins++;
@@ -324,7 +348,6 @@ void OpenGalaxyScene::Update(double dt)
 
 	updateShipMovement();
 
-	//
 	//Planet interaction/docking
 	if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){	//for planet A
 		land = true;
@@ -523,9 +546,9 @@ void OpenGalaxyScene::Render()
 		camera.up.x, camera.up.y, camera.up.z);
 
 	//Disabled Sun Directional light first to test ship spotliht
-	//modelStack.LoadIdentity();
-	//Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
-	//glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
+	modelStack.LoadIdentity();
+	Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
+	glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
 
 	//Ship spotlight
 	modelStack.LoadIdentity();
@@ -542,7 +565,7 @@ void OpenGalaxyScene::Render()
 	RenderMesh(meshList[PLANET_SUN], false);
 	modelStack.PopMatrix();
 
-	//Test Lightcube - ER it's called a lightcubt but i kinda just use it for testing in general. For this, it's the direction vector for the ship
+	//Test Lightcube - ER it's called a lightcube but i kinda just use it for testing in general. For this, it's the direction vector for the ship
 	modelStack.PushMatrix();
 	modelStack.Translate(noseOfShip->x, noseOfShip->y, noseOfShip->z);
 	RenderMesh(meshList[GEO_LIGHTCUBE], false);
@@ -562,16 +585,17 @@ void OpenGalaxyScene::Render()
 		RenderMesh(meshList[ASTEROIDS], true);
 		modelStack.PopMatrix();
 
+	//Render hitbox for Android
 		modelStack.PushMatrix();
 		modelStack.Translate(
-			((AABBboxForAsteroid[i].m_vecMin.x + AABBboxForAsteroid[i].m_vecMax.x) * 0.5),
-			((AABBboxForAsteroid[i].m_vecMin.y + AABBboxForAsteroid[i].m_vecMax.y) * 0.5),
-			((AABBboxForAsteroid[i].m_vecMin.z + AABBboxForAsteroid[i].m_vecMax.z) * 0.5)
+			(AABBboxForAsteroid[i].m_origin.x),
+			(AABBboxForAsteroid[i].m_origin.y),
+			(AABBboxForAsteroid[i].m_origin.z)
 			);
 		modelStack.Scale(
-			((AABBboxForAsteroid[i].m_vecMin - AABBboxForAsteroid[i].m_vecMax).Length() * 0.5),
-			((AABBboxForAsteroid[i].m_vecMin - AABBboxForAsteroid[i].m_vecMax).Length() * 0.5),
-			((AABBboxForAsteroid[i].m_vecMin - AABBboxForAsteroid[i].m_vecMax).Length() * 0.5)
+			(AABBboxForAsteroid[i].m_length * 2),
+			(AABBboxForAsteroid[i].m_height * 2),
+			(AABBboxForAsteroid[i].m_width * 2)
 			);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
 		RenderMesh(meshList[GEO_LIGHTCUBE], false);
@@ -579,14 +603,31 @@ void OpenGalaxyScene::Render()
 		modelStack.PopMatrix();
 	}
 
-	//Proxy Spaceship
+	//Spaceship
 	modelStack.PushMatrix();
 	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);
 	modelStack.Rotate(rotateShip, 0, 1, 0);
-	modelStack.Rotate(90, 1, 0, 0);
-	modelStack.Rotate(rotateShipZ, 1, 0, 0);
-	modelStack.Scale(5, 5, 5);
-	RenderMesh(meshList[PROXY_SPACESHIP], true);
+	modelStack.Rotate(rotateShipZ, 0, 0, 1);
+	//modelStack.Scale(5, 5, 5);
+	RenderMesh(meshList[SPACESHIP], true);
+	modelStack.PopMatrix();
+
+	//test generate AABB from origin for spaceship
+	modelStack.PushMatrix();
+	modelStack.Translate(
+		(spaceshipHitbox.m_origin.x),
+		(spaceshipHitbox.m_origin.y),
+		(spaceshipHitbox.m_origin.z)
+		);
+	modelStack.Rotate(rotateShip, 0, 1, 0);
+	modelStack.Scale(
+		(spaceshipHitbox.m_length * 0.5),
+		(spaceshipHitbox.m_height * 0.5),
+		(spaceshipHitbox.m_width * 0.5)
+		);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
+	RenderMesh(meshList[GEO_LIGHTCUBE], false);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
 	modelStack.PopMatrix();
 
 	//Planets
@@ -624,14 +665,14 @@ void OpenGalaxyScene::Render()
 	//Generate Hit Box
 	modelStack.PushMatrix();
 	modelStack.Translate(
-		((testBox.m_vecMin.x + testBox.m_vecMax.x) * 0.5),
-		((testBox.m_vecMin.y + testBox.m_vecMax.y) * 0.5),
-		((testBox.m_vecMin.z + testBox.m_vecMax.z) * 0.5)
+		((testBox2.m_vecMin - testBox2.m_vecMax).Length()),
+		((testBox2.m_vecMin - testBox2.m_vecMax).Length()),
+		((testBox2.m_vecMin - testBox2.m_vecMax).Length())
 		);
 	modelStack.Scale(
-		((testBox.m_vecMin - testBox.m_vecMax).Length() * 0.5),
-		((testBox.m_vecMin - testBox.m_vecMax).Length() * 0.5),
-		((testBox.m_vecMin - testBox.m_vecMax).Length() * 0.5)
+		((testBox2.m_vecMin + testBox2.m_vecMax).Length() * 0.5),
+		((testBox2.m_vecMin + testBox2.m_vecMax).Length() * 0.5),
+		((testBox2.m_vecMin + testBox2.m_vecMax).Length() * 0.5)
 		);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
 	RenderMesh(meshList[GEO_LIGHTCUBE], false);
@@ -641,9 +682,9 @@ void OpenGalaxyScene::Render()
 	//Generate Hit Box1
 	modelStack.PushMatrix();
 	modelStack.Translate(
-		((testBox1.m_vecMin.x + testBox1.m_vecMax.x) * 0.5),
-		((testBox1.m_vecMin.y + testBox1.m_vecMax.y) * 0.5),
-		((testBox1.m_vecMin.z + testBox1.m_vecMax.z) * 0.5)
+		((testBox1.m_vecMin + testBox1.m_vecMax).Length()),
+		((testBox1.m_vecMin + testBox1.m_vecMax).Length()),
+		((testBox1.m_vecMin + testBox1.m_vecMax).Length())
 		);
 	modelStack.Scale(
 		((testBox1.m_vecMin - testBox1.m_vecMax).Length() * 0.5),
@@ -669,6 +710,12 @@ void OpenGalaxyScene::Render()
 	RenderTextOnScreen(meshList[GEO_TEXT], "Y:" + std::to_string(middleOfShip->y), Color(1, 0, 0), 3, 17, 3);
 	RenderTextOnScreen(meshList[GEO_TEXT], "Z:" + std::to_string(middleOfShip->z), Color(1, 0, 0), 3, 17, 2);
 	RenderTextOnScreen(meshList[GEO_TEXT], "Speed:" + std::to_string(accelerateShip), Color(1, 0, 0), 3, 17, 1);
+
+	while (ynowerk){
+		RenderTextOnScreen(meshList[GEO_TEXT], "COLLISION ARGHHHHHH", Color(1, 0, 0), 2, 0.5, 5);
+		break;
+	}
+
 
 }
 
@@ -762,14 +809,14 @@ void OpenGalaxyScene::updateShipMovement(){
 	}
 	if (Application::IsKeyPressed('U')){
 		middleOfShip->y += 0.015f;
-		if (rotateShipZ > -5.0f){
-			rotateShipZ -= 0.05f;
+		if (rotateShipZ < -5.0f){
+			rotateShipZ += 0.05f;
 		}
 	}
 	if (Application::IsKeyPressed('O')){
 		middleOfShip->y -= 0.015f;
-		if (rotateShipZ < 5.0f){
-			rotateShipZ += 0.05f;
+		if (rotateShipZ > 5.0f){
+			rotateShipZ -= 0.05f;
 		}
 	}
 	if (Application::IsKeyPressed('P')){	//break acceleration to 0

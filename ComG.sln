@@ -1,14 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nbiygpiuygiyiug", "nbiygpiuygiyiug\nbiygpiuygiyiug.vcxproj", "{5B5FC3F1-EC7F-4BD7-A856-EB2B09E9F05C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComG", "nbiygpiuygiyiug\nbiygpiuygiyiug.vcxproj", "{5B5FC3F1-EC7F-4BD7-A856-EB2B09E9F05C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AF38D661-A50B-4AAD-9278-BE9A7AF6676F} = {AF38D661-A50B-4AAD-9278-BE9A7AF6676F}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "Common\Common.vcxproj", "{AF38D661-A50B-4AAD-9278-BE9A7AF6676F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4DD30C8A-1540-4608-8C9B-92EFA45F65D6}"
+	ProjectSection(SolutionItems) = preProject
+		nbiygpiuygiyiug\Source\AABB.h = nbiygpiuygiyiug\Source\AABB.h
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -45,6 +45,8 @@ class OpenGalaxyScene : public Scene
 
 		PROXY_SPACESHIP,
 
+		SPACESHIP,
+
 		GEO_TEXT,
 
 		NUM_GEOMETRY,
@@ -185,6 +187,8 @@ private:
 
 		return FINAL;
 	}
+
+	bool ynowerk;
 	
 	//For Planet Interactions
 	bool land;
