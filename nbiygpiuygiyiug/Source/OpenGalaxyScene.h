@@ -49,7 +49,6 @@ class OpenGalaxyScene : public Scene
 
 		NUM_GEOMETRY,
 	};
-
 	enum UNIFORM_TYPE
 	{
 		U_MVP = 0,
@@ -186,11 +185,13 @@ private:
 
 		return FINAL;
 	}
-
+	
+	//For Planet Interactions
 	bool land;
 	string nameOfPlanet;
 	float rotateTextX, rotateTextY, rotateTextZ;
 
+	//Ship movement stuff
 	Vector3 *noseOfShip;
 	Vector3 *middleOfShip;
 	float shipAxisX, shipAxisY, shipAxisZ; 
@@ -200,18 +201,26 @@ private:
 	float translateShip;
 	float accelerateShip;
 
+	//Asteroid random stuff
 	float randScaleX[1000];
 	float randScaleY[1000];
 	float randScaleZ[1000];
 	float randTranslateX[1000];
 	float randTranslateY[1000];
 	float randTranslateZ[1000];
+	float asteroidTranslateX[1000];
+	float asteroidTranslateY[1000];
+	float asteroidTranslateZ[1000];
 
 	//For Light
 	bool enableLight;
 
+
+
+	//Camera
 	//Camera_Mouse camera;
 	FPCamera camera;
+	//OpenGalaxyCamera camera;
 	Light light[2];
 
 	Mesh *meshList[NUM_GEOMETRY];

@@ -23,7 +23,7 @@ void FPCamera::Init(const Vector3& pos, const Vector3& target, const Vector3& up
 }
 
 void FPCamera::Update(double dt){
-
+	tempPos = position;
 	static const float MOVE_SPEED = 100.0f;
 	static const float CAMERA_SPEED = MOVE_SPEED * 2;
 	if (Application::IsKeyPressed('A'))

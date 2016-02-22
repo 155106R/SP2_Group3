@@ -11,6 +11,7 @@ using std::ifstream;
 
 #include "Scene.h"
 #include "FPCamera.h"
+#include "Camera_Mouse.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
@@ -131,10 +132,6 @@ private:
 	void generateTogan();
 	void generateWanderers();
 
-	bool boxRangecheck(float pos);
-
-	float generateRotation();
-
 	//ANIMATIONS
 	void droneAnimation(double dt);
 	void mineralAnimation(double dt);
@@ -143,7 +140,7 @@ private:
 
 	void toganwalk(double dt);
 	void getWalktarget(double dt);
-
+	void Init_getWalktarget();
 
 
 
@@ -216,7 +213,7 @@ private:
 	//For Light
 	bool enableLight;
 
-	FPCamera camera;
+	Camera_Mouse camera;
 	Light light[1];
 
 	Mesh *meshList[NUM_GEOMETRY];
@@ -258,14 +255,21 @@ private:
 
 	struct Togan
 	{
-
-		float rotate_togan;
+		int state;
+		
 
 		Vector3 position;
+		Vector3 tempposition;
+		
+		float rotate_togan;
+		float tempR;
 
 	};
+	vector<Togan> togan_NPC_Loop;
+	Togan togan;
+	
 
-	Togan togan1;
+	
 
 };
 
