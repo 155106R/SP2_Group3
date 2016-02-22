@@ -133,6 +133,9 @@ void PlanetJellyScene::Init()
 	//Render wishlist
 	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("Axes", 1000, 1000, 1000);
 
+	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
+	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
+
 	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateSphere("LightSource", Color(1, 1, 1), 18, 36);
 
 	//Skybox - Planet JELLY
@@ -167,8 +170,87 @@ void PlanetJellyScene::Init()
 
 	//Render NCP
 	Init_animation_NPC();
+	//render name of npc
+	Init_Name_NPC();
 
 	Math::InitRNG();
+}
+
+void PlanetJellyScene::Init_Name_NPC()
+{
+
+	for (int i = 0; i < 2; i++)
+	{
+		name newname;
+		newname.position = Vector3(0, 0, 0);
+		newname.R_X = 0;
+		newname.state = 0;
+		newname.tempR = 0;
+		newname.NPCname = "Jelly NPC";
+		nameS.push_back(newname);
+	}
+
+	name newname0;
+	newname0.position = Vector3(-115, 0, -15);
+	newname0.R_X = 0;
+	newname0.state = 0;
+	newname0.tempR = 0;
+	newname0.NPCname = "DRONE SHOP";
+	nameS.push_back(newname0);
+
+	name newname2;
+	newname2.position = Vector3(100, 0, 100);
+	newname2.R_X = 0;
+	newname2.state = 0;
+	newname2.tempR = 0;
+	newname2.NPCname = "UPGRADE SHOP";
+	nameS.push_back(newname2);
+
+	name newname1;
+	newname1.position = Vector3(110, 0, -90);
+	newname1.R_X = 0;
+	newname1.state = 0;
+	newname1.tempR = 0;
+	newname1.NPCname = "MINERAL SHOP";
+	nameS.push_back(newname1);
+}
+void PlanetJellyScene::Update_Name_NPC(double dt)
+{
+	for (int i = 0; i < nameS.size(); i++)
+	{
+		if (i < (nameS.size() - 3)) // only for the moving npc
+		{
+			nameS[i].position.x = jelly_NPC_Loop[i].position.x;
+			nameS[i].position.z = jelly_NPC_Loop[i].position.z;
+		}
+		nameS[i].position.y = jelly_jumping.position.y + jelly.position.y;
+		
+		nameS[i].tempR = Math::RadianToDegree(atan((camera.position.x - nameS[i].position.x) / (camera.position.z - nameS[i].position.z)));
+		if (((camera.position.x - nameS[i].position.x) < 0) && ((camera.position.z - nameS[i].position.z) > 0)) nameS[i].tempR -= nameS[i].R_X; /*(z,-x) C*/
+		else if (((camera.position.x - nameS[i].position.x) < 0) && ((camera.position.z - nameS[i].position.z) < 0)) nameS[i].tempR -= (nameS[i].R_X + 180); /*(-z,-x) T*/
+		else if (((camera.position.x - nameS[i].position.x) > 0) && ((camera.position.z - nameS[i].position.z) > 0)) nameS[i].tempR -= nameS[i].R_X; /*(z,x) A*/
+		else if (((camera.position.x - nameS[i].position.x) > 0) && ((camera.position.z - nameS[i].position.z) < 0)) nameS[i].tempR -= (nameS[i].R_X - 180); /*(-z,x) S*/
+		std::cout << nameS[i].tempR << std::endl;
+
+		if (nameS[i].tempR < -180)
+		{
+			nameS[i].tempR = 360 + nameS[i].tempR;
+		}
+		if (nameS[i].tempR > 180)
+		{
+			nameS[i].tempR = 0-360 + nameS[i].tempR;
+		}
+		if (nameS[i].tempR > 0) // trun left
+		{
+			nameS[i].tempR -= 360 * dt;
+			nameS[i].R_X += 360 * dt;
+		}
+		if (nameS[i].tempR < 0) // trun right
+		{
+			nameS[i].tempR += 360 * dt;
+			nameS[i].R_X -= 360 * dt;
+		}
+	}
 }
 
 void PlanetJellyScene::Init_animation_NPC()
@@ -240,6 +322,7 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 	// jelly npc animation
 	for (int i = 0; i <= 1; i++)
 	{
+		jelly_NPC_Loop[i].position.y = jelly.position.y + jelly_jumping.position.y - 10;
 		if (jelly_NPC_Loop[i].state == 0 && jelly_jumping.state != 0)
 		{
 			if (jelly_NPC_Loop[i].tempposition.x == 0 && jelly_NPC_Loop[i].tempposition.z == 0)
@@ -346,8 +429,11 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 
 void PlanetJellyScene::Update(double dt)
 {
-	// jelly animation
+	// NPC animation
 	Update_animation_NPC(dt);
+	// NPC name
+	Update_Name_NPC(dt);
+
 
 	//Enable culling
 	if (Application::IsKeyPressed('1'))
@@ -645,19 +731,20 @@ void PlanetJellyScene::Render()
 	RenderMesh(meshList[SHOP_UPGRADE], enableLight);
 	modelStack.PopMatrix();
 
-	// render NPC
-	//NPC-NPC
 	for (int i = 0; i <= 1; i++)
 	{
+		// render NPC
+		//NPC-NPC
 		modelStack.PushMatrix();
 		glBlendFunc(1, 1);
-		modelStack.Translate(0 + jelly_NPC_Loop[i].position.x, -10 + jelly.position.y + jelly_jumping.position.y, 0 + jelly_NPC_Loop[i].position.z);
+		modelStack.Translate(jelly_NPC_Loop[i].position.x, jelly_NPC_Loop[i].position.y, jelly_NPC_Loop[i].position.z);
 		modelStack.Rotate(jelly_NPC_Loop[i].R_X, 0, 1, 0);
 		modelStack.Scale(5, 5 + jelly.S_Y, 5);
 		RenderMesh(meshList[NPC_1], enableLight);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		modelStack.PopMatrix();
 	}
+	
 	// NPC-DRONE
 	modelStack.PushMatrix();
 	modelStack.Translate(-115, -10 + jelly.position.y + jelly_jumping.position.y, -15);
@@ -665,6 +752,9 @@ void PlanetJellyScene::Render()
 	modelStack.Scale(5, 5 + jelly.S_Y, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
+	
+
+
 	// NPC-UPGRADE
 	modelStack.PushMatrix();
 	modelStack.Translate(100, -10 + jelly.position.y + jelly_jumping.position.y, 100);
@@ -672,11 +762,36 @@ void PlanetJellyScene::Render()
 	modelStack.Scale(5, 5 + jelly.S_Y , 5);
 	RenderMesh(meshList[NPC_1], enableLight);
 	modelStack.PopMatrix();
+	
+
+
 	// NPC-MINERAL
 	modelStack.PushMatrix();
 	modelStack.Translate(110, -5 + jelly.position.y + jelly_jumping.position.y, -90);
 	modelStack.Scale(5, 5 + jelly.S_Y, 5);
 	RenderMesh(meshList[NPC_1], enableLight);
+	modelStack.PopMatrix();
+	
+	//render names
+	for (int i = 0; i < nameS.size() - 1; i++)
+	{
+		//Render Text-NPC NAME x 2
+		//Render Text -DRONE SHOP
+		//Render Text -UPGRADE SHOP
+		modelStack.PushMatrix();
+		modelStack.Translate(nameS[i].position.x, nameS[i].position.y, nameS[i].position.z);
+		modelStack.Rotate(0 + nameS[i].R_X, 0, 1, 0);
+		modelStack.Scale(2, 2, 2);
+		RenderText(meshList[GEO_TEXT], nameS[i].NPCname, Color(0, 1, 0));
+		modelStack.PopMatrix();
+	}
+
+	//Render Text -MINERAL SHOP
+	modelStack.PushMatrix();
+	modelStack.Translate(nameS[nameS.size() - 1].position.x, nameS[nameS.size() - 1].position.y + 5, nameS[nameS.size() - 1].position.z);
+	modelStack.Rotate(0 + nameS[nameS.size() - 1].R_X, 0, 1, 0);
+	modelStack.Scale(2, 2, 2);
+	RenderText(meshList[GEO_TEXT], nameS[nameS.size() - 1].NPCname, Color(0, 1, 0));
 	modelStack.PopMatrix();
 
 }
@@ -748,4 +863,18 @@ void PlanetJellyScene::generateSkybox(){
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Ynega], false);
 	modelStack.PopMatrix();
+}
+
+bool PlanetJellyScene::CheckMagnitude(float x, float z, float tempx, float tempz, float magnitude)
+{
+	if(sqrt(pow((tempx - x), 2) + pow((tempz - z), 2)) > magnitude) return false; // less then magnitude
+	else true; // more then magnitude
+}
+
+void PlanetJellyScene::CheckQuadrants(float x, float z, float tempx, float tempz, float R ,float tempR)
+{
+	if (((tempx - x) < 0) && ((tempz - z) > 0)) tempR -= R; /*( z,-x) C*/
+	else if (((tempx - x) < 0) && ((tempz - z) < 0)) tempR -= (R + 180); /*(-z,-x) T*/
+	else if (((tempx - x) > 0) && ((tempz - z) > 0)) tempR -= R; /*( z, x) A*/
+	else if (((tempx - x) > 0) && ((tempz - z) < 0)) tempR -= (R - 180); /*(-z, x) S*/
 }
