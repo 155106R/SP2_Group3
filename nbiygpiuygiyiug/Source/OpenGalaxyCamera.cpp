@@ -68,7 +68,7 @@ void OpenGalaxyCamera::Update(double dt)
 		{
 			pitch += (float)(CAMERA_SPEED * dt);
 		}
-		std::cout << pitch << std::endl;
+		//std::cout << pitch << std::endl;
 	/*	Vector3 view = (target - position).Normalized();
 		Vector3 right = view.Cross(up);
 		right.Normalize();
@@ -144,3 +144,4 @@ void OpenGalaxyCamera::getcameraCoords(float h, float v)
 	//vert distance (y)
 	position.y = target.y + v;
 }
+//Updated 22/2/2016 - Randall
