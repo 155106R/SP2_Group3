@@ -12,7 +12,7 @@ using std::ifstream;
 #include "Scene.h"
 #include "FPCamera.h"
 //#include "Camera_Mouse.h"
-//#include "OpenGalaxyCamera.h"
+#include "OpenGalaxyCamera.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
@@ -48,6 +48,7 @@ class OpenGalaxyScene : public Scene
 		SPACESHIP,
 
 		GEO_TEXT,
+		GEO_HUD,
 
 		NUM_GEOMETRY,
 	};
@@ -121,7 +122,7 @@ private:
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 
 	void generateSkybox();
-	void updateShipMovement();
+	void updateShipMovement(float dt);
 
 	vector<string> fillWithFontData(string path){
 
@@ -187,13 +188,10 @@ private:
 
 		return FINAL;
 	}
-
-	bool ynowerk;
 	
 	//For Planet Interactions
 	bool land;
 	string nameOfPlanet;
-	float rotateTextX, rotateTextY, rotateTextZ;
 
 	//Ship movement stuff
 	Vector3 *noseOfShip;
@@ -219,12 +217,12 @@ private:
 	//For Light
 	bool enableLight;
 
-
+	void drawHUD();
 
 	//Camera
 	//Camera_Mouse camera;
-	FPCamera camera;
-	//OpenGalaxyCamera camera;
+	//FPCamera camera;
+	OpenGalaxyCamera camera;
 	Light light[2];
 
 	Mesh *meshList[NUM_GEOMETRY];
@@ -233,3 +231,4 @@ private:
 #endif
 
 //Author: Randall (155106R)
+//Updated 22/2/2016 - Randall

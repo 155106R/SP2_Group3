@@ -9,30 +9,64 @@ struct AABB{
 	Vector3 m_vecMax;
 	Vector3 m_vecMin;
 
+	Vector3 m_velocity;
+
 	float m_height;
 	float m_length;
 	float m_width;
 
-	static AABB generateAABB(Vector3 minValue, Vector3 maxValue){
+	static AABB generateAABB(Vector3 minValue, Vector3 maxValue){		//"simple" not overloaded function, but this doesn't have enough parameters that i need/want
 		AABB generateNewBox;
 		generateNewBox.m_vecMin = minValue;
 		generateNewBox.m_vecMax = maxValue;
 		return generateNewBox;
 	}
 
-	static AABB generateAABB(Vector3 objectOrigin, float length, float height, float width){		//this gets a scaling and origin for the box
+	static AABB generateAABB(Vector3 objectOrigin, float length, float height, float width, Vector3 objectVelocity){		//this gets a scaling and origin for the box
 		AABB generateNewBox;
 
-		generateNewBox.m_height = height;
-		generateNewBox.m_length = length;
-		generateNewBox.m_width = width;
 		generateNewBox.m_origin = objectOrigin;
-		generateNewBox.m_vecMin = Vector3((objectOrigin.x - length), (objectOrigin.y - height), (objectOrigin.z - width) * 0.5);
-		generateNewBox.m_vecMax = Vector3((objectOrigin.x + length), (objectOrigin.y + height), (objectOrigin.z + width) * 0.5);
+
+		generateNewBox.m_velocity = objectVelocity;
+
+		generateNewBox.m_length = length;
+		generateNewBox.m_height = height;
+		generateNewBox.m_width = width;
+
+		generateNewBox.m_vecMin = Vector3(
+			objectOrigin.x - (length * 0.5),
+			objectOrigin.y - (height * 0.5), 
+			objectOrigin.z - (width * 0.5)
+			);
+		generateNewBox.m_vecMax = Vector3(
+			objectOrigin.x + (length * 0.5), 
+			objectOrigin.y + (height * 0.5), 
+			objectOrigin.z + (width * 0.5)
+			);
+
 		return generateNewBox;
 	}
 
-}spaceshipHitbox, testBox1, testBox2;
+	static AABB updateAABB(AABB &updateObject){
+
+		updateObject.m_origin += updateObject.m_velocity;
+
+		updateObject.m_vecMin = Vector3(
+			(updateObject.m_origin.x - (updateObject.m_length * 0.5)),
+			(updateObject.m_origin.y - (updateObject.m_height * 0.5)),
+			(updateObject.m_origin.z - (updateObject.m_width * 0.5))
+			);
+
+		updateObject.m_vecMax = Vector3(
+			(updateObject.m_origin.x + (updateObject.m_length * 0.5)),
+			(updateObject.m_origin.y + (updateObject.m_height * 0.5)),
+			(updateObject.m_origin.z + (updateObject.m_width * 0.5))
+			);
+
+		return updateObject;
+	}
+
+}spaceshipHitbox;
 
 bool collision(const AABB& hitbox, const Vector3& vecPoint){	//for point within the AABB
 
@@ -65,3 +99,5 @@ bool collision(const AABB& lhsBox, const AABB& rhsBox){		//for AABB to AABB coll
 
 
 #endif;
+
+//Updated 22/2/2016 - Randall
