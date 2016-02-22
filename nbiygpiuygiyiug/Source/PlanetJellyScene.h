@@ -109,8 +109,14 @@ private:
 	void RenderText(Mesh* mesh, std::string text, Color color);
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 	void generateSkybox();
+
 	void Init_animation_NPC();
 	void Update_animation_NPC(double dt);
+
+	void Init_Name_NPC();
+	void Update_Name_NPC(double dt);
+	void CheckQuadrants(float x, float z, float tempx, float tempz, float R, float tempR);
+	bool CheckMagnitude(float x, float z, float tempx, float tempz, float magnitude);
 
 	vector<string> fillWithFontData(string path){
 
@@ -155,25 +161,28 @@ private:
 	bool enableLight;
 
 	//animation
-
-	
-
 	struct animation {
 		int state;
-		//translate
-		Vector3 position;
-		Vector3 tempposition;
-		//sacle
 		float S_Y;
-		//rotate
 		float R_X;
 		float tempR;
+		Vector3 position;
+		Vector3 tempposition;
 	};
-
 	vector<animation> jelly_NPC_Loop;
+
 	animation jelly;
 	animation jelly_jumping;
-	/*animation jelly_NPC_Loop;*/
+	
+	//name
+	struct name {
+		int state;	
+		float R_X;
+		float tempR;
+		Vector3 position;
+		string NPCname;
+	};
+	vector<name> nameS;
 
 	Camera_Mouse camera;
 	Light light[1];
