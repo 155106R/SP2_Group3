@@ -11,7 +11,8 @@ using std::cout;
 using std::endl;
 using std::cin;
 
-class TradeCalculation{
+class TradeCalculation
+{
 
 public:
 	TradeCalculation();
@@ -19,17 +20,6 @@ public:
 
 	void setItemsList();
 
-	void setBag();
-
-	void setShopList(); 
-
-	void sellItem(int ID , int amount, char PID); // sell item in bag (pop) , PID of the shop
-
-	void getItem(int ID, int amount); // get item into bag (push)
-
-	void buyItem(int ID, int amount); // buy item from shop (push)
-
-private:
 	enum Minerals
 	{
 		ZERO,
@@ -59,25 +49,56 @@ private:
 		int bitcoin;
 		bool MaxStack; // one stack x99
 	};
-
 	vector<Item> ItemS;
 
-	struct Bag {
-		int bitcoin;
-		bool MaxSlot; //one bag have x3 slot
-		vector<Item> Slot;
-	};
+	//struct Bag {
+	//	int bitcoin;
+	//	bool MaxSlot; //one bag have x3 slot
+	//	vector<Item> Slot;
+	//};
+	//Bag Backpack;
 
-	Bag Backpack;
+};
 
-	struct Shop {
+class Shop : public TradeCalculation
+{
 
-		string name;
-		char PID;  //planet ID(A, B) <shop in that planet>
-		vector<Item> GoodS;
-	};
+public:
+	Shop();
+	~Shop();
+	void setShopList();
+	void AddStack(int ID, int amount, char PID);
+	void GetNewItem(int ID, int amount, char PID); // get new item into shop (push)
+	void RemoveStack(int ID, int amount, char PID); // remove stack from shop (pop)
 
-	vector<Shop> ShopS;
+private:
+	Shop* JellyShop;
+	Shop* TogaShop;
+	string name;
+	char PID;  //planet ID(A, B) <shop in that planet>
+	vector<Item> GoodS;
+
+
+};
+
+class Bag :public Shop
+{
+public:
+	Bag();
+	~Bag();
+	void setBag();
+	void GetItem(int ID, int amount); // get item into bag (push)
+	void RemoveItem(int ID, int amount); // remove item from bag (pop)
+	void buyItem(int ID, int amount, char PID); // buy item from shop (push), PID of the shop
+	void sellItem(int ID, int amount, char PID); // sell item in bag (pop), PID of the shop
+	bool isEmpty(int slotposition); // check slot whatever slot empty
+	void clearSlot_reLocation(); // clear Detail in the slot && so no empting slot in between
+
+private:
+	int bitcoin;
+	int Slots; // init the slot you want
+	bool MaxSlot; 
+	vector<Item> Slot;
 };
 
 #endif
