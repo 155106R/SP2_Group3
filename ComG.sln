@@ -10,11 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComG", "nbiygpiuygiyiug\nbi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "Common\Common.vcxproj", "{AF38D661-A50B-4AAD-9278-BE9A7AF6676F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4DD30C8A-1540-4608-8C9B-92EFA45F65D6}"
-	ProjectSection(SolutionItems) = preProject
-		nbiygpiuygiyiug\Source\AABB.h = nbiygpiuygiyiug\Source\AABB.h
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32

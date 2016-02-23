@@ -46,11 +46,11 @@ void OpenGalaxyScene::Init()
 	//Init random location to spawn for each astroid
 	for (unsigned i = 0; i < 500; i++){
 		randTranslateX[i] = Math::RandFloatMinMax(-500, 500);
-		randTranslateY[i] = Math::RandFloatMinMax(-500, 500);
+		randTranslateY[i] = 0;//Math::RandFloatMinMax(-500, 500);
 		randTranslateZ[i] = Math::RandFloatMinMax(-500, 500);
 
 		asteroidTranslateX[i] = Math::RandFloatMinMax(-0.05f, 0.05f);
-		asteroidTranslateY[i] = Math::RandFloatMinMax(-0.05f, 0.05f);
+		asteroidTranslateY[i] = 0;// Math::RandFloatMinMax(-0.05f, 0.05f);
 		asteroidTranslateZ[i] = Math::RandFloatMinMax(-0.05f, 0.05f);
 
 		randScaleX[i] = Math::RandFloatMinMax(1, 5);
@@ -271,8 +271,12 @@ void OpenGalaxyScene::Update(double dt)
 			SharedData::GetInstance()->SD_hullIntegrity--;
 			SharedData::GetInstance()->SD_bitcoins++;
 
-			AABBboxForAsteroid[i].m_velocity = *noseOfShip * (accelerateShip * 0.015);
-			AABBboxForAsteroid[i].m_origin += *noseOfShip;
+			if (accelerateShip == 0){
+				AABBboxForAsteroid[i].m_velocity = -AABBboxForAsteroid[i].m_velocity;
+			}else{
+				AABBboxForAsteroid[i].m_velocity = (*noseOfShip + AABBboxForAsteroid[i].m_velocity)  * (accelerateShip * 0.015);
+				AABBboxForAsteroid[i].m_origin += *noseOfShip;
+			}
 		}
 
 		for (int a = 0; a < AABBboxForAsteroid.size(); a++){
@@ -281,8 +285,8 @@ void OpenGalaxyScene::Update(double dt)
 			}
 			else if (collision(AABBboxForAsteroid[a], AABBboxForAsteroid[i])){
 
-				AABBboxForAsteroid[a].m_velocity = -(AABBboxForAsteroid[a].m_velocity);
-				AABBboxForAsteroid[i].m_velocity = -(AABBboxForAsteroid[i].m_velocity);
+				AABBboxForAsteroid[a].m_velocity = AABBboxForAsteroid[i].m_velocity;
+				AABBboxForAsteroid[i].m_velocity = AABBboxForAsteroid[a].m_velocity;
 
 			}
 		}
@@ -589,10 +593,25 @@ void OpenGalaxyScene::Render()
 
 	//Spaceship
 	modelStack.PushMatrix();
+
+
+	modelStack.PushMatrix();
+
 	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);
 	modelStack.Rotate(rotateShip, 0, 1, 0);
 	modelStack.Rotate(rotateShipZ, 0, 0, 1);
 	RenderMesh(meshList[SPACESHIP], true);
+
+	for (int i = 0; i < accelerateShip; i++){
+		modelStack.PushMatrix();
+		modelStack.Translate(Math::RandFloatMinMax(-10, -15), Math::RandFloatMinMax(-3, 3), Math::RandFloatMinMax(-8, 8));
+		RenderMesh(meshList[GEO_LIGHTCUBE], false);
+		modelStack.PopMatrix();
+	}
+
+	modelStack.PopMatrix();
+
+
 	modelStack.PopMatrix();
 
 	//test generate AABB from origin for spaceship
