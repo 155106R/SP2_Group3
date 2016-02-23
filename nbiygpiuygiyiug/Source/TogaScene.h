@@ -61,6 +61,7 @@ class TogaScene : public Scene
 
 
 		GEO_TEXT,
+		GEO_UI,
 
 
 		NUM_GEOMETRY,

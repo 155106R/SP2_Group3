@@ -27,6 +27,9 @@ void Camera_Mouse::Init(const Vector3& pos, const Vector3& target, const Vector3
 	right.Normalize();
 	this->up = defaultUp = right.Cross(view).Normalized();
 
+	maxjump = 18;
+	_jump = false;
+
 }
 
 void Camera_Mouse::Update(double dt)
@@ -44,6 +47,7 @@ void Camera_Mouse::Update(double dt)
 	screenMidX = screenSizeX / 2;
 	screenMidY = screenSizeY / 2;
 
+	
 	//GLFW Method (Laggier)
 	/*MousePosition mousePosition;
 	glfwGetCursorPos(m_window, &(mousePosition.x), &(mousePosition.y));
@@ -141,11 +145,22 @@ void Camera_Mouse::Update(double dt)
 		position.z += cos(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
 	}
 
+
+
+	if (Application::IsKeyPressed(VK_SPACE))
+	{
+		if ( position.y < 15.2)
+		{
+			_jump = true;
+		}
+	}
+
 	target = Vector3(-sin(DegreeToRadian(cameraRotationY)) * cos(DegreeToRadian(cameraRotationX)) + this->position.x, sin(DegreeToRadian(cameraRotationX)) + this->position.y, -cos(DegreeToRadian(cameraRotationY)) * cos(DegreeToRadian(cameraRotationX)) + this->position.z);
 	view = (target - position).Normalized();
 	right = view.Cross(defaultUp);
 	up = right.Cross(view);
-
+	
+	jump(dt);
 }
 
 void Camera_Mouse::Reset()
@@ -205,3 +220,35 @@ void Camera_Mouse::boundCheck2(float minX, float minZ, float maxX, float maxZ)
 		position.x = maxX + 4;
 	}
 }
+
+void Camera_Mouse::jump(float dt)
+{
+
+	//Windows Method
+	POINT mousePosition;
+	GetCursorPos(&mousePosition);
+
+
+	if (_jump == true && position.y < maxjump)
+	{ 
+		position.y += 50 * dt;
+		target.y += 50 * dt;
+		if (position.y > maxjump)
+		{
+			_jump = false;
+		}
+
+	}
+
+	if (_jump == false && position.y > 0)
+	{
+		position.y -= 40 * dt;
+		target.y -= 40 * dt;
+	}
+
+	//mousePosition.x = screenSizeX;
+	//mousePosition.y = screenSizeY;
+	
+
+}
+

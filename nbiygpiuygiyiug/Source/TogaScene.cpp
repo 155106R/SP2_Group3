@@ -78,7 +78,7 @@ void TogaScene::Init()
 	glEnable(GL_DEPTH_TEST);
 
 	//Camera
-	camera.Init(Vector3(30, 15, 1), Vector3(30, 15, 0), Vector3(0, 1, 0));
+	camera.Init(Vector3(30, 0, 1), Vector3(30, 0, 0), Vector3(0, 1, 0));
 	camera.Reset();
 
 	glGenVertexArrays(1, &m_vertexArrayID);
@@ -231,10 +231,15 @@ void TogaScene::Init()
 	meshList[NPC_TOGAN_LEG] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_leg.obj");
 	meshList[NPC_TOGAN_LEG]->textureID = LoadTGA("Image//toga_texture.tga");
 
+	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
+	meshList[GEO_UI]->textureID = LoadTGA("Image//Planet_UI.tga");
+
+
 
 }
 
 float inc = 0;
+
 void TogaScene::Update(double dt)
 {
 
@@ -480,7 +485,7 @@ void TogaScene::Render()
 
 	//ground
 	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, 0);
+	modelStack.Translate(0, -15, 0);
 	modelStack.Scale(2000, 2000, 2000);
 	RenderMesh(meshList[GROUNDMESH], false);
 	modelStack.PopMatrix();
@@ -489,34 +494,34 @@ void TogaScene::Render()
 	//skybox
 	modelStack.PushMatrix();
 	modelStack.Translate(camera.position.x, 0, camera.position.z);
-	modelStack.Translate(0, 200, 0);
+	modelStack.Translate(0, 185, 0);
 	generateSkybox();
 
 	modelStack.PopMatrix();
 	//Cave
 	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, -500);
+	modelStack.Translate(0, -30, -500);
 	modelStack.Scale(150, 150, 150);
 	RenderMesh(meshList[CAVE], true);
 	modelStack.PopMatrix();
 
 	//Mineral merchant
 	modelStack.PushMatrix();
-	modelStack.Translate(-70, 0, -60);
+	modelStack.Translate(-70, -15, -60);
 	modelStack.Rotate(35,0,1,0);
 	generateMineralmerchant();
 	modelStack.PopMatrix();
 
 	//Drone merchant
 	modelStack.PushMatrix();
-	modelStack.Translate(60, dm_y-5, -80);
+	modelStack.Translate(60, dm_y-20, -80);
 	modelStack.Rotate(-75, 0, 1, 0);
 	generateDronemerchant();
 	modelStack.PopMatrix();
 
 	//Upgrade merchant
 	modelStack.PushMatrix();
-	modelStack.Translate(-40, -8, 410);
+	modelStack.Translate(-40, -23, 410);
 	modelStack.Rotate(155, 0, 1, 0);
 	generateUpgrademerchant();
 	modelStack.PopMatrix();
@@ -532,6 +537,15 @@ void TogaScene::Render()
 		modelStack.PopMatrix();
 	}
 	
+
+	viewStack.LoadIdentity();
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, -1);
+	modelStack.Rotate(-92.5, 90, 1, 0);
+	modelStack.Scale(1.1, 0.8, 0.8);
+	RenderMesh(meshList[GEO_UI], false);
+	modelStack.PopMatrix();
+
 }
 
 void TogaScene::Exit()
@@ -938,7 +952,7 @@ void TogaScene::getWalktarget(double dt)
 			if (togan_NPC_Loop[i].tempposition.x == 0)
 			{
 				togan_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-50, 50);
-				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-50, 50);
+				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-100, 100);
 			}
 			else if (togan_NPC_Loop[i].tempR == 0)
 			{
@@ -1033,15 +1047,15 @@ void TogaScene::Init_getWalktarget()
 
 
 	// init togan pos and state
-	togan.position = Vector3(0, 0, 0);
+	togan.position = Vector3(0, -15, 0);
 	togan.state = 0;
 
 	//togan npc animation instances
 	for (int i = 0; i <= 1; i++)
 	{
 		Togan newtogan;
-		newtogan.position = Vector3(0, 0, 0);
-		newtogan.tempposition = Vector3(0, 0, 0);
+		newtogan.position = Vector3(0, -15, 0);
+		newtogan.tempposition = Vector3(0, -15, 0);
 		newtogan.rotate_togan = 0;
 		newtogan.state = 0;
 		newtogan.tempR = 0;
