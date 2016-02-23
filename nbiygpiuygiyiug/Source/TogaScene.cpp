@@ -231,6 +231,10 @@ void TogaScene::Init()
 	meshList[NPC_TOGAN_LEG] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_leg.obj");
 	meshList[NPC_TOGAN_LEG]->textureID = LoadTGA("Image//toga_texture.tga");
 
+	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
+	meshList[GEO_UI]->textureID = LoadTGA("Image//Planet_UI.tga");
+
+
 
 }
 
@@ -533,6 +537,15 @@ void TogaScene::Render()
 		modelStack.PopMatrix();
 	}
 	
+
+	viewStack.LoadIdentity();
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, -1);
+	modelStack.Rotate(-92.5, 90, 1, 0);
+	modelStack.Scale(1.1, 0.8, 0.8);
+	RenderMesh(meshList[GEO_UI], false);
+	modelStack.PopMatrix();
+
 }
 
 void TogaScene::Exit()
