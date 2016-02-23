@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <fstream>
 
 using std::string;
 using std::vector;
@@ -16,9 +15,18 @@ using std::ifstream;
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
+#include <map>
+
+class ASTEROID{
+public:
+	string materialName;
+	int count;
+};
 
 class OpenGalaxyScene : public Scene
 {
+
+
 	enum GEOMETRY_TYPE
 	{
 		GEO_AXES,
@@ -124,70 +132,7 @@ private:
 	void generateSkybox();
 	void updateShipMovement(float dt);
 
-	vector<string> fillWithFontData(string path){
 
-		string line;
-		vector<string> data;
-		ifstream myfile;
-		myfile.open(path);
-		if (myfile.is_open())
-		{
-			std::cout << "File Opened" << std::endl;
-			while (!myfile.eof()) {
-				while (getline(myfile, line, '\n'))
-				{
-					data.push_back(line);
-				}
-			}
-			myfile.close();
-		}
-		else
-		{
-			std::cout << "Cannot open .csv file" << std::endl;
-		}
-
-		return data;
-
-	}
-	std::vector<std::string> fontData = fillWithFontData("PixelFontData.csv");
-	float getFontOffset(char text){
-		std::string whatIWantHolder;
-		std::string whatIWantInt;
-
-		float FINAL;
-
-		bool store = false;
-
-		whatIWantHolder = fontData[static_cast<int>(text)];
-
-		for (int i = 0; i < whatIWantHolder.size(); i++)
-		{
-			if (whatIWantHolder[i] == ','){
-				store = true;
-			}
-			else if (store){
-				whatIWantInt += whatIWantHolder[i];
-			}
-			else{}
-		}
-
-		FINAL = std::stoi(whatIWantInt, nullptr, 0);
-		//std::cout << FINAL << std::endl;
-		if (FINAL == 28){
-			FINAL += 14;
-		}
-		if (FINAL == 21){
-			FINAL += 21;
-		}
-		if (FINAL == 35){
-			FINAL += 7;
-		}
-		if (FINAL == 14){
-			FINAL += 26;
-		}
-
-		return FINAL;
-	}
 	
 	//For Planet Interactions
 	bool land;
@@ -202,7 +147,7 @@ private:
 	float rotateShip;
 	float translateShip;
 	float accelerateShip;
-
+	AABB spaceshipHitbox;
 	//Asteroid random stuff
 	float randScaleX[1000];
 	float randScaleY[1000];
@@ -217,6 +162,7 @@ private:
 	//For Light
 	bool enableLight;
 
+	//Generates HUD
 	void drawHUD();
 
 	//Camera

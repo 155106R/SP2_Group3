@@ -66,9 +66,9 @@ struct AABB{
 		return updateObject;
 	}
 
-}spaceshipHitbox;
+};
 
-bool collision(const AABB& hitbox, const Vector3& vecPoint){	//for point within the AABB
+static bool collision(const AABB& hitbox, const Vector3& vecPoint){	//for point within the AABB
 
 	//Check if the point is less than max and greater than min
 	if (vecPoint.x > hitbox.m_vecMin.x && vecPoint.x < hitbox.m_vecMax.x &&
@@ -81,7 +81,7 @@ bool collision(const AABB& hitbox, const Vector3& vecPoint){	//for point within 
 	}
 }
 
-bool collision(const AABB& lhsBox, const AABB& rhsBox){		//for AABB to AABB collision
+static bool collision(const AABB& lhsBox, const AABB& rhsBox){		//for AABB to AABB collision
 	//Check if lhsBox's max is greater than rhsBox's min and lhsBox's min is less than rhsBox's max
 	if (lhsBox.m_vecMax.x > rhsBox.m_vecMin.x &&
 		lhsBox.m_vecMin.x < rhsBox.m_vecMax.x &&

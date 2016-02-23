@@ -10,9 +10,13 @@
 #include "Mtx44.h"
 #include "Camera_Mouse.h"
 
+
 #include <iostream>
 using std::cout;
 using std::endl;
+
+vector<AABB> Shophitbox;
+
 
 TogaScene::TogaScene()
 {
@@ -23,7 +27,29 @@ TogaScene::~TogaScene()
 }
 
 void TogaScene::Init()
+
 {
+
+
+	state = 0; //0 = normal gameplat, 1 == locked camera
+	//collision
+	
+	rendertext = 0;
+	
+	Shophitbox.push_back(AABB::generateAABB(Vector3(-70, 0, -60), 30, 30, 30, 0));// Mineral shop [0]
+
+	Shophitbox.push_back(AABB::generateAABB(Vector3(-40, 0, 410), 30, 30, 30, 0));// Upgrade shop [1]
+
+	Shophitbox.push_back(AABB::generateAABB(Vector3(60, 0, -80), 10, 24, 10, 0));// drone shop [2]
+
+	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 200, 200, 0));// Cave [3]
+
+	infrontOfPlayer = AABB::generateAABB(camera.target, 10, 10, 10, 0);	//small box infront of player
+
+	AABB player;
+	player.generateAABB(camera.position, 10, 15, 10, 0);
+
+
 
 	//npc togan spawning
 	Init_getWalktarget();
@@ -154,6 +180,8 @@ void TogaScene::Init()
 
 	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateSphere("LightSource", Color(1, 1, 1), 18, 36);
 
+	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("hitbox", Color(0,1,0));
+
 	//Skybox - TOGA
 	meshList[SKYBOX_Xposv] = MeshBuilder::GenerateQuad("right", Color(1, 1, 1));
 	meshList[SKYBOX_Xposv]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_rt.tga");
@@ -234,6 +262,12 @@ void TogaScene::Init()
 	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
 	meshList[GEO_UI]->textureID = LoadTGA("Image//Planet_UI.tga");
 
+	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
+	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
+
+	meshList[GEO_TEXT_BOX] = MeshBuilder::GenerateQuad("textbox", Color(0,0,0));
+	meshList[GEO_TEXT_BOX]->textureID = LoadTGA("Image//textbox.tga");
+
 
 
 }
@@ -242,16 +276,20 @@ float inc = 0;
 
 void TogaScene::Update(double dt)
 {
+	button_prompt = 0;
+
+	infrontOfPlayer.m_origin = camera.position + camera.view*(float)(20);
+	AABB::updateAABB(infrontOfPlayer);
 
 	if (Application::IsKeyPressed('Z'))
 	{
 		inc += 50 * dt;
-	
+		std::cout << inc << endl;
 	}
 	if (Application::IsKeyPressed('X'))
 	{
 		inc -= 50 * dt;
-	
+		std::cout << inc << endl;
 	}
 	//Enable culling
 	if (Application::IsKeyPressed('1'))
@@ -274,8 +312,10 @@ void TogaScene::Update(double dt)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
-	camera.Update(dt);
-
+	if (state == 0)
+	{
+		camera.Update(dt);
+	}
 
 	//Light
 	if (Application::IsKeyPressed('8')){
@@ -291,8 +331,7 @@ void TogaScene::Update(double dt)
 		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
 	}
 
-	
-
+	timer += dt;
 
 
 	droneAnimation(dt);
@@ -300,8 +339,7 @@ void TogaScene::Update(double dt)
 	upgradeAnimation(dt);
 	toganwalk(dt);
 	getWalktarget(dt);
-
-
+	interactionUpdate(dt);
 }
 
 
@@ -347,6 +385,7 @@ void TogaScene::RenderText(Mesh* mesh, std::string text, Color color)
 
 	glEnable(GL_DEPTH_TEST);
 }
+
 
 void TogaScene::RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y)
 {
@@ -537,14 +576,32 @@ void TogaScene::Render()
 		modelStack.PopMatrix();
 	}
 	
+		viewStack.LoadIdentity();
+		modelStack.PushMatrix();
+	
+		switch (state){
+		case 0:	
+		modelStack.Translate(0, 0, -1);
+		modelStack.Rotate(-92.5, 90, 1, 0);
+		modelStack.Scale(1.1, 0.8, 0.8);
+		RenderMesh(meshList[GEO_UI], false);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 1.6, 1.7);
+		RenderTextOnScreen(meshList[GEO_TEXT], "TOGA", Color(1, 0, 0), 3.5, 20.4, 16.2);
+		break;
+		case 1:
+		modelStack.Translate(0, -0.3, -1);
+		modelStack.Rotate(90, 1, 0, 0);
+		modelStack.Scale(1, 1, 0.3);
+		RenderMesh(meshList[GEO_TEXT_BOX], false);
+		break;
+		};
+		modelStack.PopMatrix();
 
-	viewStack.LoadIdentity();
-	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, -1);
-	modelStack.Rotate(-92.5, 90, 1, 0);
-	modelStack.Scale(1.1, 0.8, 0.8);
-	RenderMesh(meshList[GEO_UI], false);
-	modelStack.PopMatrix();
+
+
+
+	renderinteract();
+	text();
 
 }
 
@@ -758,13 +815,6 @@ void TogaScene::generateTogan()
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_ARM], true);
 	modelStack.PopMatrix();
-
-}
-
-void TogaScene::generateWanderers()
-{
-	//wanderer1
-
 
 }
 
@@ -1061,4 +1111,95 @@ void TogaScene::Init_getWalktarget()
 		newtogan.tempR = 0;
 		togan_NPC_Loop.push_back(newtogan);
 	}
+}
+
+float TogaScene::checkDistance(Vector3 firstvector, Vector3 secondvector)
+{
+
+	return sqrt(pow((firstvector.x - secondvector.x), 2) + pow((firstvector.z - secondvector.z), 2));
+}
+
+void TogaScene::interactionUpdate(double dt)
+{
+	//cout <<"view : " << camera.view << endl;
+	//cout << "Target : " << camera.target << endl;
+
+	if ((collision(Shophitbox[0], infrontOfPlayer) == true ) )//Mineral merchant
+	{
+		if (state == 0)
+		{
+			button_prompt = 1;
+		}
+
+		if (Application::IsKeyPressed('E') && timer > delay)
+		{
+		button_prompt = 0;
+		interact_state();
+		rendertext = 1;
+		delay = timer + 0.5;
+		}
+	}
+
+	
+	if ((collision(Shophitbox[1], infrontOfPlayer) == true))//Mineral merchant
+	{
+		
+	}
+	
+	
+	if ((collision(Shophitbox[2], infrontOfPlayer) == true))//Upgrade merchant
+	{
+		
+	}
+	
+	if ((collision(Shophitbox[3], infrontOfPlayer) == true))//cave
+	{
+
+	}
+}
+
+void TogaScene::interact_state()
+{
+	if (state == 0)
+	{
+		state = 1;
+		return;
+	}
+	else if (state == 1)
+	{
+		state = 0;
+		return;
+	}
+
+}
+
+void TogaScene::renderinteract()
+{
+	if (button_prompt == 1)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Press 'E' to interact", Color(1, 0, 0), 3.5, 7.4, 5.8);
+	}
+	else
+	{
+		return;
+	}
+}
+
+void TogaScene::text()
+{
+	switch(rendertext)
+	{
+	case(0) : break;
+			
+	case(1):
+	RenderTextOnScreen(meshList[GEO_TEXT], "H-Hey kid, wanna buy some minerals?", Color(1, 0, 0), 2, 4.2, 5.8);
+		break;
+
+
+	
+
+
+
+	}
+
 }

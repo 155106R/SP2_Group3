@@ -34,6 +34,7 @@ void Camera_Mouse::Init(const Vector3& pos, const Vector3& target, const Vector3
 
 void Camera_Mouse::Update(double dt)
 {
+	view *= 20;
 	static const float CAMERA_SPEED = 5.f;
 	int screenSizeX = glfwGetVideoMode(glfwGetPrimaryMonitor())->width;
 	int screenSizeY = glfwGetVideoMode(glfwGetPrimaryMonitor())->height;
@@ -155,7 +156,9 @@ void Camera_Mouse::Update(double dt)
 		}
 	}
 
-	target = Vector3(-sin(DegreeToRadian(cameraRotationY)) * cos(DegreeToRadian(cameraRotationX)) + this->position.x, sin(DegreeToRadian(cameraRotationX)) + this->position.y, -cos(DegreeToRadian(cameraRotationY)) * cos(DegreeToRadian(cameraRotationX)) + this->position.z);
+	target = Vector3(-sin(DegreeToRadian(cameraRotationY)) * cos(DegreeToRadian(cameraRotationX)) + this->position.x, 
+		sin(DegreeToRadian(cameraRotationX)) + this->position.y, 
+		-cos(DegreeToRadian(cameraRotationY)) * cos(DegreeToRadian(cameraRotationX)) + this->position.z);
 	view = (target - position).Normalized();
 	right = view.Cross(defaultUp);
 	up = right.Cross(view);
