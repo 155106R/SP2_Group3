@@ -7,7 +7,7 @@
 #include "Utility.h"
 #include "LoadTGA.h"
 #include "Mtx44.h"
-#include "AABB.h"
+
 
 vector<AABB> AABBboxForAsteroid;
 vector<ASTEROID> asteroidDetails;
@@ -327,11 +327,11 @@ void OpenGalaxyScene::Update(double dt)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
+		//Camera Movement
+		camera.target = *middleOfShip;
+		camera.target.y = (middleOfShip->y) + 15;
+		camera.Update(dt);
 
-	//Camera Movement
-	camera.target = *middleOfShip;
-	camera.target.y = (middleOfShip->y) + 15;
-	camera.Update(dt);
 
 	////Light
 	//if (Application::IsKeyPressed('8')){

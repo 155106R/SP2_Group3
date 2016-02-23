@@ -16,6 +16,7 @@ using std::ifstream;
 #include "MatrixStack.h"
 #include "Light.h"
 #include "Camera_Mouse.h"
+#include "AABB.h"
 
 class TogaScene : public Scene
 {
@@ -24,6 +25,7 @@ class TogaScene : public Scene
 		GEO_AXES,
 		GEO_LIGHTBALL,
 		GEO_TEXTBOX,
+		GEO_CUBE,
 
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
@@ -57,11 +59,14 @@ class TogaScene : public Scene
 		NPC_TOGAN_LEG,
 
 
+
+
 		CAVE,
 
 
 		GEO_TEXT,
 		GEO_UI,
+		GEO_TEXT_BOX,
 
 
 		NUM_GEOMETRY,
@@ -104,6 +109,7 @@ public:
 	~TogaScene();
 
 	float LSPEED;
+	bool state;
 
 	MS modelStack, viewStack, projectionStack;
 
@@ -131,7 +137,6 @@ private:
 	void generateDronemerchant();
 	void generateUpgrademerchant();
 	void generateTogan();
-	void generateWanderers();
 
 	//ANIMATIONS
 	void droneAnimation(double dt);
@@ -142,6 +147,20 @@ private:
 	void toganwalk(double dt);
 	void getWalktarget(double dt);
 	void Init_getWalktarget();
+	
+	bool button_prompt;
+	
+
+	//ui states
+	void interact_state();
+	void renderinteract();
+	void text();
+	int rendertext;
+	float timer = 0;
+	float delay = 0;
+	//Distance check
+	 float checkDistance(Vector3 firstvector,Vector3 secondvector);
+	 void interactionUpdate(double dt);
 
 
 
@@ -213,7 +232,7 @@ private:
 	}
 	//For Light
 	bool enableLight;
-
+	AABB infrontOfPlayer;
 	Camera_Mouse camera;
 	Light light[1];
 

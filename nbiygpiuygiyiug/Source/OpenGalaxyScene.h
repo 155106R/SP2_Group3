@@ -147,7 +147,7 @@ private:
 	float rotateShip;
 	float translateShip;
 	float accelerateShip;
-
+	AABB spaceshipHitbox;
 	//Asteroid random stuff
 	float randScaleX[1000];
 	float randScaleY[1000];
