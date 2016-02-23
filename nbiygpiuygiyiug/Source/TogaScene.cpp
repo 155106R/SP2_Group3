@@ -234,6 +234,9 @@ void TogaScene::Init()
 	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
 	meshList[GEO_UI]->textureID = LoadTGA("Image//Planet_UI.tga");
 
+	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
+	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
+
 
 
 }
@@ -246,12 +249,12 @@ void TogaScene::Update(double dt)
 	if (Application::IsKeyPressed('Z'))
 	{
 		inc += 50 * dt;
-	
+		std::cout << inc << endl;
 	}
 	if (Application::IsKeyPressed('X'))
 	{
 		inc -= 50 * dt;
-	
+		std::cout << inc << endl;
 	}
 	//Enable culling
 	if (Application::IsKeyPressed('1'))
@@ -347,6 +350,7 @@ void TogaScene::RenderText(Mesh* mesh, std::string text, Color color)
 
 	glEnable(GL_DEPTH_TEST);
 }
+
 
 void TogaScene::RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y)
 {
@@ -538,6 +542,9 @@ void TogaScene::Render()
 	}
 	
 
+
+
+
 	viewStack.LoadIdentity();
 	modelStack.PushMatrix();
 	modelStack.Translate(0, 0, -1);
@@ -545,6 +552,10 @@ void TogaScene::Render()
 	modelStack.Scale(1.1, 0.8, 0.8);
 	RenderMesh(meshList[GEO_UI], false);
 	modelStack.PopMatrix();
+
+	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 1.6, 1.7);
+	RenderTextOnScreen(meshList[GEO_TEXT], "TOGA", Color(1, 0, 0), 3.5, 20.4, 16.2);
+
 
 }
 
