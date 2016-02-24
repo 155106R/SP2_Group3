@@ -29,11 +29,10 @@ TogaScene::~TogaScene()
 void TogaScene::Init()
 
 {
+	e_state = 0;
 
+	currentstate = FREEMOVE;
 
-	state = 0; //0 = normal gameplat, 1 == locked camera
-	//collision
-	
 	rendertext = 0;
 	
 	Shophitbox.push_back(AABB::generateAABB(Vector3(-70, 0, -60), 30, 30, 30, 0));// Mineral shop [0]
@@ -44,7 +43,7 @@ void TogaScene::Init()
 
 	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 200, 200, 0));// Cave [3]
 
-	infrontOfPlayer = AABB::generateAABB(camera.target, 10, 10, 10, 0);	//small box infront of player
+
 
 	AABB player;
 	player.generateAABB(camera.position, 10, 15, 10, 0);
@@ -260,7 +259,7 @@ void TogaScene::Init()
 	meshList[NPC_TOGAN_LEG]->textureID = LoadTGA("Image//toga_texture.tga");
 
 	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
-	meshList[GEO_UI]->textureID = LoadTGA("Image//Planet_UI.tga");
+	meshList[GEO_UI]->textureID = LoadTGA("Image//planet_UI.tga");
 
 	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
 	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
@@ -268,6 +267,8 @@ void TogaScene::Init()
 	meshList[GEO_TEXT_BOX] = MeshBuilder::GenerateQuad("textbox", Color(0,0,0));
 	meshList[GEO_TEXT_BOX]->textureID = LoadTGA("Image//textbox.tga");
 
+	meshList[GEO_SHOP] = MeshBuilder::GenerateQuad("shop screen", Color(0, 0, 0));
+	meshList[GEO_SHOP]->textureID = LoadTGA("Image//shop_screen.tga");
 
 
 }
@@ -278,8 +279,7 @@ void TogaScene::Update(double dt)
 {
 	button_prompt = 0;
 
-	infrontOfPlayer.m_origin = camera.position + camera.view*(float)(20);
-	AABB::updateAABB(infrontOfPlayer);
+
 
 	if (Application::IsKeyPressed('Z'))
 	{
@@ -312,7 +312,7 @@ void TogaScene::Update(double dt)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
-	if (state == 0)
+	if (currentstate == 0)
 	{
 		camera.Update(dt);
 	}
@@ -340,6 +340,7 @@ void TogaScene::Update(double dt)
 	toganwalk(dt);
 	getWalktarget(dt);
 	interactionUpdate(dt);
+	resetKey();
 }
 
 
@@ -579,7 +580,7 @@ void TogaScene::Render()
 		viewStack.LoadIdentity();
 		modelStack.PushMatrix();
 	
-		switch (state){
+		switch (currentstate){
 		case 0:	
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-92.5, 90, 1, 0);
@@ -594,6 +595,14 @@ void TogaScene::Render()
 		modelStack.Scale(1, 1, 0.3);
 		RenderMesh(meshList[GEO_TEXT_BOX], false);
 		break;
+		case 2:
+		modelStack.Translate(0, 0, -1);
+		modelStack.Rotate(-90, 1, 0, 0);
+		modelStack.Scale(1.1, 0.8, 0.8);
+		RenderMesh(meshList[GEO_SHOP], false);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		break;
+
 		};
 		modelStack.PopMatrix();
 
@@ -1124,50 +1133,109 @@ void TogaScene::interactionUpdate(double dt)
 	//cout <<"view : " << camera.view << endl;
 	//cout << "Target : " << camera.target << endl;
 
-	if ((collision(Shophitbox[0], infrontOfPlayer) == true ) )//Mineral merchant
+	if ((collision(Shophitbox[0], camera.frontTarget) == true ) )//Mineral merchant
 	{
-		if (state == 0)
+		if (currentstate == 0)
 		{
 			button_prompt = 1;
 		}
 
-		if (Application::IsKeyPressed('E') && timer > delay)
+		if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
 		{
-		button_prompt = 0;
-		interact_state();
-		rendertext = 1;
-		delay = timer + 0.5;
+			e_state = 1;
+			button_prompt = 0;
+			interact_state();
+			if (rendertext == 0 && currentstate == 1)
+			{
+				rendertext = 1;
+			}
+			else
+			{
+				rendertext = 0;
+			}
+		
+			delay = timer + 0.5;//set delay offset
+		
+
 		}
 	}
 
 	
-	if ((collision(Shophitbox[1], infrontOfPlayer) == true))//Mineral merchant
+	if ((collision(Shophitbox[1], camera.frontTarget) == true))//Mineral merchant
 	{
-		
+		if (currentstate == 0)
+		{
+			button_prompt = 1;
+		}
+		if ((Application::IsKeyPressed('E') && timer > delay)&& e_state ==0)
+		{
+			e_state = 1;
+			button_prompt = 0;
+			interact_state();
+			if (rendertext == 0 && currentstate == 1)
+			{
+				rendertext = 2;
+			}
+			else
+			{
+				rendertext = 0;
+			}
+
+			delay = timer + 0.5;//set delay offset
+
+
+		}
 	}
 	
 	
-	if ((collision(Shophitbox[2], infrontOfPlayer) == true))//Upgrade merchant
+	if ((collision(Shophitbox[2], camera.frontTarget) == true))//Drone merchant
 	{
-		
+		if (currentstate == 0)
+		{
+			button_prompt = 1;
+		}
+		if( (Application::IsKeyPressed('E') && timer > delay) && e_state ==0)
+		{
+			e_state = 1;
+			button_prompt = 0;
+			interact_state();
+			if (rendertext == 0 && currentstate == 1)
+			{
+				rendertext = 3;
+			}
+			else
+			{
+				rendertext = 0;
+			}
+
+			delay = timer + 0.5;//set delay offset
+
+
+		}
 	}
 	
-	if ((collision(Shophitbox[3], infrontOfPlayer) == true))//cave
+	if (((collision(Shophitbox[3], camera.frontTarget) == true)) && e_state ==0)//cave
 	{
+		e_state = 1;
 
 	}
 }
 
 void TogaScene::interact_state()
 {
-	if (state == 0)
+	if (currentstate == FREEMOVE)
 	{
-		state = 1;
+		currentstate = CONVERSE;
 		return;
 	}
-	else if (state == 1)
+	else if (currentstate == CONVERSE)
 	{
-		state = 0;
+		currentstate = TRADE;
+		return;
+	}
+	else if (currentstate == TRADE)
+	{
+		currentstate = FREEMOVE;
 		return;
 	}
 
@@ -1189,17 +1257,28 @@ void TogaScene::text()
 {
 	switch(rendertext)
 	{
-	case(0) : break;
+	case(0) : break;//inactive
 			
 	case(1):
-	RenderTextOnScreen(meshList[GEO_TEXT], "H-Hey kid, wanna buy some minerals?", Color(1, 0, 0), 2, 4.2, 5.8);
+	RenderTextOnScreen(meshList[GEO_TEXT], "H-Hey kid, wanna buy some minerals?", Color(1, 0, 0), 2, 4.2, 5.8);//mineral shop
 		break;
 
+	case(2) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "I have the parts. If you have the Bitcoins...", Color(1, 0, 0), 2, 4.2, 5.8);//upgrade shop
+		break;
 
-	
+	case(3) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "Drone prices are non-negotiable.", Color(1, 0, 0), 2, 4.2, 5.8);//drone shop
+		break;
+	};
 
+}
 
-
+void TogaScene::resetKey()
+{
+	if (!Application::IsKeyPressed('E'))
+	{
+		e_state = 0;
 	}
 
 }

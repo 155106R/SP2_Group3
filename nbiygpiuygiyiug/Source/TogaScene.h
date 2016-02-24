@@ -67,7 +67,7 @@ class TogaScene : public Scene
 		GEO_TEXT,
 		GEO_UI,
 		GEO_TEXT_BOX,
-
+		GEO_SHOP,
 
 		NUM_GEOMETRY,
 	};
@@ -109,7 +109,7 @@ public:
 	~TogaScene();
 
 	float LSPEED;
-	bool state;
+
 
 	MS modelStack, viewStack, projectionStack;
 
@@ -148,16 +148,33 @@ private:
 	void getWalktarget(double dt);
 	void Init_getWalktarget();
 	
+	bool e_state;
 	bool button_prompt;
 	
 
 	//ui states
+	enum state{
+		
+		FREEMOVE,
+		CONVERSE,
+		TRADE,
+		NUM_state
+	};
+
+
+	//interactions
+	unsigned currentstate;
 	void interact_state();
 	void renderinteract();
 	void text();
+	void resetKey();
 	int rendertext;
 	float timer = 0;
 	float delay = 0;
+
+
+
+
 	//Distance check
 	 float checkDistance(Vector3 firstvector,Vector3 secondvector);
 	 void interactionUpdate(double dt);

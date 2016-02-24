@@ -16,6 +16,7 @@ using std::ifstream;
 #include "MatrixStack.h"
 #include "Light.h"
 #include <map>
+#include "AABB.h""
 
 class ASTEROID{
 public:

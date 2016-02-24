@@ -11,7 +11,7 @@
 
 vector<AABB> AABBboxForAsteroid;
 vector<ASTEROID> asteroidDetails;
-
+float incre = 0;
 OpenGalaxyScene::OpenGalaxyScene()
 {
 
@@ -263,7 +263,7 @@ void OpenGalaxyScene::Init()
 
 void OpenGalaxyScene::Update(double dt)
 {
-	std::cout << asteroidDetails[0].count << std::endl;
+	//std::cout << asteroidDetails[0].count << std::endl;
 
 	AABB::updateAABB(spaceshipHitbox);
 	spaceshipHitbox.m_origin = *middleOfShip;
@@ -308,6 +308,11 @@ void OpenGalaxyScene::Update(double dt)
 	}
 
 	//Enable culling
+	if (Application::IsKeyPressed('Z'))
+	{
+		incre += 50 * dt;
+		std::cout << incre<<std::endl;
+	}
 	if (Application::IsKeyPressed('1'))
 	{
 		glEnable(GL_CULL_FACE);
@@ -683,20 +688,19 @@ void OpenGalaxyScene::generateSkybox(){
 	RenderMesh(meshList[SKYBOX_Yposv], false);
 	modelStack.PopMatrix();
 
-	//Back
+	//Back/<FIXED>
 	modelStack.PushMatrix();
-	modelStack.Rotate(90, 1, 0, 0);
-	modelStack.Rotate(-180, 0, 1, 0);
-	modelStack.Translate(0, 500, 0);
+	modelStack.Translate(0, 0, 500);
+	modelStack.Rotate(270, 1, 0, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Znega], false);
 	modelStack.PopMatrix();
 
-	//Left
+	//Left/<FIXED>
 	modelStack.PushMatrix();
+	modelStack.Translate(-500, 0, 0);
+	modelStack.Rotate(180, 0, 1, 0);
 	modelStack.Rotate(90, 0, 0, 1);
-	//modelStack.Rotate(-90, 0, 1, 0);
-	modelStack.Translate(0, 500, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Xnega], false);
 	modelStack.PopMatrix();

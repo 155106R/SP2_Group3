@@ -163,6 +163,8 @@ void Camera_Mouse::Update(double dt)
 	right = view.Cross(defaultUp);
 	up = right.Cross(view);
 	
+	frontTarget = position + view*(float)(20);
+
 	jump(dt);
 }
 
