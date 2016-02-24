@@ -520,19 +520,7 @@ void PlanetJellyScene::RenderText(Mesh* mesh, std::string text, Color color)
 	for (unsigned i = 0; i < text.length(); ++i)
 	{
 		Mtx44 characterSpacing;
-		float lmao = getFontOffset(text[i]);
-		if (lmao == 28){
-			lmao = lmao + (14);
-		}
-		if (lmao == 21){
-			lmao = lmao + (21);
-		}
-		if (lmao == 35){
-			lmao = lmao + (7);
-		}
-		if (lmao == 14){
-			lmao = lmao + (26);
-		}
+		float lmao = SharedData::GetInstance()->getFontOffset(text[i]);
 		lmao *= 0.01;
 		lmao = 1.0f - lmao;
 		characterSpacing.SetToTranslation(i * lmao, 0, 0); //1.0f is the spacing of each character, you may change this value
@@ -575,19 +563,7 @@ void PlanetJellyScene::RenderTextOnScreen(Mesh* mesh, std::string text, Color co
 	for (unsigned i = 0; i < text.length(); ++i)
 	{
 		Mtx44 characterSpacing;
-		float lmao = getFontOffset(text[i]);
-		if (lmao == 28){
-			lmao = lmao + (14);
-		}
-		if (lmao == 21){
-			lmao = lmao + (21);
-		}
-		if (lmao == 35){
-			lmao = lmao + (7);
-		}
-		if (lmao == 14){
-			lmao = lmao + (26);
-		}
+		float lmao = SharedData::GetInstance()->getFontOffset(text[i]);
 		lmao *= 0.01;
 		lmao = 1.0f - lmao;
 		characterSpacing.SetToTranslation(i * lmao, 0, 0); //1.0f is the spacing of each character, you may change this value
