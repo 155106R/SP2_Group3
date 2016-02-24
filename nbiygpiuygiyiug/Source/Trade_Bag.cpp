@@ -112,6 +112,7 @@ void Bag::sellItem(int ID, int amount, char PID) // sell item in bag (pop), PID 
 		AddStack(ID, amount, PID);
 		SharedData::GetInstance()->SD_bitcoins += (ItemS[ID - 1].bitcoin * amount);
 	}
+	clearSlot_reLocation();
 }
 
 bool Bag::isEmpty(int slotposition)
@@ -124,7 +125,7 @@ void Bag::clearSlot_reLocation()
 {
 	for (int i = 0; i < Slots; i++)
 	{
-		if (isEmpty(i) == true && (i + 1) <= Slots && isEmpty(i + 1) == false)
+		if (isEmpty(i) == true && (i + 1) < Slots && isEmpty(i + 1) == false)
 		{
 			Slot[i].name = Slot[i + 1].name;
 			Slot[i].PID = Slot[i + 1].PID;
@@ -132,10 +133,12 @@ void Bag::clearSlot_reLocation()
 			Slot[i].bitcoin = Slot[i + 1].bitcoin;
 			Slot[i].stack = Slot[i + 1].stack;
 			Slot[i].MaxStack = Slot[i + 1].MaxStack;
+			Slot[i + 1].stack = 0;
+
 		}
 		else if (isEmpty(i) == true)
 		{
-			Slot[i].name = "";
+			Slot[i].name = "NO ITEM";
 			Slot[i].PID = 0;
 			Slot[i].ID = 0;
 			Slot[i].bitcoin = 0;

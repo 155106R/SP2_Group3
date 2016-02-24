@@ -152,6 +152,9 @@ private:
 	Light light[1];
 
 	Mesh *meshList[NUM_GEOMETRY];
+
+
+	bool e_state;
 };
 
 #endif

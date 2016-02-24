@@ -854,23 +854,61 @@ void PlanetJellyScene::CheckQuadrants(float x, float z, float tempx, float tempz
 
 void PlanetJellyScene::Updata_Checker(double dt)
 {
+
+
+	
+
+	if (!Application::IsKeyPressed('B'))
+	{
+		e_state = 0;
+	}
+
 	if (Application::IsKeyPressed('V'))
 	{
+		
+		
 		SharedData::GetInstance()->PlayerInventory->setItemsList();
-		//SharedData::GetInstance()->PlayerInventory->setShopList();
 		SharedData::GetInstance()->PlayerInventory->setBag();
+		SharedData::GetInstance()->PlayerInventory->setShopList();
+		
 	}
-	if (Application::IsKeyPressed('B'))
+	if (Application::IsKeyPressed('B')  && e_state == 0)
 	{
+		e_state = 1;
 		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slot[0].name << endl;
 		/*SharedData::GetInstance()->PlayerInventory->Bag::GetItem(4, 10);*/
 		for (int i = 0; i < 3; i++)
 		{
-			cout << i << " + "  << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+			cout << "Before " << i << " + "  << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
 		}
-		SharedData::GetInstance()->PlayerInventory->Bag::GetItem(4, 10);
+		cout << SharedData::GetInstance()->SD_bitcoins << endl;
+		SharedData::GetInstance()->PlayerInventory->GetItem(4, 10);
+		SharedData::GetInstance()->PlayerInventory->GetItem(10, 10);
+		SharedData::GetInstance()->PlayerInventory->GetItem(7, 10);
 
-		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slots << endl;
+
+		for (int i = 0; i < 3; i++)
+		{
+			cout << "After " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+		}
+
+
+
+		SharedData::GetInstance()->PlayerInventory->sellItem(4, 1, 'A');
+		
+
+		SharedData::GetInstance()->PlayerInventory->sellItem(4, 9, 'B');
+		cout << SharedData::GetInstance()->SD_bitcoins << endl;
+		SharedData::GetInstance()->PlayerInventory->buyItem(6, 10, 'A');
+
+		cout << SharedData::GetInstance()->SD_bitcoins << endl;
+		for (int i = 0; i < 3; i++)
+		{
+			cout << "After " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+		}
+		cout << camera.target.x << endl;
+		cout << camera.target.y << endl;
+		/*cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slots << endl;*/
 	}
 
 	/*	if (Application::IsKeyPressed('N'))
