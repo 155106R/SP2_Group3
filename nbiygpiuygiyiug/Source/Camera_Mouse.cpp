@@ -34,6 +34,7 @@ void Camera_Mouse::Init(const Vector3& pos, const Vector3& target, const Vector3
 
 void Camera_Mouse::Update(double dt)
 {
+	
 	view *= 20;
 	static const float CAMERA_SPEED = 5.f;
 	int screenSizeX = glfwGetVideoMode(glfwGetPrimaryMonitor())->width;
@@ -48,7 +49,8 @@ void Camera_Mouse::Update(double dt)
 	screenMidX = screenSizeX / 2;
 	screenMidY = screenSizeY / 2;
 
-	
+	nextPosition.y = 0;
+	tempPosition = position;
 	//GLFW Method (Laggier)
 	/*MousePosition mousePosition;
 	glfwGetCursorPos(m_window, &(mousePosition.x), &(mousePosition.y));
@@ -121,29 +123,48 @@ void Camera_Mouse::Update(double dt)
 		Counter--;
 	}
 
+	
+		if (Application::IsKeyPressed('W'))
+		{
+			nextPosition.x = position.x +sin(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
+			nextPosition.z = position.z + cos(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
 
-	if (Application::IsKeyPressed('W'))
-	{
-		position.x += sin(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
-		position.z += cos(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
-	}
+			if (!colliding){
+				position.x += sin(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
+				position.z += cos(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
+			}
+		}
+	
 
-	if (Application::IsKeyPressed('S'))
-	{
-		position.x += sin(DegreeToRadian(cameraRotationY)) * walkSpeed;
-		position.z += cos(DegreeToRadian(cameraRotationY)) * walkSpeed;
-	}
+		if (Application::IsKeyPressed('S'))
+		{
+			nextPosition.x = position.x + sin(DegreeToRadian(cameraRotationY)) * walkSpeed;
+			nextPosition.z = position.z + cos(DegreeToRadian(cameraRotationY)) * walkSpeed;
+			if (!colliding){
+				position.x += sin(DegreeToRadian(cameraRotationY)) * walkSpeed;
+				position.z += cos(DegreeToRadian(cameraRotationY)) * walkSpeed;
+			}
+		}
 
 	if (Application::IsKeyPressed('A'))
 	{
-		position.x += sin(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
-		position.z += cos(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+		nextPosition.x = position.x + sin(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+		nextPosition.z = position.z + (DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+
+		if (!colliding){
+			position.x += sin(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+			position.z += cos(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+		}
 	}
 
 	if (Application::IsKeyPressed('D'))
 	{
-		position.x += sin(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
-		position.z += cos(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+		nextPosition.x = position.x + sin(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+		nextPosition.z = position.z + (DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+		if (!colliding){
+			position.x += sin(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+			position.z += cos(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+		}
 	}
 
 

@@ -17,11 +17,14 @@ public:
 	Vector3 defaultTarget;
 	Vector3 defaultUp;
 	Vector3 frontTarget;
+	Vector3 tempPosition;
+	Vector3 nextPosition;
 	float cameraRotationX, cameraRotationY;
 	int Counter;
 	int screenMidX;
 	int screenMidY;
 
+	bool colliding;
 	float maxjump;
 	float gravityForce;
 	float jumpForce;
