@@ -7,6 +7,10 @@
 #include <fstream>
 #include <iostream>
 
+#include "TradeCalculation.h"
+#include "Trade_Shop.h"
+#include "Trade_Bag.h"
+
 using std::map;
 using std::vector;
 using std::string;
@@ -41,7 +45,7 @@ public:
 	//PlayerAssests
 	map<Minerals, int> inventory;
 	int SD_hullIntegrity = 100;
-	int SD_bitcoins = 100;
+	int SD_bitcoins = 0;
 	//PlayerLocation
 	unsigned SD_location;
 
@@ -111,6 +115,8 @@ public:
 		return FINAL;
 	}
 
+	Bag* PlayerInventory = new Bag;
+	
 private:
 	//SharedData(){};
 

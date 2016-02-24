@@ -230,7 +230,6 @@ void PlanetJellyScene::Update_Name_NPC(double dt)
 		else if (((camera.position.x - nameS[i].position.x) < 0) && ((camera.position.z - nameS[i].position.z) < 0)) nameS[i].tempR -= (nameS[i].R_X + 180); /*(-z,-x) T*/
 		else if (((camera.position.x - nameS[i].position.x) > 0) && ((camera.position.z - nameS[i].position.z) > 0)) nameS[i].tempR -= nameS[i].R_X; /*(z,x) A*/
 		else if (((camera.position.x - nameS[i].position.x) > 0) && ((camera.position.z - nameS[i].position.z) < 0)) nameS[i].tempR -= (nameS[i].R_X - 180); /*(-z,x) S*/
-		std::cout << nameS[i].tempR << std::endl;
 
 		if (nameS[i].tempR < -180)
 		{
@@ -335,9 +334,6 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 				if (sqrt(pow((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x), 2) + pow((jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z), 2)) > 5)
 				{
 					jelly_NPC_Loop[i].tempR = Math::RadianToDegree(atan((jelly_NPC_Loop[i].tempposition.x - jelly_NPC_Loop[i].position.x) / (jelly_NPC_Loop[i].tempposition.z - jelly_NPC_Loop[i].position.z)));
-					std::cout << i << "X " << jelly_NPC_Loop[i].tempposition.x << std::endl;
-					std::cout << i << "Z " << jelly_NPC_Loop[i].tempposition.z << std::endl;
-					std::cout << i << "R " << jelly_NPC_Loop[i].tempR << std::endl;
 				}
 				else
 				{
@@ -383,7 +379,6 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 			if (jelly_NPC_Loop[i].tempR < -180)
 			{
 				jelly_NPC_Loop[i].tempR = 360 + jelly_NPC_Loop[i].tempR;
-				std::cout << i << "R " << jelly_NPC_Loop[i].tempR << std::endl;
 				jelly_NPC_Loop[i].state = 3;
 			}
 			else if (jelly_NPC_Loop[i].tempR < 0) //turn right
@@ -407,7 +402,6 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 			if (jelly_NPC_Loop[i].tempR>180)
 			{
 				jelly_NPC_Loop[i].tempR = 0 - 360 + jelly_NPC_Loop[i].tempR;
-				std::cout << i << "R " << jelly_NPC_Loop[i].tempR << std::endl;
 				jelly_NPC_Loop[i].state = 2;
 			}
 			else if (jelly_NPC_Loop[i].tempR > 0) //turn left
@@ -433,6 +427,9 @@ void PlanetJellyScene::Update(double dt)
 	Update_animation_NPC(dt);
 	// NPC name
 	Update_Name_NPC(dt);
+
+	//test codes
+	Updata_Checker(dt);
 
 
 	//Enable culling
@@ -877,4 +874,32 @@ void PlanetJellyScene::CheckQuadrants(float x, float z, float tempx, float tempz
 	else if (((tempx - x) < 0) && ((tempz - z) < 0)) tempR -= (R + 180); /*(-z,-x) T*/
 	else if (((tempx - x) > 0) && ((tempz - z) > 0)) tempR -= R; /*( z, x) A*/
 	else if (((tempx - x) > 0) && ((tempz - z) < 0)) tempR -= (R - 180); /*(-z, x) S*/
+}
+
+void PlanetJellyScene::Updata_Checker(double dt)
+{
+	if (Application::IsKeyPressed('V'))
+	{
+		SharedData::GetInstance()->PlayerInventory->setItemsList();
+		//SharedData::GetInstance()->PlayerInventory->setShopList();
+		SharedData::GetInstance()->PlayerInventory->setBag();
+	}
+	if (Application::IsKeyPressed('B'))
+	{
+		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slot[0].name << endl;
+		/*SharedData::GetInstance()->PlayerInventory->Bag::GetItem(4, 10);*/
+		for (int i = 0; i < 3; i++)
+		{
+			cout << i << " + "  << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+		}
+		SharedData::GetInstance()->PlayerInventory->Bag::GetItem(4, 10);
+
+		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slots << endl;
+	}
+
+	/*	if (Application::IsKeyPressed('N'))
+		{
+
+			if (Application::IsKeyPressed('M'))
+			{*/
 }
