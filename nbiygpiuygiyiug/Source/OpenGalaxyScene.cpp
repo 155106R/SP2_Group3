@@ -26,7 +26,7 @@ void OpenGalaxyScene::Init()
 
 	//Definations
 	LSPEED = 10.0f;
-
+	e_state = 0;//e key state
 	land = false;
 	rotateShip = 0;
 	shipAxisX = 0;
@@ -345,13 +345,15 @@ void OpenGalaxyScene::Update(double dt)
 		land = true;
 		nameOfPlanet = "Jelly Planet";
 
-		if (Application::IsKeyPressed('E')){
+		if (Application::IsKeyPressed('E') && e_state == 0){
+			e_state = 1;
 			SharedData::GetInstance()->SD_location = PLANET_JELLY;
 		}
 	}
 	else{
 		land = false;
 	}
+	resetKey();
 }
 
 void OpenGalaxyScene::RenderText(Mesh* mesh, std::string text, Color color)
@@ -792,6 +794,15 @@ void OpenGalaxyScene::drawHUD()
 	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->y), Color(1, 0, 0), 3, 4.5, 5.5);
 	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->z), Color(1, 0, 0), 3, 4.5, 4.5);
 	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)accelerateShip), Color(1, 0, 0), 4, 18.0, 5.7);
+}
+
+void OpenGalaxyScene::resetKey()
+{
+	if (!Application::IsKeyPressed('E'))
+	{
+		e_state = 0;
+	}
+
 }
 
 //Author: Randall (155106R)

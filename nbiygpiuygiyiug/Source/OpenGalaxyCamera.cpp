@@ -4,6 +4,10 @@
 #include "MyMath.h"
 #include "math.h"
 #include "OpenGalaxyScene.h"
+#include "GLFW\glfw3.h"
+
+extern GLFWwindow* m_window;
+
 OpenGalaxyCamera::OpenGalaxyCamera()
 {
 }
@@ -19,12 +23,12 @@ void OpenGalaxyCamera::Init(const Vector3& pos, const Vector3& target, const Vec
 	distance = 50;
 	yaw = 0;
 
+
 	this->position = defaultPosition = pos;
 	this->target = defaultTarget = target;
 	Vector3 view = (position-target).Normalized();
 	Vector3 right = view.Cross(up);
 	right.y = 0;
-	//right.Normalize();
 	this->up = defaultUp = right.Cross(view).Normalized();
 }
 double oldMouseX = 0;
@@ -33,33 +37,59 @@ void OpenGalaxyCamera::Update(double dt)
 {
 	//std::cout << position << std::endl;
 
-	static const float CAMERA_SPEED = 100.f;
-	//Vector3 view = (position - target).Normalized();
-	//Mtx44 rotation;
-	//rotation.SetToRotation(0, 0, 1, 0);
-	//view = rotation * view;
 
-	//std::cout << position << std::endl;
-	//std::cout << view.Normalized() << std::endl;
-	//position = target + view * 50;
+	int screenSizeX = glfwGetVideoMode(glfwGetPrimaryMonitor())->width;
+	int screenSizeY = glfwGetVideoMode(glfwGetPrimaryMonitor())->height;
+	double screenMidX, screenMidY;
+	float maxCameraRotationX = 89.99f;
+	float rotationSpeed = 4.0f;
+
+	static const float CAMERA_SPEED = 100.f;
+	glfwGetWindowSize(m_window, &screenSizeX, &screenSizeY);
+
+	screenMidX = screenSizeX / 2;
+	screenMidY = screenSizeY / 2;
+
+	POINT mousePosition;
+	GetCursorPos(&mousePosition);
+	SetCursorPos(screenMidX, screenMidY);
+
+
+	if (mousePosition.x > screenSizeX) {
+
+		mousePosition.x = screenSizeX;
+
+	}
+	else if (mousePosition.x < 0) {
+
+		mousePosition.x = 0;
+
+	}
+
+	if (mousePosition.y > screenSizeY) {
+
+		mousePosition.y = screenSizeY;
+
+	}
+	else if (mousePosition.y < 0) {
+
+		mousePosition.y = 0;
+
+	}
+
+
+	yaw -= (mousePosition.x - screenMidX) / rotationSpeed;
+	pitch -= (mousePosition.y - screenMidY) / rotationSpeed;
 
 	if (Application::IsKeyPressed(VK_LEFT) || Application::IsKeyPressed('A'))
 	{
 		yaw += (float)(-CAMERA_SPEED * dt);
-		/*Mtx44 rotation;
-		rotation.SetToRotation(yaw, 0, 1, 0);
-		view = rotation * view;
-		up = rotation * up;*/
-		//position = target + view * 50;
+	
 	}
 	if (Application::IsKeyPressed(VK_RIGHT) || Application::IsKeyPressed('D'))
 	{
 		yaw += (float)(CAMERA_SPEED * dt);
-		//Mtx44 rotation;
-		//rotation.SetToRotation(yaw, 0, 1, 0);
-		//view = rotation * view;
-		//up = rotation * up;
-		//
+
 	}
 	if (Application::IsKeyPressed(VK_UP) || Application::IsKeyPressed('W'))
 	{
@@ -68,14 +98,7 @@ void OpenGalaxyCamera::Update(double dt)
 		{
 			pitch += (float)(CAMERA_SPEED * dt);
 		}
-		//std::cout << pitch << std::endl;
-	/*	Vector3 view = (target - position).Normalized();
-		Vector3 right = view.Cross(up);
-		right.Normalize();
-		up = right.Cross(view).Normalized();
-		Mtx44 rotation;
-		rotation.SetToRotation(pitch, right.x, right.y, right.z);*/
-		//position = rotation * position;
+
 	}
 	if (Application::IsKeyPressed(VK_DOWN) || Application::IsKeyPressed('S'))
 	{
@@ -83,14 +106,7 @@ void OpenGalaxyCamera::Update(double dt)
 		{
 			pitch += (float)(-CAMERA_SPEED * dt);
 		}
-	/*	Vector3 view = (target - position).Normalized();
-		Vector3 right = view.Cross(up);
-		right.y = 0;
-		right.Normalize();
-		up = right.Cross(view).Normalized();*/
-		//Mtx44 rotation;
-		//rotation.SetToRotation(pitch, right.x, right.y, right.z);
-		////position = rotation * position;
+
 	}
 
 	Vector3 view = (target - position).Normalized();
@@ -103,9 +119,6 @@ void OpenGalaxyCamera::Update(double dt)
 	float v = getVertdistance();
 	getcameraCoords(h,v);
 	
-	//position = target + view * 50;
-
-	//position = (target) - view *50;
 
 
 	if (Application::IsKeyPressed('R'))
@@ -143,5 +156,48 @@ void OpenGalaxyCamera::getcameraCoords(float h, float v)
 	
 	//vert distance (y)
 	position.y = target.y + v;
+}
+
+
+void OpenGalaxyCamera::boundCheck(float minX, float minZ, float maxX, float maxZ)
+{
+
+	if ((position.x > minX - 5) && (position.x < maxX + 5) && (position.z > minZ - 4) && (position.z<minZ))
+	{
+		position.z = minZ;
+	}
+	if ((position.x > minX - 5) && (position.x < maxX + 5) && (position.z<maxZ + 4) && (position.z>maxZ))
+	{
+		position.z = maxZ;
+	}
+	if ((position.z >minZ - 5) && (position.z < maxZ + 5) && (position.x>minX - 4) && (position.x<minX))
+	{
+		position.x = minX;
+	}
+	if ((position.z >minZ - 5) && (position.z < maxZ + 5) && (position.x < maxX + 4) && (position.x>maxX))
+	{
+		position.x = maxX;
+	}
+}
+
+void OpenGalaxyCamera::boundCheck2(float minX, float minZ, float maxX, float maxZ)
+{
+
+	if ((position.x > minX) && (position.x < maxX) && (position.z < minZ + 4) && (position.z>minZ - 4))
+	{
+		position.z = minZ - 4;
+	}
+	if ((position.x > minX) && (position.x < maxX) && (position.z>maxZ - 4) && (position.z<maxZ + 4))
+	{
+		position.z = maxZ + 4;
+	}
+	if ((position.z >minZ) && (position.z < maxZ) && (position.x<minX + 4) && (position.x>minX - 4))
+	{
+		position.x = minX - 4;
+	}
+	if ((position.z >minZ) && (position.z < maxZ) && (position.x > maxX - 4) && (position.x<maxX + 4))
+	{
+		position.x = maxX + 4;
+	}
 }
 //Updated 22/2/2016 - Randall

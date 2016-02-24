@@ -15,8 +15,7 @@ public:
 	void RemoveStack(int ID, int amount, char PID); // remove stack from shop (pop)
 
 
-	Shop* JellyShop;
-	Shop* TogaShop;
+	
 	string name;
 	char PID;  //planet ID(A, B) <shop in that planet>
 	vector<Item> GoodS;
