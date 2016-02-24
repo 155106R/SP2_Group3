@@ -117,6 +117,8 @@ private:
 	void Update_Name_NPC(double dt);
 	void CheckQuadrants(float x, float z, float tempx, float tempz, float R, float tempR);
 	bool CheckMagnitude(float x, float z, float tempx, float tempz, float magnitude);
+	
+	void Updata_Checker(double dt);
 
 	vector<string> fillWithFontData(string path){
 
