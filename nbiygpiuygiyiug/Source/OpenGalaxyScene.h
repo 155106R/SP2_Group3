@@ -136,6 +136,8 @@ private:
 
 	
 	//For Planet Interactions
+	bool e_state;
+	void resetKey();
 	bool land;
 	string nameOfPlanet;
 

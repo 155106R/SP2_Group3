@@ -43,10 +43,7 @@ void TogaScene::Init()
 
 	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 200, 200, 0));// Cave [3]
 
-
-
-	AABB player;
-	player.generateAABB(camera.position, 10, 15, 10, 0);
+	player.generateAABB(camera.position, 50, 50, 50, 0);
 
 
 
@@ -270,7 +267,7 @@ void TogaScene::Init()
 	meshList[GEO_SHOP] = MeshBuilder::GenerateQuad("shop screen", Color(0, 0, 0));
 	meshList[GEO_SHOP]->textureID = LoadTGA("Image//shop_screen.tga");
 
-
+	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("Light Cube", Color(1, 0.2509, 0));
 }
 
 float inc = 0;
@@ -279,7 +276,10 @@ void TogaScene::Update(double dt)
 {
 	button_prompt = 0;
 
+	AABB::updateAABB(player);
 
+
+	cout << player.m_origin << endl;
 
 	if (Application::IsKeyPressed('Z'))
 	{
@@ -333,7 +333,7 @@ void TogaScene::Update(double dt)
 
 	timer += dt;
 
-
+	checkCollision();
 	droneAnimation(dt);
 	mineralAnimation(dt);
 	upgradeAnimation(dt);
@@ -492,8 +492,8 @@ void TogaScene::RenderMesh(Mesh *mesh, bool enableLight)
 
 void TogaScene::Render()
 {
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	//Tranformation of shapes 
 	Mtx44 translate, rotate, scale;
 	Mtx44 model;
@@ -566,6 +566,40 @@ void TogaScene::Render()
 	generateUpgrademerchant();
 	modelStack.PopMatrix();
 
+
+	modelStack.PushMatrix();
+	modelStack.Translate(
+		(Shophitbox[0].m_origin.x),
+		(Shophitbox[0].m_origin.y),
+		(Shophitbox[0].m_origin.z)
+		);
+	modelStack.Scale(
+		(Shophitbox[0].m_length),
+		(Shophitbox[0].m_height),
+		(Shophitbox[0].m_width)
+		);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
+	RenderMesh(meshList[GEO_CUBE], false);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
+	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(
+		(player.m_origin.x),
+		(player.m_origin.y),
+		(player.m_origin.z)
+		);
+	modelStack.Scale(
+		(player.m_length),
+		(player.m_height),
+		(player.m_width)
+		);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
+	RenderMesh(meshList[GEO_CUBE], false);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
+	modelStack.PopMatrix();
+
+
 	// render NPC
 	//NPC-NPC
 	for (int i = 0; i <= 1; i++)
@@ -579,7 +613,6 @@ void TogaScene::Render()
 	
 		viewStack.LoadIdentity();
 		modelStack.PushMatrix();
-	
 		switch (currentstate){
 		case 0:	
 		modelStack.Translate(0, 0, -1);
@@ -607,7 +640,7 @@ void TogaScene::Render()
 		modelStack.PopMatrix();
 
 
-
+	
 
 	renderinteract();
 	text();
@@ -1279,6 +1312,18 @@ void TogaScene::resetKey()
 	if (!Application::IsKeyPressed('E'))
 	{
 		e_state = 0;
+	}
+
+}
+
+void TogaScene::checkCollision()
+{
+	Vector3 tempPosition = camera.position;
+
+	if ((collision(player, Shophitbox[1])))
+	{
+		camera.position = tempPosition;
+
 	}
 
 }
