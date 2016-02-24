@@ -288,6 +288,9 @@ private:
 
 	float boxRange;
 
+	//collision checking
+	void checkCollision();
+	AABB player;
 
 
 	struct Togan
