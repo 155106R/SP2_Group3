@@ -16,6 +16,7 @@ public:
 	Vector3 defaultPosition;
 	Vector3 defaultTarget;
 	Vector3 defaultUp;
+	Vector3 frontTarget;
 	float cameraRotationX, cameraRotationY;
 	int Counter;
 	int screenMidX;
