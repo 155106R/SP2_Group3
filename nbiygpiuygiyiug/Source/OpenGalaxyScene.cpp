@@ -8,10 +8,8 @@
 #include "LoadTGA.h"
 #include "Mtx44.h"
 
+vector<Asteroid*> allAsteroids;
 
-vector<AABB> AABBboxForAsteroid;
-vector<ASTEROID> asteroidDetails;
-float incre = 0;
 OpenGalaxyScene::OpenGalaxyScene()
 {
 
@@ -30,7 +28,6 @@ void OpenGalaxyScene::Init()
 	LSPEED = 10.0f;
 
 	land = false;
-
 	rotateShip = 0;
 	shipAxisX = 0;
 	shipAxisY = 0;
@@ -40,43 +37,13 @@ void OpenGalaxyScene::Init()
 	middleOfShip = new Vector3(shipAxisX, shipAxisY, shipAxisZ);
 	accelerateShip = 0;
 
+	inShip = false;
+
 	spaceshipHitbox = AABB::generateAABB(*middleOfShip, 20, 5, 17.5, 0);
 
 	//Init random location to spawn for each astroid
-	for (unsigned i = 0; i < 1; i++){
-		randTranslateX[i] = 1;//Math::RandFloatMinMax(-500, 500);
-		randTranslateY[i] = 0;//Math::RandFloatMinMax(-500, 500);
-		randTranslateZ[i] = 1;// Math::RandFloatMinMax(-500, 500);
-
-		asteroidTranslateX[i] = Math::RandFloatMinMax(-0.05f, 0.05f);
-		asteroidTranslateY[i] = 0;// Math::RandFloatMinMax(-0.05f, 0.05f);
-		asteroidTranslateZ[i] = Math::RandFloatMinMax(-0.05f, 0.05f);
-
-		randScaleX[i] = Math::RandFloatMinMax(1, 5);
-		randScaleY[i] = Math::RandFloatMinMax(1, 5);
-		randScaleZ[i] = Math::RandFloatMinMax(1, 5);
-
-		//For asteroid materials
-		asteroidDetails.push_back(*new ASTEROID);
-		asteroidDetails[i].materialName = std::to_string(Math::RandIntMinMax(0, 5));
-		asteroidDetails[i].count = 500;//5 * randTranslateX[i] * randTranslateY[i] * randTranslateZ[i];
-
-		//For asteroid location
-		AABBboxForAsteroid.push_back(
-
-			AABB::generateAABB(
-
-			Vector3(randTranslateX[i], randTranslateY[i], randTranslateZ[i]),
-
-			randScaleX[i] * 2,
-			randScaleY[i] * 2,
-			randScaleZ[i] * 2,
-
-			Vector3(asteroidTranslateX[i], asteroidTranslateY[i], asteroidTranslateZ[i])
-
-			)
-		);
-
+	for (unsigned i = 0; i < 1; i++){	//change loop number for how many asteroids you want to random
+		allAsteroids.push_back(new Asteroid());
 	}
 
 	Mtx44 projection;
@@ -96,6 +63,8 @@ void OpenGalaxyScene::Init()
 	//Camera
 	camera.Init(Vector3(30, 30, 30), *middleOfShip, Vector3(0, 10, 0));
 	camera.Reset();
+	inShipCamera.Init(Vector3(0, 0, 1), Vector3(0, 0, 0), Vector3(0, 1, 0)); //if using Camera_Mouse
+	inShipCamera.Reset();
 
 	glGenVertexArrays(1, &m_vertexArrayID);
 	glBindVertexArray(m_vertexArrayID);
@@ -227,16 +196,13 @@ void OpenGalaxyScene::Init()
 	meshList[SKYBOX_Znega] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1));
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
 
-	//Proxy SpaceShip
-	meshList[PROXY_SPACESHIP] = MeshBuilder::GeneratePyramid("Proxy spaceship", Color(0.5, 0.5, 0.5), 18, 36);
-	meshList[PROXY_SPACESHIP]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
-	meshList[PROXY_SPACESHIP]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
-	meshList[PROXY_SPACESHIP]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
-	meshList[PROXY_SPACESHIP]->material.kShininess = 0.1f;
-
 	//Spaceship
 	meshList[SPACESHIP] = MeshBuilder::GenerateOBJ("Spaceship", "OBJ//ship.obj");
 	meshList[SPACESHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
+
+	//Spaceship Interior
+	meshList[SPACESHIP_INTERIOR] = MeshBuilder::GenerateOBJ("Spaceship", "OBJ//ship_interior.obj");
+	meshList[SPACESHIP_INTERIOR]->textureID = LoadTGA("Image//ship_interior.tga");
 		
 	//Asteroids
 	meshList[ASTEROIDS] = MeshBuilder::GenerateSphere("Asteroids", Color(0.2941, 0.2941, 0.2941), 5, 10); //75, 75, 75 in RGB (Grey)
@@ -263,44 +229,44 @@ void OpenGalaxyScene::Init()
 
 void OpenGalaxyScene::Update(double dt)
 {
-	//std::cout << asteroidDetails[0].count << std::endl;
-
-	AABB::updateAABB(spaceshipHitbox);
 	spaceshipHitbox.m_origin = *middleOfShip;
+	AABB::updateAABB(spaceshipHitbox);
 
-	for (int i = 0; i < AABBboxForAsteroid.size(); i++){
-		AABB::updateAABB(AABBboxForAsteroid[i]);
+	std::cout << allAsteroids[0]->material << ": " << allAsteroids[0]->count << std::endl;
 
-		if (collision(AABBboxForAsteroid[i], spaceshipHitbox)){
-			//std::cout << "YOU RAN INTO AN ASTEROID DIPSHIT " << i << std::endl;
+	for (int i = 0; i < allAsteroids.size(); i++){
+		AABB::updateAABB(allAsteroids[i]->hitbox);//Currently updating the translate for asteroids in render according to the asteroid's hitbox position
+
+		if (collision(allAsteroids[i]->hitbox, spaceshipHitbox)){
 			SharedData::GetInstance()->SD_hullIntegrity--;
 			SharedData::GetInstance()->SD_bitcoins++;
 
 			if (accelerateShip == 0){
-				AABBboxForAsteroid[i].m_velocity = -AABBboxForAsteroid[i].m_velocity;	//Asteroids bounce off ship if it's not moving
+				allAsteroids[i]->hitbox.m_velocity = -allAsteroids[i]->hitbox.m_velocity;			//Asteroids bounce off ship if it's not moving
 			}else{
-				AABBboxForAsteroid[i].m_velocity = (*noseOfShip) * (accelerateShip * 0.5) * dt;	//Asteroids are dragged along the path of the ship because the ship passes it's velocity onto the asteroid upon collison
-				AABBboxForAsteroid[i].m_origin += *noseOfShip;	//Get the astroid to move in the same direction as the ship upon collision (after passing the ship's velocity)
-				if (asteroidDetails[i].count){//bug: need to delete the asteroid completely
-					asteroidDetails[i].count--;
+				allAsteroids[i]->hitbox.m_velocity = (*noseOfShip) * (accelerateShip * 0.5) * dt;	//Asteroids are dragged along the path of the ship because the ship passes it's velocity onto the asteroid upon collison
+				allAsteroids[i]->hitbox.m_origin += *noseOfShip;									//Get the astroid to move in the same direction as the ship upon collision (after passing the ship's velocity)
+
+				if (allAsteroids[i]->count){//bug: need to delete the asteroid completely
+					allAsteroids[i]->count--;
 				}
-				else{//move asteroid out of worldspace. supposed to delete this
-					AABBboxForAsteroid[i].m_origin = Vector3(100000000, 100000000, 1000000);
-					AABBboxForAsteroid[i].m_velocity = Vector3(0, 0, 0);
-					//delete &AABBboxForAsteroid[i];	//Cannot delete this way. need to use an iterator and use .erase()
-					delete &asteroidDetails[i];		//Can delete this way, but there are rubbish numbers and it kind of breaks? I don't even know;
+				else{
+					//allAsteroids[i]->hitbox.m_origin = Vector3(100000000, 100000000, 1000000);		//move asteroid out of worldspace. supposed to delete this
+					//allAsteroids[i]->hitbox.m_velocity = Vector3(0, 0, 0);
+					//allAsteroids.erase(i);
+					delete allAsteroids[i];	//need to erase and fix the vector before deleting
 				}
 			}
 		}
 
-		for (int a = 0; a < AABBboxForAsteroid.size(); a++){
-			if (a == i){
+		for (int a = 0; a < allAsteroids.size(); a++){
+			if (a == i){	//Don't check for asteroid collision with itself (obviously)
 				break;
 			}
-			else if (collision(AABBboxForAsteroid[a], AABBboxForAsteroid[i])){
+			else if (collision(allAsteroids[a]->hitbox, allAsteroids[i]->hitbox)){
 
-				AABBboxForAsteroid[a].m_velocity = AABBboxForAsteroid[i].m_velocity;
-				AABBboxForAsteroid[i].m_velocity = AABBboxForAsteroid[a].m_velocity;
+				allAsteroids[a]->hitbox.m_velocity = allAsteroids[i]->hitbox.m_velocity;
+				allAsteroids[i]->hitbox.m_velocity = allAsteroids[a]->hitbox.m_velocity;
 
 			}
 		}
@@ -308,11 +274,6 @@ void OpenGalaxyScene::Update(double dt)
 	}
 
 	//Enable culling
-	if (Application::IsKeyPressed('Z'))
-	{
-		incre += 50 * dt;
-		std::cout << incre<<std::endl;
-	}
 	if (Application::IsKeyPressed('1'))
 	{
 		glEnable(GL_CULL_FACE);
@@ -332,25 +293,34 @@ void OpenGalaxyScene::Update(double dt)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
-		//Camera Movement
-		camera.target = *middleOfShip;
-		camera.target.y = (middleOfShip->y) + 15;
-		camera.Update(dt);
+	if (Application::IsKeyPressed(VK_SPACE)){	
+		if (!inShip){
+			inShip = true;
+			inShipCamera.position = *middleOfShip;
+		}
+		else{
+			inShip = false;
+		}
+	}
 
-
-	////Light
-	//if (Application::IsKeyPressed('8')){
-	//	light[1].type = Light::LIGHT_POINT;
-	//	glUniform1i(m_parameters[U_LIGHT1_TYPE], light[1].type);
-	//}
-	//if (Application::IsKeyPressed('9')){
-	//	light[1].type = Light::LIGHT_DIRECTIONAL;
-	//	glUniform1i(m_parameters[U_LIGHT1_TYPE], light[1].type);
-	//}
-	//if (Application::IsKeyPressed('0')){
-	//	light[1].type = Light::LIGHT_SPOT;
-	//	glUniform1i(m_parameters[U_LIGHT1_TYPE], light[1].type);
-	//}
+	//Camera Movement
+	if (!inShip){
+		camera.target = *middleOfShip;	//Camera Problems
+		camera.Update(dt);				
+	}
+	else{
+		inShipCamera.position.y = 5;
+		inShipCamera.position += (*noseOfShip) * accelerateShip * dt;
+		tempPosition = inShipCamera.position;
+		inShipCamera.Update(dt);
+		if ((inShipCamera.position.x > middleOfShip->x + 6.5) ||
+			(inShipCamera.position.x < middleOfShip->x - 20) //||
+			//(inShipCamera.position.z > middleOfShip->z + 100) ||
+			//(inShipCamera.position.z > middleOfShip->z - 100)
+		){
+			inShipCamera.position = tempPosition;
+		}
+	}
 
 	updateShipMovement(dt);
 
@@ -523,9 +493,16 @@ void OpenGalaxyScene::Render()
 	view.SetToIdentity();
 
 	viewStack.LoadIdentity();
-	viewStack.LookAt(camera.position.x, camera.position.y, camera.position.z,
-		camera.target.x, camera.target.y, camera.target.z,
-		camera.up.x, camera.up.y, camera.up.z);
+	if (!inShip){
+		viewStack.LookAt(camera.position.x, camera.position.y, camera.position.z,
+			camera.target.x, camera.target.y, camera.target.z,
+			camera.up.x, camera.up.y, camera.up.z);
+	}
+	else{
+		viewStack.LookAt(inShipCamera.position.x, inShipCamera.position.y, inShipCamera.position.z,
+			inShipCamera.target.x, inShipCamera.target.y, inShipCamera.target.z,
+			inShipCamera.up.x, inShipCamera.up.y, inShipCamera.up.z);
+	}
 
 	//Sun Directional light
 	modelStack.LoadIdentity();
@@ -561,25 +538,25 @@ void OpenGalaxyScene::Render()
 
 	//Render Asteroids
 	//This is for the object itself
-	for (unsigned i = 0; i < AABBboxForAsteroid.size(); i++){
+	for (unsigned i = 0; i < allAsteroids.size(); i++){
 		//if (asteroidDetails[i].count){
 			modelStack.PushMatrix();
-			modelStack.Translate(AABBboxForAsteroid[i].m_origin.x, AABBboxForAsteroid[i].m_origin.y, AABBboxForAsteroid[i].m_origin.z);
-			modelStack.Scale(randScaleX[i], randScaleY[i], randScaleZ[i]);
+			modelStack.Translate(allAsteroids[i]->hitbox.m_origin.x, allAsteroids[i]->hitbox.m_origin.y, allAsteroids[i]->hitbox.m_origin.z);
+			modelStack.Scale(allAsteroids[i]->length, allAsteroids[i]->height, allAsteroids[i]->width);
 			RenderMesh(meshList[ASTEROIDS], true);
 			modelStack.PopMatrix();
 
 			//Render hitbox for Astroid
 			modelStack.PushMatrix();
 			modelStack.Translate(
-				(AABBboxForAsteroid[i].m_origin.x),
-				(AABBboxForAsteroid[i].m_origin.y),
-				(AABBboxForAsteroid[i].m_origin.z)
+				(allAsteroids[i]->hitbox.m_origin.x),
+				(allAsteroids[i]->hitbox.m_origin.y),
+				(allAsteroids[i]->hitbox.m_origin.z)
 				);
 			modelStack.Scale(
-				(AABBboxForAsteroid[i].m_length),
-				(AABBboxForAsteroid[i].m_height),
-				(AABBboxForAsteroid[i].m_width)
+				(allAsteroids[i]->hitbox.m_length),
+				(allAsteroids[i]->hitbox.m_height),
+				(allAsteroids[i]->hitbox.m_width)
 				);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
 			RenderMesh(meshList[GEO_LIGHTCUBE], false);
@@ -594,8 +571,16 @@ void OpenGalaxyScene::Render()
 	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);
 	modelStack.Rotate(rotateShip, 0, 1, 0);
 	modelStack.Rotate(rotateShipZ, 0, 0, 1);
-	RenderMesh(meshList[SPACESHIP], true);
+	if (!inShip){
+		RenderMesh(meshList[SPACESHIP], true);
+	}
+	else{
+		modelStack.Rotate(90, 0, 1, 0);
+		modelStack.Scale(10, 10, 10);
+		RenderMesh(meshList[SPACESHIP_INTERIOR], true);
+	}
 
+	//SpaceShip - Particle effects
 	for (int i = 0; i < accelerateShip* 3; i++){
 		modelStack.PushMatrix();
 		modelStack.Translate(Math::RandFloatMinMax(-10, -15), Math::RandFloatMinMax(-2, 2), Math::RandFloatMinMax(-8, 8));
@@ -606,14 +591,13 @@ void OpenGalaxyScene::Render()
 	modelStack.PopMatrix();
 	modelStack.PopMatrix();
 
-	//test generate AABB from origin for spaceship
+	//Generate AABB from origin for spaceship
 	modelStack.PushMatrix();
 	modelStack.Translate(
 		(spaceshipHitbox.m_origin.x),
 		(spaceshipHitbox.m_origin.y),
 		(spaceshipHitbox.m_origin.z)
 		);
-	modelStack.Rotate(rotateShip, 0, 1, 0);
 	modelStack.Scale(
 		(spaceshipHitbox.m_length),
 		(spaceshipHitbox.m_height),
@@ -688,15 +672,15 @@ void OpenGalaxyScene::generateSkybox(){
 	RenderMesh(meshList[SKYBOX_Yposv], false);
 	modelStack.PopMatrix();
 
-	//Back/<FIXED>
+	//Back - done
 	modelStack.PushMatrix();
 	modelStack.Translate(0, 0, 500);
-	modelStack.Rotate(270, 1, 0, 0);
+	modelStack.Rotate(-90, 1, 0, 0);
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Znega], false);
 	modelStack.PopMatrix();
 
-	//Left/<FIXED>
+	//Left - done
 	modelStack.PushMatrix();
 	modelStack.Translate(-500, 0, 0);
 	modelStack.Rotate(180, 0, 1, 0);
