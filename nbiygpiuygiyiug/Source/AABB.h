@@ -47,7 +47,7 @@ struct AABB{
 		return generateNewBox;
 	}
 
-	static AABB updateAABB(AABB &updateObject){
+	static void updateAABB(AABB &updateObject){
 
 		updateObject.m_origin += updateObject.m_velocity;
 
@@ -63,7 +63,6 @@ struct AABB{
 			(updateObject.m_origin.z + (updateObject.m_width * 0.5))
 			);
 
-		return updateObject;
 	}
 
 };
