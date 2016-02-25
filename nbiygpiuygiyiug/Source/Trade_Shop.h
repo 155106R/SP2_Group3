@@ -15,11 +15,14 @@ public:
 	void RemoveStack(int ID, int amount, char PID); // remove stack from shop (pop)
 
 
+	struct Shops
+	{
+		string name;
+		char PID;  //planet ID(A, B) <shop in that planet>
+		vector<Item> GoodS;
+	};
 	
-	string name;
-	char PID;  //planet ID(A, B) <shop in that planet>
-	vector<Item> GoodS;
-
+	vector<Shops> ShopS;
 
 };
 

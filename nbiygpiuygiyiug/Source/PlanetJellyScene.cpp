@@ -767,6 +767,8 @@ void PlanetJellyScene::Render()
 	RenderText(meshList[GEO_TEXT], nameS[nameS.size() - 1].NPCname, Color(0, 1, 0));
 	modelStack.PopMatrix();
 
+
+	Render_Checker();
 }
 
 void PlanetJellyScene::Exit()
@@ -855,21 +857,24 @@ void PlanetJellyScene::CheckQuadrants(float x, float z, float tempx, float tempz
 void PlanetJellyScene::Updata_Checker(double dt)
 {
 
-
+	RenderTextOnScreen(meshList[GEO_TEXT], "Hello World", Color(1, 0, 0), 3.5, 7.4, 5.8);
 	
 
 	if (!Application::IsKeyPressed('B'))
 	{
 		e_state = 0;
+
 	}
 
 	if (Application::IsKeyPressed('V'))
 	{
-		
-		
+		num = 0;
+		tempnum = 0;
+		shop = false;
 		SharedData::GetInstance()->PlayerInventory->setItemsList();
 		SharedData::GetInstance()->PlayerInventory->setBag();
 		SharedData::GetInstance()->PlayerInventory->setShopList();
+		SharedData::GetInstance()->PlayerInventory->IncreaseSlots(8);
 		
 	}
 	if (Application::IsKeyPressed('B')  && e_state == 0)
@@ -906,14 +911,99 @@ void PlanetJellyScene::Updata_Checker(double dt)
 		{
 			cout << "After " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
 		}
-		cout << camera.target.x << endl;
-		cout << camera.target.y << endl;
-		/*cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slots << endl;*/
+		//cout << camera.target.x << endl;
+		//cout << camera.target.y << endl;
+		cout << "check  " << SharedData::GetInstance()->PlayerInventory->ShopS[0].name << endl;
 	}
 
+	if (Application::IsKeyPressed(VK_DOWN))
+	{
+
+		if (num <SharedData::GetInstance()->PlayerInventory->Slots - 1)
+		{
+			num++;
+			if (num > 4)
+			{
+				tempnum++;
+			}
+		}
+		
+
+		
+
+	}
+	if (Application::IsKeyPressed(VK_UP))
+	{
+		if (num > 0)
+		{
+			num--;
+			if (num >3)
+			{
+				tempnum--;
+			}
+		}
+		
+	}
+	if (Application::IsKeyPressed(VK_LEFT) && shop!=true)
+	{
+		shop = true;
+		num = 0;
+		tempnum = 0;
+	}
+	if (Application::IsKeyPressed(VK_RIGHT) && shop != false)
+	{
+		shop = false;
+		num = 0;
+		tempnum = 0;
+	}
+
+
+	//cout << num << endl;
 	/*	if (Application::IsKeyPressed('N'))
 		{
 
 			if (Application::IsKeyPressed('M'))
 			{*/
+}
+void PlanetJellyScene::Render_Checker()
+{
+	RenderTextOnScreen(meshList[GEO_TEXT], "BagPack", Color(1, 0, 0), 3, 15, 17);
+
+	for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->Slots; i++)
+	{
+		
+		if (i<5)
+		{
+			if (shop == false) RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 20, (22 - (num - tempnum) * 2));
+			RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1 + tempnum) + "-" + SharedData::GetInstance()->PlayerInventory->Slot[i + tempnum].name, Color(1, 0, 0), 2, 22, (22 - (i * 2)));
+			RenderTextOnScreen(meshList[GEO_TEXT], "X" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[i+tempnum].stack), Color(1, 0, 0), 2, 32, (22 - (i * 2)));
+		}
+		
+	}
+	
+
+
+	RenderTextOnScreen(meshList[GEO_TEXT], "Slots :" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slots), Color(1, 0, 0), 2, 22, 12);
+	RenderTextOnScreen(meshList[GEO_TEXT], "BitCoins :" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2, 22, 10);
+
+	//////////////////////////////////////////////////////////
+
+	RenderTextOnScreen(meshList[GEO_TEXT], "Shop", Color(1, 0, 0), 3, 5, 17);
+
+	for (int i = 0; i < 1; i++)
+	{
+
+	/*	if (i<5)
+		{
+			if (shop == true) RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 7, (22 - (num - tempnum) * 2));
+			RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1 + tempnum) + "-" + SharedData::GetInstance()->PlayerInventory->ShopS[0].GoodS[i + tempnum].name, Color(1, 0, 0), 2, 7, (22 - (i * 2)));
+			RenderTextOnScreen(meshList[GEO_TEXT], "X" + std::to_string(SharedData::GetInstance()->PlayerInventory->ShopS[0].GoodS[i + tempnum].stack), Color(1, 0, 0), 2, 17, (22 - (i * 2)));
+		}
+*/
+	}
+
+
+
+	//RenderTextOnScreen(meshList[GEO_TEXT], "Items in shop :" + SharedData::GetInstance()->PlayerInventory->ShopS[1].name, Color(1, 0, 0), 2, 7, 12);
+	//RenderTextOnScreen(meshList[GEO_TEXT], "Sell At" + , Color(1, 0, 0), 2, 7, 10);
 }

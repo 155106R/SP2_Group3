@@ -119,7 +119,10 @@ private:
 	bool CheckMagnitude(float x, float z, float tempx, float tempz, float magnitude);
 	
 	void Updata_Checker(double dt);
-
+	void Render_Checker();
+	int num;
+	int tempnum;
+	bool shop;
 	
 	//For Light
 	bool enableLight;
