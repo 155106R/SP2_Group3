@@ -291,7 +291,7 @@ private:
 	//collision checking
 	void checkCollision();
 	AABB player;
-
+	//Vector3 tempPosition;
 
 	struct Togan
 	{

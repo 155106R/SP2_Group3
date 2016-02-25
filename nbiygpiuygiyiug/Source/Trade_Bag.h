@@ -9,6 +9,7 @@ public:
 	Bag();
 	~Bag();
 	void setBag();
+	void IncreaseSlots(int slots);
 	void GetItem(int ID, int amount); // get item into bag (push)
 	void RemoveItem(int ID, int amount); // remove item from bag (pop)
 	void buyItem(int ID, int amount, char PID); // buy item from shop (push), PID of the shop

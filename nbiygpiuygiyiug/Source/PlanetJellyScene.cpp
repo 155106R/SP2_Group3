@@ -8,6 +8,8 @@
 #include "LoadTGA.h"
 #include "Mtx44.h"
 
+vector<AABB> hitbox;
+
 PlanetJellyScene::PlanetJellyScene()
 {
 }
@@ -18,6 +20,25 @@ PlanetJellyScene::~PlanetJellyScene()
 
 void PlanetJellyScene::Init()
 {
+	//interactions
+
+	e_state = 0;
+
+	currentstate = FREEMOVE;
+
+	rendertext = 0;
+
+	hitbox.push_back(AABB::generateAABB(Vector3(100, 0, -100), 30, 30, 30, 0));// Mineral shop [0]
+
+	hitbox.push_back(AABB::generateAABB(Vector3(100, 0, 100), 50, 30, 50, 0));// Ugrade shop [1]
+
+	hitbox.push_back(AABB::generateAABB(Vector3(-135, 0, 0), 45, 60, 70, 0));// drone shop [2]
+
+	hitbox.push_back(AABB::generateAABB(Vector3(180, 0, 0), 90, 80, 75, 0));// cave [3]
+
+	hitbox.push_back(AABB::generateAABB(Vector3(-55, 0, -270), 90, 30, 75, 0));// ship [4]
+
+
 	//Definations
 	LSPEED = 10.0f;
 
@@ -167,7 +188,22 @@ void PlanetJellyScene::Init()
 	meshList[SHOP_DRONE]->textureID = LoadTGA("Image//droneshop_textureA.tga");
 	meshList[SHOP_UPGRADE] = MeshBuilder::GenerateOBJ("upgrade shop", "OBJ//upgradeshopA.obj");
 	meshList[SHOP_UPGRADE]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
+	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("hitbox", Color(0,1,0));
+	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
+	meshList[GEO_UI]->textureID = LoadTGA("Image//planet_UI.tga");
 
+	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
+	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
+
+	meshList[GEO_TEXT_BOX] = MeshBuilder::GenerateQuad("textbox", Color(0, 0, 0));
+	meshList[GEO_TEXT_BOX]->textureID = LoadTGA("Image//textbox.tga");
+
+	meshList[GEO_SHOP] = MeshBuilder::GenerateQuad("shop screen", Color(0, 0, 0));
+	meshList[GEO_SHOP]->textureID = LoadTGA("Image//shop_screen.tga");
+
+	meshList[SHIP] = MeshBuilder::GenerateOBJ("player ship", "OBJ//ship.obj");
+	meshList[SHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
+	
 	//Render NCP
 	Init_animation_NPC();
 	//render name of npc
@@ -423,6 +459,12 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 
 void PlanetJellyScene::Update(double dt)
 {
+	cout << camera.position << endl;
+	button_prompt = 0;
+
+	player.m_origin = camera.nextPosition;
+	AABB::updateAABB(player);
+
 	// NPC animation
 	Update_animation_NPC(dt);
 	// NPC name
@@ -486,7 +528,12 @@ void PlanetJellyScene::Update(double dt)
 		light[0].position.y += (float)(LSPEED*dt);
 	}
 
-	camera.Update(dt);
+	if (currentstate == 0)
+	{
+		camera.Update(dt);
+		checkCollision();
+		camera.movement();
+	}
 
 
 	//Light
@@ -502,6 +549,10 @@ void PlanetJellyScene::Update(double dt)
 		light[0].type = Light::LIGHT_SPOT;
 		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
 	}
+
+	timer += dt;
+	interactionUpdate(dt);
+	resetKey();
 }
 
 void PlanetJellyScene::RenderText(Mesh* mesh, std::string text, Color color)
@@ -672,13 +723,22 @@ void PlanetJellyScene::Render()
 	modelStack.Scale(500, 400, 500);
 	RenderMesh(meshList[GROUND_MESH], enableLight);
 	modelStack.PopMatrix();
-
+	
 	//render cave
 	modelStack.PushMatrix();
 	modelStack.Translate(200, 43, 0);
 	modelStack.Rotate(-90, 0, 1, 0);
 	modelStack.Scale(40, 40, 40);
 	RenderMesh(meshList[CAVE], enableLight);
+	modelStack.PopMatrix();
+
+
+	//render ship
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, -460);
+	modelStack.Rotate(-105, 0, 1, 0);
+	modelStack.Scale(20, 20, 20);
+	RenderMesh(meshList[SHIP], enableLight);
 	modelStack.PopMatrix();
 
 	// render shop
@@ -766,6 +826,54 @@ void PlanetJellyScene::Render()
 	modelStack.Scale(2, 2, 2);
 	RenderText(meshList[GEO_TEXT], nameS[nameS.size() - 1].NPCname, Color(0, 1, 0));
 	modelStack.PopMatrix();
+
+
+	modelStack.PushMatrix();
+	modelStack.Translate(
+		(hitbox[4].m_origin.x),
+		(hitbox[4].m_origin.y),
+		(hitbox[4].m_origin.z)
+		);
+	modelStack.Scale(
+		(hitbox[4].m_length),
+		(hitbox[4].m_height),
+		(hitbox[4].m_width)
+		);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
+	RenderMesh(meshList[GEO_CUBE], false);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
+	modelStack.PopMatrix();
+
+
+	viewStack.LoadIdentity();
+	modelStack.PushMatrix();
+	switch (currentstate){
+	case 0:
+		modelStack.Translate(0, 0, -1);
+		modelStack.Rotate(-92.5, 90, 1, 0);
+		modelStack.Scale(1.1, 0.8, 0.8);
+		RenderMesh(meshList[GEO_UI], false);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 1.6, 1.7);
+		RenderTextOnScreen(meshList[GEO_TEXT], "JELLO", Color(1, 0, 0), 3.5, 20.4, 16.2);
+		break;
+	case 1:
+		modelStack.Translate(0, -0.3, -1);
+		modelStack.Rotate(90, 1, 0, 0);
+		modelStack.Scale(1, 1, 0.3);
+		RenderMesh(meshList[GEO_TEXT_BOX], false);
+		break;
+	case 2:
+		modelStack.Translate(0, 0, -1);
+		modelStack.Rotate(-90, 1, 0, 0);
+		modelStack.Scale(1.1, 0.8, 0.8);
+		RenderMesh(meshList[GEO_SHOP], false);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		break;
+
+	};
+	modelStack.PopMatrix();
+	renderinteract();
+	text();
 
 }
 
@@ -861,15 +969,18 @@ void PlanetJellyScene::Updata_Checker(double dt)
 	if (!Application::IsKeyPressed('B'))
 	{
 		e_state = 0;
+
 	}
 
 	if (Application::IsKeyPressed('V'))
 	{
-		
-		
+		num = 0;
+		tempnum = 0;
+		shop = false;
 		SharedData::GetInstance()->PlayerInventory->setItemsList();
 		SharedData::GetInstance()->PlayerInventory->setBag();
 		SharedData::GetInstance()->PlayerInventory->setShopList();
+		SharedData::GetInstance()->PlayerInventory->IncreaseSlots(8);
 		
 	}
 	if (Application::IsKeyPressed('B')  && e_state == 0)
@@ -911,9 +1022,279 @@ void PlanetJellyScene::Updata_Checker(double dt)
 		/*cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slots << endl;*/
 	}
 
+	if (Application::IsKeyPressed(VK_DOWN))
+	{
+
+		if (num <SharedData::GetInstance()->PlayerInventory->Slots - 1)
+		{
+			num++;
+			if (num > 4)
+			{
+				tempnum++;
+			}
+		}
+		
+
+		
+
+	}
+	if (Application::IsKeyPressed(VK_UP))
+	{
+		if (num > 0)
+		{
+			num--;
+			if (num >3)
+			{
+				tempnum--;
+			}
+		}
+		
+	}
+	if (Application::IsKeyPressed(VK_LEFT) && shop!=true)
+	{
+		shop = true;
+		num = 0;
+		tempnum = 0;
+	}
+	if (Application::IsKeyPressed(VK_RIGHT) && shop != false)
+	{
+		shop = false;
+		num = 0;
+		tempnum = 0;
+	}
+
+
+	//cout << num << endl;
 	/*	if (Application::IsKeyPressed('N'))
 		{
 
 			if (Application::IsKeyPressed('M'))
 			{*/
 }
+
+void PlanetJellyScene::Render_Checker()
+{
+	RenderTextOnScreen(meshList[GEO_TEXT], "BagPack", Color(1, 0, 0), 3, 15, 17);
+
+	for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->Slots; i++)
+	{
+		
+		if (i<5)
+		{
+			if (shop == false) RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 20, (22 - (num - tempnum) * 2));
+			RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1 + tempnum) + "-" + SharedData::GetInstance()->PlayerInventory->Slot[i + tempnum].name, Color(1, 0, 0), 2, 22, (22 - (i * 2)));
+			RenderTextOnScreen(meshList[GEO_TEXT], "X" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[i+tempnum].stack), Color(1, 0, 0), 2, 32, (22 - (i * 2)));
+		}
+		
+	}
+	
+
+
+	RenderTextOnScreen(meshList[GEO_TEXT], "Slots :" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slots), Color(1, 0, 0), 2, 22, 12);
+	RenderTextOnScreen(meshList[GEO_TEXT], "BitCoins :" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2, 22, 10);
+
+	//////////////////////////////////////////////////////////
+
+	RenderTextOnScreen(meshList[GEO_TEXT], "Shop", Color(1, 0, 0), 3, 5, 17);
+
+	for (int i = 0; i < 1; i++)
+	{
+
+	/*	if (i<5)
+		{
+			if (shop == true) RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 7, (22 - (num - tempnum) * 2));
+			RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1 + tempnum) + "-" + SharedData::GetInstance()->PlayerInventory->ShopS[0].GoodS[i + tempnum].name, Color(1, 0, 0), 2, 7, (22 - (i * 2)));
+			RenderTextOnScreen(meshList[GEO_TEXT], "X" + std::to_string(SharedData::GetInstance()->PlayerInventory->ShopS[0].GoodS[i + tempnum].stack), Color(1, 0, 0), 2, 17, (22 - (i * 2)));
+		}
+*/
+	}
+
+
+
+	//RenderTextOnScreen(meshList[GEO_TEXT], "Items in shop :" + SharedData::GetInstance()->PlayerInventory->ShopS[1].name, Color(1, 0, 0), 2, 7, 12);
+	//RenderTextOnScreen(meshList[GEO_TEXT], "Sell At" + , Color(1, 0, 0), 2, 7, 10);
+}
+
+void PlanetJellyScene::interactionUpdate(double dt)
+{
+	//cout <<"view : " << camera.view << endl;
+	//cout << "Target : " << camera.target << endl;
+
+	if ((collision(hitbox[0], camera.frontTarget) == true))//Mineral merchant
+	{
+		if (currentstate == 0)
+		{
+			button_prompt = 1;
+		}
+
+		if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+		{
+			e_state = 1;
+			button_prompt = 0;
+			interact_state();
+			if (rendertext == 0 && currentstate == 1)
+			{
+				rendertext = 1;
+			}
+			else
+			{
+				rendertext = 0;
+			}
+
+			delay = timer + 0.5;//set delay offset
+
+		}
+	}
+
+
+	if ((collision(hitbox[1], camera.frontTarget) == true))//upgrade merchant
+	{
+		if (currentstate == 0)
+		{
+			button_prompt = 1;
+		}
+		if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+		{
+			e_state = 1;
+			button_prompt = 0;
+			interact_state();
+			if (rendertext == 0 && currentstate == 1)
+			{
+				rendertext = 2;
+			}
+			else
+			{
+				rendertext = 0;
+			}
+
+			delay = timer + 0.5;//set delay offset
+
+
+		}
+	}
+
+
+	if ((collision(hitbox[2], camera.frontTarget) == true))//Drone merchant
+	{
+		if (currentstate == 0)
+		{
+			button_prompt = 1;
+		}
+		if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+		{
+			e_state = 1;
+			button_prompt = 0;
+			interact_state();
+			if (rendertext == 0 && currentstate == 1)
+			{
+				rendertext = 3;
+			}
+			else
+			{
+				rendertext = 0;
+			}
+
+			delay = timer + 0.5;//set delay offset
+
+
+		}
+	}
+
+	if (((collision(hitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
+	{
+		e_state = 1;
+
+	}
+
+	if (((collision(hitbox[4], camera.frontTarget) == true)) && e_state == 0)//cave
+	{
+		
+		button_prompt = 1;
+		
+		if (Application::IsKeyPressed('E') )
+		{
+			e_state = 1;
+			SharedData::GetInstance()->SD_location = OPEN_GALAXY;
+
+		}
+			
+		}
+}
+
+void PlanetJellyScene::interact_state()
+{
+	if (currentstate == FREEMOVE)
+	{
+		currentstate = CONVERSE;
+		return;
+	}
+	else if (currentstate == CONVERSE)
+	{
+		currentstate = TRADE;
+		return;
+	}
+	else if (currentstate == TRADE)
+	{
+		currentstate = FREEMOVE;
+		return;
+	}
+
+}
+
+void PlanetJellyScene::renderinteract()
+{
+	if (button_prompt == 1)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Press 'E' to interact", Color(1, 0, 0), 3.5, 7.4, 5.8);
+	}
+	else
+	{
+		return;
+	}
+}
+
+void PlanetJellyScene::text()
+{
+	switch (rendertext)
+	{
+	case(0) : break;//inactive
+
+	case(1) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "Bloop???Bloop!", Color(1, 0, 0), 2, 4.2, 5.8);//mineral shop
+		break;
+
+	case(2) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "BLOOOOOOOOOOOOOO!", Color(1, 0, 0), 2, 4.2, 5.8);//upgrade shop
+		RenderTextOnScreen(meshList[GEO_TEXT], "(He places jelly coated components on the counter.)", Color(1, 0, 0), 2, 4.2, 4.6);
+		break;
+
+	case(3) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "Please do not feed purchased drones to the natives.", Color(1, 0, 0), 2, 4.2, 5.8);//drone shop
+		break;
+	};
+
+}
+
+void PlanetJellyScene::resetKey()
+{
+	if (!Application::IsKeyPressed('E'))
+	{
+		e_state = 0;
+	}
+
+}
+
+void PlanetJellyScene::checkCollision()
+{
+	for (int i = 0; i <= 4; i++)
+	{
+		if ((collision(hitbox[i], camera.nextPosition)))
+		{
+			camera.colliding = true;
+			cout << "fuck" << endl;
+		}
+	}
+
+
+}
+

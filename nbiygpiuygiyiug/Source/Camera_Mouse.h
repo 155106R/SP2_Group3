@@ -17,15 +17,22 @@ public:
 	Vector3 defaultTarget;
 	Vector3 defaultUp;
 	Vector3 frontTarget;
+	Vector3 tempPosition;
+	Vector3 nextPosition;
 	float cameraRotationX, cameraRotationY;
 	int Counter;
 	int screenMidX;
 	int screenMidY;
 
+	bool colliding;
+	int move;
 	float maxjump;
 	float gravityForce;
 	float jumpForce;
 	bool _jump;
+	float walkSpeed;
+	void movement();
+
 
 	Camera_Mouse();
 	~Camera_Mouse();
@@ -36,6 +43,20 @@ public:
 	virtual void boundCheck(float minX, float minZ, float maxX, float maxZ);
 	virtual void boundCheck2(float minX, float minZ, float maxX, float maxZ);
 	void jump(float dt);
+
+
+	enum movement
+	{
+		FOWARD,
+		BACK,
+		LEFT,
+		RIGHT,
+
+		NUM_MOVEMENT
+		
+
+
+	};
 };
 
 #endif

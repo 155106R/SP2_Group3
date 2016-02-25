@@ -22,6 +22,22 @@ void Bag::setBag()
 		Slot.push_back(newSlot);
 	}
 }
+void  Bag::IncreaseSlots(int slots)
+{
+	MaxSlot = false;
+	for (int i = 0; i < slots; i++)
+	{
+		Item newSlot;
+		newSlot.name = "NO ITEM";
+		newSlot.PID = 0;
+		newSlot.ID = 0;
+		newSlot.bitcoin = 0;
+		newSlot.stack = 0;
+		newSlot.MaxStack = false;
+		Slot.push_back(newSlot);
+	}
+	Slots += slots;
+}
 
 void Bag::GetItem(int ID, int amount) // get item into bag (push)
 {

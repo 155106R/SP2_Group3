@@ -19,6 +19,7 @@ Camera_Mouse::~Camera_Mouse()
 
 void Camera_Mouse::Init(const Vector3& pos, const Vector3& target, const Vector3& up)
 {
+	colliding = false;
 	this->position = defaultPosition = pos;
 	this->target = defaultTarget = target;
 	Vector3 view = (target - position).Normalized();
@@ -26,7 +27,7 @@ void Camera_Mouse::Init(const Vector3& pos, const Vector3& target, const Vector3
 	right.y = 0;
 	right.Normalize();
 	this->up = defaultUp = right.Cross(view).Normalized();
-
+	walkSpeed = 0.5f;
 	maxjump = 18;
 	_jump = false;
 
@@ -34,6 +35,7 @@ void Camera_Mouse::Init(const Vector3& pos, const Vector3& target, const Vector3
 
 void Camera_Mouse::Update(double dt)
 {
+	
 	view *= 20;
 	static const float CAMERA_SPEED = 5.f;
 	int screenSizeX = glfwGetVideoMode(glfwGetPrimaryMonitor())->width;
@@ -42,13 +44,16 @@ void Camera_Mouse::Update(double dt)
 	float maxCameraRotationX = 89.99f;
 	float rotationSpeed = 1.0f / (CAMERA_SPEED * dt);
 	//float walkSpeed = 0.1f;
-	float walkSpeed = 0.5f;
+	walkSpeed = 0.8f;
 	glfwGetWindowSize(m_window, &screenSizeX, &screenSizeY);
+	
+	colliding = false;
 
 	screenMidX = screenSizeX / 2;
 	screenMidY = screenSizeY / 2;
 
-	
+	nextPosition.y = 0;
+	tempPosition = position;
 	//GLFW Method (Laggier)
 	/*MousePosition mousePosition;
 	glfwGetCursorPos(m_window, &(mousePosition.x), &(mousePosition.y));
@@ -100,10 +105,7 @@ void Camera_Mouse::Update(double dt)
 		cameraRotationY = 0;
 
 	}
-	if (Application::IsKeyPressed(MK_SHIFT) || Application::IsKeyPressed(VK_SHIFT))
-	{
-		walkSpeed *= 4;
-	}
+
 	if (Application::IsKeyPressed(MK_CONTROL) || Application::IsKeyPressed(VK_CONTROL))
 	{
 		if (Counter <= 1)
@@ -121,29 +123,58 @@ void Camera_Mouse::Update(double dt)
 		Counter--;
 	}
 
+	
+		if (Application::IsKeyPressed('W'))
+		{
+			nextPosition.x = position.x + sin(DegreeToRadian(cameraRotationY + 180))  *walkSpeed;
+			nextPosition.z = position.z + cos(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
+			move = FOWARD;
 
-	if (Application::IsKeyPressed('W'))
-	{
-		position.x += sin(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
-		position.z += cos(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
-	}
+			//check for colllision now
 
-	if (Application::IsKeyPressed('S'))
-	{
-		position.x += sin(DegreeToRadian(cameraRotationY)) * walkSpeed;
-		position.z += cos(DegreeToRadian(cameraRotationY)) * walkSpeed;
-	}
+
+			//check before runing v
+	
+			
+		}
+	
+
+		if (Application::IsKeyPressed('S'))
+		{
+			nextPosition.x = position.x + sin(DegreeToRadian(cameraRotationY)) * walkSpeed;
+			nextPosition.z = position.z + cos(DegreeToRadian(cameraRotationY)) * walkSpeed;
+			move = BACK;
+			//check for colllision now
+
+
+			//check before runing v
+		/*	if (!colliding){
+				position.x += sin(DegreeToRadian(cameraRotationY)) * walkSpeed;
+				position.z += cos(DegreeToRadian(cameraRotationY)) * walkSpeed;
+			}*/
+		}
 
 	if (Application::IsKeyPressed('A'))
 	{
-		position.x += sin(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
-		position.z += cos(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+		nextPosition.x = position.x + sin(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+		nextPosition.z = position.z + (DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+		move = LEFT;
+	/*	if (!colliding){
+			position.x += sin(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+			position.z += cos(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+		}*/
 	}
 
 	if (Application::IsKeyPressed('D'))
 	{
-		position.x += sin(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
-		position.z += cos(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+		nextPosition.x = position.x + sin(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+		nextPosition.z = position.z + (DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+
+		move = RIGHT;
+	/*	if (!colliding){
+			position.x += sin(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+			position.z += cos(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+		}*/
 	}
 
 
@@ -257,3 +288,46 @@ void Camera_Mouse::jump(float dt)
 
 }
 
+void Camera_Mouse::movement()
+{
+	position = tempPosition;
+	if (Application::IsKeyPressed(MK_SHIFT) || Application::IsKeyPressed(VK_SHIFT))
+	{
+		position = tempPosition;
+		walkSpeed *= 2;
+		if (colliding)
+		{
+			position = tempPosition;
+		}
+	}
+
+	if ((!colliding && move == FOWARD) && (Application::IsKeyPressed('W')))
+	{
+		position.x += sin(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
+		position.z += cos(DegreeToRadian(cameraRotationY + 180)) * walkSpeed;
+	}
+
+	if ((!colliding && move == BACK) && (Application::IsKeyPressed('S')))
+	{
+		position.x += sin(DegreeToRadian(cameraRotationY)) * walkSpeed;
+		position.z += cos(DegreeToRadian(cameraRotationY)) * walkSpeed;
+	}
+	if ((!colliding && move == LEFT) && (Application::IsKeyPressed('A')))
+	{
+		position.x += sin(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+		position.z += cos(DegreeToRadian(cameraRotationY + 270)) * walkSpeed;
+	}
+	if ((!colliding && move == RIGHT) && (Application::IsKeyPressed('D')))
+	{
+		position.x += sin(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+		position.z += cos(DegreeToRadian(cameraRotationY + 90)) * walkSpeed;
+	}
+	target = Vector3(-sin(DegreeToRadian(cameraRotationY)) * cos(DegreeToRadian(cameraRotationX)) + this->position.x,
+		sin(DegreeToRadian(cameraRotationX)) + this->position.y,
+		-cos(DegreeToRadian(cameraRotationY)) * cos(DegreeToRadian(cameraRotationX)) + this->position.z);
+	view = (target - position).Normalized();
+	right = view.Cross(defaultUp);
+	up = right.Cross(view);
+
+	frontTarget = position + view*(float)(20);
+}
