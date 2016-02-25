@@ -115,7 +115,7 @@ void Application::Run()
 	//Main Loop
 	OpenGalaxy->Init();
 	TogaPlanet->Init();
-	//JellyPlanet->Init();
+	JellyPlanet->Init();
 
 	m_timer.startTimer();    // Start timer to calculate how long it takes to render this frame
 	while (!glfwWindowShouldClose(m_window) && !IsKeyPressed(VK_ESCAPE))
@@ -129,7 +129,7 @@ void Application::Run()
 				currentScene = TogaPlanet;
 				break;
 			case(PLANET_JELLY):
-				//currentScene = JellyPlanet;
+				currentScene = JellyPlanet;
 				break;
 		}
 

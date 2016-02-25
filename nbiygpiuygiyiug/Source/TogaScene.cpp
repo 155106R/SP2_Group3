@@ -37,13 +37,13 @@ void TogaScene::Init()
 	
 	Shophitbox.push_back(AABB::generateAABB(Vector3(-70, 0, -60), 30, 30, 30, 0));// Mineral shop [0]
 
-	Shophitbox.push_back(AABB::generateAABB(Vector3(-40, 0, 410), 30, 30, 30, 0));// Upgrade shop [1]
+	Shophitbox.push_back(AABB::generateAABB(Vector3(-43, 0, 410), 50, 30, 50, 0));// Upgrade shop [1]
 
 	Shophitbox.push_back(AABB::generateAABB(Vector3(60, 0, -80), 10, 24, 10, 0));// drone shop [2]
 
 	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 200, 200, 0));// Cave [3]
 
-	player = AABB::generateAABB(camera.position, 20, 30, 20, 0);
+	player = AABB::generateAABB(camera.nextPosition, 10, 30, 10, 0);//player
 
 
 	//npc togan spawning
@@ -275,11 +275,13 @@ void TogaScene::Update(double dt)
 {
 	button_prompt = 0;
 
-	player.m_origin = camera.position;
+	
+
+	player.m_origin = camera.nextPosition;
 	AABB::updateAABB(player);
 
 
-	cout << camera.nextPosition << endl;
+	cout << "collision? :"<< camera.colliding << endl;
 
 	if (Application::IsKeyPressed('Z'))
 	{
@@ -312,11 +314,18 @@ void TogaScene::Update(double dt)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 	
+	
 	if (currentstate == 0)
 	{
 		camera.Update(dt);
+		checkCollision();
+		camera.movement();
 	}
-	checkCollision();
+	
+
+
+
+
 	//Light
 	if (Application::IsKeyPressed('8')){
 		light[0].type = Light::LIGHT_POINT;
@@ -1294,7 +1303,7 @@ void TogaScene::text()
 	case(0) : break;//inactive
 			
 	case(1):
-	RenderTextOnScreen(meshList[GEO_TEXT], "H-Hey kid, wanna buy some minerals?", Color(1, 0, 0), 2, 4.2, 5.8);//mineral shop
+	RenderTextOnScreen(meshList[GEO_TEXT], "Blob-Blob?(looks like he sells minerals)", Color(1, 0, 0), 2, 4.2, 5.8);//mineral shop
 		break;
 
 	case(2) :
@@ -1325,7 +1334,8 @@ void TogaScene::checkCollision()
 		camera.colliding = true;
 		cout << "fuck" << endl;
 	}
-	else{
+	else
+	{
 		camera.colliding = false;
 	}
 
