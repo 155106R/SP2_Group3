@@ -22,7 +22,7 @@ public:
 		vector<Item> GoodS;
 	};
 	
-	vector<Shops> ShopS;
+	vector<Shops> store;
 
 };
 

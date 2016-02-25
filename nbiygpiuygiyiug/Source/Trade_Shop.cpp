@@ -25,7 +25,7 @@ void Shop::setShopList() // item the shop sells
 		newGood2.stack = 10;
 		newGood2.MaxStack = false;
 	TogaShop.GoodS.push_back(newGood2);
-	ShopS.push_back(TogaShop);
+	store.push_back(TogaShop);
 
 	Shops JellyShop;
 	JellyShop.name = " MINERAL SHOP";
@@ -44,30 +44,30 @@ void Shop::setShopList() // item the shop sells
 		newGood4.stack = 10;
 		newGood4.MaxStack = false;
 	JellyShop.GoodS.push_back(newGood4);
-	ShopS.push_back(JellyShop);
+	store.push_back(JellyShop);
 }
 
 void Shop::AddStack(int ID, int amount, char PID) // Add stack into shop (push) PID of the shop
 {
 	int tempCheck = 0; // check shop whatever have this ID item, if no temp check will == GoodS.size()
-	for (int i = 0; i < ShopS.size(); i++)
+	for (int x = 0; x < store.size(); x++)
 	{
-		if (ShopS[i].PID == PID)
+		if (store[x].PID == PID)
 		{
-			for (int i = 0; i < ShopS[i].GoodS.size(); i++)
+			for (int y = 0; y < store[x].GoodS.size(); y++)
 			{
-				if (ShopS[i].GoodS[i].ID == ID && ShopS[i].GoodS[i].MaxStack != true)
+				if (store[x].GoodS[y].ID == ID && store[x].GoodS[y].MaxStack != true)
 				{
-					if ((ShopS[i].GoodS[i].stack + amount) > 99)
+					if ((store[x].GoodS[y].stack + amount) > 99)
 					{
-						ShopS[i].GoodS[i].stack = 99;
-						ShopS[i].GoodS[i].MaxStack = true;
+						store[x].GoodS[y].stack = 99;
+						store[x].GoodS[y].MaxStack = true;
 					}
-					else ShopS[i].GoodS[i].stack += amount;
+					else store[x].GoodS[y].stack += amount;
 				}
-				else if (ShopS[i].GoodS[i].ID != ID) tempCheck++;
+				else if (store[x].GoodS[y].ID != ID) tempCheck++;
 			}
-			if (tempCheck == ShopS[i].GoodS.size())
+			if (tempCheck == store[x].GoodS.size())
 			{
 				GetNewItem(ID, amount, PID);
 			}
@@ -82,9 +82,9 @@ void Shop::GetNewItem(int ID, int amount, char PID) // get new item into shop (p
 {
 
 	if (amount > 99) amount = 99;
-	for (int i = 0; i < ShopS.size(); i++)
+	for (int i = 0; i < store.size(); i++)
 	{
-		if (ShopS[i].PID == PID)
+		if (store[i].PID == PID)
 		{
 			Item newGood1;
 			newGood1.name = ItemS[ID - 1].name;
@@ -93,27 +93,27 @@ void Shop::GetNewItem(int ID, int amount, char PID) // get new item into shop (p
 			newGood1.stack = amount;
 			if (amount < 99) newGood1.MaxStack = false;
 			else newGood1.MaxStack = true;
-			ShopS[i].GoodS.push_back(newGood1);
+			store[i].GoodS.push_back(newGood1);
 		}
 	}
 }
 
 void Shop::RemoveStack(int ID, int amount, char PID) // remove stack from shop (pop) PID of the shop
 {
-	for (int i = 0; i < ShopS.size(); i++)
+	for (int i = 0; i < store.size(); i++)
 	{
-		if (ShopS[i].PID == PID)
+		if (store[i].PID == PID)
 		{
-			for (int i = 0; i < ShopS[i].GoodS.size(); i++)
+			for (int i = 0; i < store[i].GoodS.size(); i++)
 			{
-				if (ShopS[i].GoodS[i].ID == ID && ShopS[i].GoodS[i].stack != 0)
+				if (store[i].GoodS[i].ID == ID && store[i].GoodS[i].stack != 0)
 				{
-					ShopS[i].GoodS[i].MaxStack = false;
-					if ((ShopS[i].GoodS[i].stack - amount) < 0)
+					store[i].GoodS[i].MaxStack = false;
+					if ((store[i].GoodS[i].stack - amount) < 0)
 					{
-						ShopS[i].GoodS[i].stack = 0;
+						store[i].GoodS[i].stack = 0;
 					}
-					else ShopS[i].GoodS[i].stack -= amount;
+					else store[i].GoodS[i].stack -= amount;
 				}
 			}
 		}

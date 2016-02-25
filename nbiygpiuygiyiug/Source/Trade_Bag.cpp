@@ -1,7 +1,11 @@
 #include"Trade_Bag.h"
 #include "SharedData.h"
 
-Bag::Bag() {}
+Bag::Bag() {
+	setItemsList();
+	setBag();
+	setShopList();
+}
 
 Bag::~Bag() {}
 
