@@ -68,6 +68,8 @@ class TogaScene : public Scene
 		GEO_UI,
 		GEO_TEXT_BOX,
 		GEO_SHOP,
+		SHIP,
+
 
 		NUM_GEOMETRY,
 	};

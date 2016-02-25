@@ -48,6 +48,7 @@ public:
 	int SD_bitcoins = 0;
 	//PlayerLocation
 	unsigned SD_location;
+	bool SD_enableinteract = true;
 
 	//stuff to get offset for text character spacing
 	std::vector<std::string> fontData = fillWithFontData("PixelFontData.csv");

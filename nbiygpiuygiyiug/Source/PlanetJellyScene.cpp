@@ -1224,7 +1224,7 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 	}
 
-	if (((collision(hitbox[4], camera.frontTarget) == true)) && e_state == 0)//cave
+	if (((collision(hitbox[4], camera.frontTarget) == true)) && e_state == 0)//ship
 	{
 		
 		button_prompt = 1;
@@ -1236,7 +1236,7 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 		}
 			
-		}
+	}
 }
 
 void PlanetJellyScene::interact_state()
@@ -1245,6 +1245,7 @@ void PlanetJellyScene::interact_state()
 	{
 		currentstate = CONVERSE;
 		return;
+
 	}
 	else if (currentstate == CONVERSE)
 	{

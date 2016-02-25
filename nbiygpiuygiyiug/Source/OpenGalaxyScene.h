@@ -173,6 +173,8 @@ private:
 	
 	//For Planet Interactions
 	bool e_state;
+	float timer = 0;
+	float delay;
 	void resetKey();
 	bool land;
 	string nameOfPlanet;

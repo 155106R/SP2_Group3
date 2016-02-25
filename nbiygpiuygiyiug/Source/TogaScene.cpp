@@ -39,10 +39,12 @@ void TogaScene::Init()
 
 	Shophitbox.push_back(AABB::generateAABB(Vector3(-43, 0, 410), 50, 30, 50, 0));// Upgrade shop [1]
 
-	Shophitbox.push_back(AABB::generateAABB(Vector3(60, 0, -80), 10, 24, 10, 0));// drone shop [2]
+	Shophitbox.push_back(AABB::generateAABB(Vector3(90, 0, -80), 60, 24, 60, 0));// drone shop [2]
 
 	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 200, 200, 0));// Cave [3]
-
+	
+	Shophitbox.push_back(AABB::generateAABB(Vector3(-56, 0, 664), 450 ,30, 340, 0));// ship [4]
+	
 	player = AABB::generateAABB(camera.nextPosition, 10, 30, 10, 0);//player
 
 
@@ -266,6 +268,10 @@ void TogaScene::Init()
 	meshList[GEO_SHOP] = MeshBuilder::GenerateQuad("shop screen", Color(0, 0, 0));
 	meshList[GEO_SHOP]->textureID = LoadTGA("Image//shop_screen.tga");
 
+	meshList[SHIP] = MeshBuilder::GenerateOBJ("player ship", "OBJ//ship.obj");
+	meshList[SHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
+
+
 	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("Light Cube", Color(1, 0.2509, 0));
 }
 
@@ -273,15 +279,13 @@ float inc = 0;
 
 void TogaScene::Update(double dt)
 {
-	button_prompt = 0;
+	cout << SharedData::GetInstance()->SD_enableinteract << endl;
 
-	
+	button_prompt = 0;
 
 	player.m_origin = camera.nextPosition;
 	AABB::updateAABB(player);
 
-
-	cout << "collision? :"<< camera.colliding << endl;
 
 	if (Application::IsKeyPressed('Z'))
 	{
@@ -396,7 +400,6 @@ void TogaScene::RenderText(Mesh* mesh, std::string text, Color color)
 
 	glEnable(GL_DEPTH_TEST);
 }
-
 
 void TogaScene::RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y)
 {
@@ -555,6 +558,14 @@ void TogaScene::Render()
 	RenderMesh(meshList[CAVE], true);
 	modelStack.PopMatrix();
 
+	//render ship
+	modelStack.PushMatrix();
+	modelStack.Translate(-56, 0, 664);
+	//modelStack.Rotate(55, 0, 1, 0);
+	modelStack.Scale(20, 20, 20);
+	RenderMesh(meshList[SHIP], true);
+	modelStack.PopMatrix();
+
 	//Mineral merchant
 	modelStack.PushMatrix();
 	modelStack.Translate(-70, -15, -60);
@@ -565,7 +576,7 @@ void TogaScene::Render()
 	//Drone merchant
 	modelStack.PushMatrix();
 	modelStack.Translate(60, dm_y-20, -80);
-	modelStack.Rotate(-75, 0, 1, 0);
+	modelStack.Rotate(-90, 0, 1, 0);
 	generateDronemerchant();
 	modelStack.PopMatrix();
 
@@ -579,35 +590,21 @@ void TogaScene::Render()
 
 	modelStack.PushMatrix();
 	modelStack.Translate(
-		(Shophitbox[0].m_origin.x),
-		(Shophitbox[0].m_origin.y),
-		(Shophitbox[0].m_origin.z)
+		(Shophitbox[2].m_origin.x),
+		(Shophitbox[2].m_origin.y),
+		(Shophitbox[2].m_origin.z)
 		);
 	modelStack.Scale(
-		(Shophitbox[0].m_length),
-		(Shophitbox[0].m_height),
-		(Shophitbox[0].m_width)
+		(Shophitbox[2].m_length),
+		(Shophitbox[2].m_height),
+		(Shophitbox[2].m_width)
 		);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
 	RenderMesh(meshList[GEO_CUBE], false);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
 	modelStack.PopMatrix();
 
-	modelStack.PushMatrix();
-	modelStack.Translate(
-		(player.m_origin.x),
-		(player.m_origin.y),
-		(player.m_origin.z)
-		);
-	modelStack.Scale(
-		(player.m_length),
-		(player.m_height),
-		(player.m_width)
-		);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	RenderMesh(meshList[GEO_CUBE], false);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-	modelStack.PopMatrix();
+
 
 
 	// render NPC
@@ -749,6 +746,8 @@ void TogaScene::generateDronemerchant()
 
 	//head
 	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, -15);
+	modelStack.PushMatrix();
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_DRONE_BODY], true);
@@ -765,6 +764,7 @@ void TogaScene::generateDronemerchant()
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_DRONE_ARMS], true);
+	modelStack.PopMatrix();
 	modelStack.PopMatrix();
 	
 	modelStack.PushMatrix();
@@ -1176,92 +1176,118 @@ void TogaScene::interactionUpdate(double dt)
 	//cout <<"view : " << camera.view << endl;
 	//cout << "Target : " << camera.target << endl;
 
-	if ((collision(Shophitbox[0], camera.frontTarget) == true ) )//Mineral merchant
+	if (SharedData::GetInstance()->SD_enableinteract == false)
 	{
-		if (currentstate == 0)
+		delay = timer + 1;
+		if (timer > delay)
 		{
-			button_prompt = 1;
+			SharedData::GetInstance()->SD_enableinteract = true;
 		}
 
-		if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+	}
+
+
+		if ((collision(Shophitbox[0], camera.frontTarget) == true))//Mineral merchant
+		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				e_state = 1;
+				button_prompt = 0;
+				interact_state();
+				if (rendertext == 0 && currentstate == 1)
+				{
+					rendertext = 1;
+				}
+				else
+				{
+					rendertext = 0;
+				}
+
+				delay = timer + 0.5;//set delay offset
+
+
+			}
+		}
+
+
+		if ((collision(Shophitbox[1], camera.frontTarget) == true))//Mineral merchant
+		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				e_state = 1;
+				button_prompt = 0;
+				interact_state();
+				if (rendertext == 0 && currentstate == 1)
+				{
+					rendertext = 2;
+				}
+				else
+				{
+					rendertext = 0;
+				}
+
+				delay = timer + 0.5;//set delay offset
+
+
+			}
+		}
+
+
+		if ((collision(Shophitbox[2], camera.frontTarget) == true))//Drone merchant
+		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				e_state = 1;
+				button_prompt = 0;
+				interact_state();
+				if (rendertext == 0 && currentstate == 1)
+				{
+					rendertext = 3;
+				}
+				else
+				{
+					rendertext = 0;
+				}
+
+				delay = timer + 0.5;//set delay offset
+
+
+			}
+		}
+
+		if (((collision(Shophitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
 		{
 			e_state = 1;
-			button_prompt = 0;
-			interact_state();
-			if (rendertext == 0 && currentstate == 1)
-			{
-				rendertext = 1;
-			}
-			else
-			{
-				rendertext = 0;
-			}
-		
-			delay = timer + 0.5;//set delay offset
-		
 
 		}
-	}
 
-	
-	if ((collision(Shophitbox[1], camera.frontTarget) == true))//Mineral merchant
-	{
-		if (currentstate == 0)
+		if (((collision(Shophitbox[4], camera.frontTarget) == true)) && e_state == 0)//ship
 		{
 			button_prompt = 1;
-		}
-		if ((Application::IsKeyPressed('E') && timer > delay)&& e_state ==0)
-		{
-			e_state = 1;
-			button_prompt = 0;
-			interact_state();
-			if (rendertext == 0 && currentstate == 1)
+
+			if (Application::IsKeyPressed('E'))
 			{
-				rendertext = 2;
+				e_state = 1;
+				SharedData::GetInstance()->SD_enableinteract = false;
+				SharedData::GetInstance()->SD_location = OPEN_GALAXY;
+
+
 			}
-			else
-			{
-				rendertext = 0;
-			}
-
-			delay = timer + 0.5;//set delay offset
-
-
 		}
-	}
 	
-	
-	if ((collision(Shophitbox[2], camera.frontTarget) == true))//Drone merchant
-	{
-		if (currentstate == 0)
-		{
-			button_prompt = 1;
-		}
-		if( (Application::IsKeyPressed('E') && timer > delay) && e_state ==0)
-		{
-			e_state = 1;
-			button_prompt = 0;
-			interact_state();
-			if (rendertext == 0 && currentstate == 1)
-			{
-				rendertext = 3;
-			}
-			else
-			{
-				rendertext = 0;
-			}
-
-			delay = timer + 0.5;//set delay offset
-
-
-		}
-	}
-	
-	if (((collision(Shophitbox[3], camera.frontTarget) == true)) && e_state ==0)//cave
-	{
-		e_state = 1;
-
-	}
 }
 
 void TogaScene::interact_state()
@@ -1303,7 +1329,7 @@ void TogaScene::text()
 	case(0) : break;//inactive
 			
 	case(1):
-	RenderTextOnScreen(meshList[GEO_TEXT], "Blob-Blob?(looks like he sells minerals)", Color(1, 0, 0), 2, 4.2, 5.8);//mineral shop
+	RenderTextOnScreen(meshList[GEO_TEXT], "H-Hey kid, wanna buy some minerals? ", Color(1, 0, 0), 2, 4.2, 5.8);//mineral shop
 		break;
 
 	case(2) :
@@ -1324,19 +1350,19 @@ void TogaScene::resetKey()
 		e_state = 0;
 	}
 
+
 }
 
 void TogaScene::checkCollision()
 {
-
-	if ((collision(Shophitbox[0], camera.nextPosition)))
-	{
-		camera.colliding = true;
-		cout << "fuck" << endl;
+	for (int i = 0; i <= 4; i++)
+	{		if ((collision(Shophitbox[i], camera.nextPosition)))
+		{
+			camera.colliding = true;
+		
+			
+		}
 	}
-	else
-	{
-		camera.colliding = false;
-	}
+	
 
 }
