@@ -29,7 +29,7 @@ public:
 	//Visual appearence of the asteroid
 	float length;	
 	float height;
-	float width;
+	float width; 
 
 	AABB hitbox;	//Generate a hitbox for the Asteroid for collision checks
 
@@ -37,7 +37,7 @@ public:
 		material = Math::RandIntMinMax(0, 20);
 		count = Math::RandIntMinMax(1, 200);
 
-		position = Vector3(Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200)); //Vector3(0, 0, 0);
+		position = Vector3(Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200));
 		velocity = Vector3(Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f));
 
 		length = Math::RandFloatMinMax(1, 5);
@@ -137,11 +137,17 @@ class OpenGalaxyScene : public Scene
 		U_TOTAL,
 	};
 
+	enum GAMESTATE{
+		PILOTING,
+		IN_SHIP,
+		DRILLING,
+
+		MAX_GAMESTATE
+	};
+
 public:
 	OpenGalaxyScene();
 	~OpenGalaxyScene();
-
-	float LSPEED;
 
 	MS modelStack, viewStack, projectionStack;
 
@@ -175,7 +181,13 @@ private:
 	Vector3 *noseOfShip;
 	Vector3 *middleOfShip;
 
+	//Hitboxes
 	AABB spaceshipHitbox;
+	AABB planetA_Hitbox;
+	AABB planetB_Hitbox;
+	AABB planetC_Hitbox;
+
+	AABB shipInterior;
 
 	float shipAxisX, shipAxisY, shipAxisZ; 
 	float rotateShipZ;
@@ -185,6 +197,7 @@ private:
 	float accelerateShip;
 
 	bool inShip;
+	unsigned CURRENT_STATE;
 	Vector3 tempPosition;
 
 	//For Light
@@ -193,10 +206,10 @@ private:
 	//Generates HUD
 	void drawHUD();
 
-	//Camera
+	//Cameras
 	Camera_Mouse inShipCamera;
-	//FPCamera inShipCamera;
-	OpenGalaxyCamera camera;
+	Camera_Mouse drillingCamera;
+	OpenGalaxyCamera shipCamera;
 	Light light[2];
 
 	Mesh *meshList[NUM_GEOMETRY];
