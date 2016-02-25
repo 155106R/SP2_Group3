@@ -10,23 +10,56 @@ using std::ifstream;
 
 #include "Scene.h"
 #include "FPCamera.h"
-//#include "Camera_Mouse.h"
+#include "Camera_Mouse.h"
 #include "OpenGalaxyCamera.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
-#include <map>
-#include "AABB.h""
+#include "AABB.h"
 
-class ASTEROID{
+
+class Asteroid{
 public:
-	string materialName;
-	int count;
+	int material;	//The kind of material this asteroid has (currently set to int)
+	int count;		//How much of the material it has
+
+	Vector3 position;//Where the asteroid is
+	Vector3 velocity;//How much the asteroid moves in each update
+	
+	//Visual appearence of the asteroid
+	float length;	
+	float height;
+	float width;
+
+	AABB hitbox;	//Generate a hitbox for the Asteroid for collision checks
+
+	Asteroid(){
+		material = Math::RandIntMinMax(0, 20);
+		count = Math::RandIntMinMax(1, 200);
+
+		position = Vector3(Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200)); //Vector3(0, 0, 0);
+		velocity = Vector3(Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f));
+
+		length = Math::RandFloatMinMax(1, 5);
+		height = Math::RandFloatMinMax(1, 5);
+		width = Math::RandFloatMinMax(1, 5);
+
+		hitbox = AABB::generateAABB(
+			position,		//Pass in where the asteroid is to set as the origin of hitbox
+			length * 2,		//Pass in length
+			height * 2,		//Pass in height
+			width * 2,		//Pass in width
+			velocity		//Pass in Velocity
+			);
+	};
+
+	~Asteroid(){
+
+	};
 };
 
 class OpenGalaxyScene : public Scene
 {
-
 
 	enum GEOMETRY_TYPE
 	{
@@ -52,9 +85,8 @@ class OpenGalaxyScene : public Scene
 
 		ASTEROIDS,
 
-		PROXY_SPACESHIP,
-
 		SPACESHIP,
+		SPACESHIP_INTERIOR,
 
 		GEO_TEXT,
 		GEO_HUD,
@@ -132,8 +164,6 @@ private:
 
 	void generateSkybox();
 	void updateShipMovement(float dt);
-
-
 	
 	//For Planet Interactions
 	bool e_state;
@@ -144,23 +174,18 @@ private:
 	//Ship movement stuff
 	Vector3 *noseOfShip;
 	Vector3 *middleOfShip;
+
+	AABB spaceshipHitbox;
+
 	float shipAxisX, shipAxisY, shipAxisZ; 
 	float rotateShipZ;
 	bool isTransltingY;
 	float rotateShip;
 	float translateShip;
 	float accelerateShip;
-	AABB spaceshipHitbox;
-	//Asteroid random stuff
-	float randScaleX[1000];
-	float randScaleY[1000];
-	float randScaleZ[1000];
-	float randTranslateX[1000];
-	float randTranslateY[1000];
-	float randTranslateZ[1000];
-	float asteroidTranslateX[1000];
-	float asteroidTranslateY[1000];
-	float asteroidTranslateZ[1000];
+
+	bool inShip;
+	Vector3 tempPosition;
 
 	//For Light
 	bool enableLight;
@@ -169,8 +194,8 @@ private:
 	void drawHUD();
 
 	//Camera
-	//Camera_Mouse camera;
-	//FPCamera camera;
+	Camera_Mouse inShipCamera;
+	//FPCamera inShipCamera;
 	OpenGalaxyCamera camera;
 	Light light[2];
 
@@ -181,3 +206,4 @@ private:
 
 //Author: Randall (155106R)
 //Updated 22/2/2016 - Randall
+//Updated 24/2/2016 - Randall

@@ -15,6 +15,7 @@ using std::ifstream;
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
+#include "AABB.h"
 
 
 class PlanetJellyScene : public Scene
@@ -24,6 +25,7 @@ class PlanetJellyScene : public Scene
 		GEO_AXES,
 		GEO_LIGHTBALL,
 		GEO_TEXTBOX,
+		GEO_CUBE,
 
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
@@ -44,8 +46,12 @@ class PlanetJellyScene : public Scene
 		SHOP_MINERAL,
 		SHOP_DRONE,
 		SHOP_UPGRADE,
+		SHIP,
 
 		GEO_TEXT,
+		GEO_UI,
+		GEO_TEXT_BOX,
+		GEO_SHOP,
 
 		NUM_GEOMETRY,
 	};
@@ -158,6 +164,31 @@ private:
 
 
 	bool e_state;
+	bool button_prompt;
+
+
+	//ui states
+	enum state{
+
+		FREEMOVE,
+		CONVERSE,
+		TRADE,
+		NUM_state
+	};
+	//interactions
+	unsigned currentstate;
+	void interact_state();
+	void renderinteract();
+	void text();
+	void resetKey();
+	int rendertext;
+	float timer = 0;
+	float delay = 0;
+	void interactionUpdate(double dt);
+
+	//collision checking
+	void checkCollision();
+	AABB player;
 };
 
 #endif
