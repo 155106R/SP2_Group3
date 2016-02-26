@@ -16,7 +16,7 @@ using std::ifstream;
 #include "MatrixStack.h"
 #include "Light.h"
 #include "AABB.h"
-
+#include <map>
 
 class Asteroid{
 public:
@@ -34,8 +34,8 @@ public:
 	AABB hitbox;	//Generate a hitbox for the Asteroid for collision checks
 
 	Asteroid(){
-		material = Math::RandIntMinMax(0, 20);
-		count = Math::RandIntMinMax(1, 200);
+		material = 1;//Math::RandIntMinMax(1, 12);
+		count = Math::RandIntMinMax(1, 10);
 
 		position = Vector3(Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200));
 		velocity = Vector3(Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f));
@@ -60,6 +60,17 @@ public:
 
 class OpenGalaxyScene : public Scene
 {
+	struct DrillAssets{
+		Vector3 position;
+		Vector3 facing;
+		float rotate;
+		float moveSpeed = 5;
+		std::map<unsigned, unsigned> storage;	//Drill's storage of materials in a map <unsigned materialID, unsigned count/stack>
+
+		AABB drillHead;
+
+		OpenGalaxyCamera camera;
+	}Drill;
 
 	enum GEOMETRY_TYPE
 	{
@@ -87,6 +98,8 @@ class OpenGalaxyScene : public Scene
 
 		SPACESHIP,
 		SPACESHIP_INTERIOR,
+		SPACESHIP_DRILL_BODY,
+		SPACESHIP_DRILL_HEAD,
 
 		GEO_TEXT,
 		GEO_HUD,
@@ -156,6 +169,10 @@ public:
 	virtual void Render();
 	virtual void Exit();
 
+	//Ship movement stuff
+	Vector3 *noseOfShip;
+	Vector3 *middleOfShip;
+
 private:
 	unsigned m_vertexArrayID;
 	unsigned m_vertexBuffer[NUM_GEOMETRY];
@@ -169,7 +186,6 @@ private:
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 
 	void generateSkybox();
-	void updateShipMovement(float dt);
 	
 	//For Planet Interactions
 	bool e_state;
@@ -179,10 +195,6 @@ private:
 	bool land;
 	string nameOfPlanet;
 
-	//Ship movement stuff
-	Vector3 *noseOfShip;
-	Vector3 *middleOfShip;
-
 	//Hitboxes
 	AABB spaceshipHitbox;
 	AABB planetA_Hitbox;
@@ -191,6 +203,8 @@ private:
 
 	AABB shipInterior;
 
+	unsigned CURRENT_STATE;	//Play state
+
 	float shipAxisX, shipAxisY, shipAxisZ; 
 	float rotateShipZ;
 	bool isTransltingY;
@@ -198,8 +212,9 @@ private:
 	float translateShip;
 	float accelerateShip;
 
-	bool inShip;
-	unsigned CURRENT_STATE;
+	void updateDrillMovement(double dt);
+	void updateShipMovement(double dt);
+
 	Vector3 tempPosition;
 
 	//For Light
@@ -210,7 +225,6 @@ private:
 
 	//Cameras
 	Camera_Mouse inShipCamera;
-	Camera_Mouse drillingCamera;
 	OpenGalaxyCamera shipCamera;
 	Light light[2];
 

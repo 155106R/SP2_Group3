@@ -16,14 +16,6 @@ using std::vector;
 using std::string;
 using std::ifstream;
 
-
-enum Minerals{
-	ADAMANTIUM,
-	ROCK2,
-
-	NUM_ROCKS
-};
-
 enum onPlanet{
 	OPEN_GALAXY,
 	PLANET_TOGA,
@@ -43,7 +35,6 @@ public:
 	}
 
 	//PlayerAssests
-	map<Minerals, int> inventory;
 	int SD_hullIntegrity = 100;
 	int SD_bitcoins = 0;
 	//PlayerLocation

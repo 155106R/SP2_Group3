@@ -23,7 +23,6 @@ void OpenGalaxyCamera::Init(const Vector3& pos, const Vector3& target, const Vec
 	distance = 50;
 	yaw = 0;
 
-
 	this->position = defaultPosition = pos;
 	this->target = defaultTarget = target;
 	Vector3 view = (position-target).Normalized();

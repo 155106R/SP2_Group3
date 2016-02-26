@@ -24,11 +24,10 @@ public:
 	bool OpenGalaxyCamera::checkCamera(int minX, int minZ, int maxX, int maxZ);
 	virtual void boundCheck(float minX, float minZ, float maxX, float maxZ);
 	virtual void boundCheck2(float minX, float minZ, float maxX, float maxZ);
-	
+	float distance;
 
 private:
 	float pitch;
-	float distance;
 	float yaw;
 	
 
