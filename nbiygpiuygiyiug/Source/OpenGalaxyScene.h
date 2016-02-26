@@ -34,8 +34,8 @@ public:
 	AABB hitbox;	//Generate a hitbox for the Asteroid for collision checks
 
 	Asteroid(){
-		material = 1;//Math::RandIntMinMax(1, 12);
-		count = Math::RandIntMinMax(1, 10);
+		material = Math::RandIntMinMax(1, 12);
+		count = Math::RandIntMinMax(1, 50);
 
 		position = Vector3(Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200));
 		velocity = Vector3(Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f));

@@ -254,7 +254,7 @@ void OpenGalaxyScene::Update(double dt)
 	spaceshipHitbox.m_origin = *middleOfShip;
 	AABB::updateAABB(spaceshipHitbox);
 
-	std::cout << SharedData::GetInstance()->PlayerInventory->Slot[0].name << SharedData::GetInstance()->PlayerInventory->Slot[0].stack << std::endl;
+	std::cout << SharedData::GetInstance()->PlayerInventory->Slot[0].name << " " << SharedData::GetInstance()->PlayerInventory->Slot[0].stack << std::endl;
 
 
 	for (int i = 0; i < allAsteroids.size(); i++){
@@ -273,9 +273,8 @@ void OpenGalaxyScene::Update(double dt)
 				allAsteroids[i]->hitbox.m_velocity = (*noseOfShip) * (accelerateShip * 0.5) * dt;	//Asteroids are dragged along the path of the ship because the ship passes ONLY HALF it's velocity onto the asteroid upon collison
 				allAsteroids[i]->hitbox.m_origin += *noseOfShip;									//Get the astroid to move in the same direction as the ship upon collision (after passing the ship's velocity)
 
-				if (allAsteroids[i]->count){//bug: need to delete the asteroid completely			//If the asteroid still has any minerals in it
+				if (allAsteroids[i]->count){														//If the asteroid still has any minerals in it
 					allAsteroids[i]->count--;
-					SharedData::GetInstance()->PlayerInventory->GetItem(allAsteroids[i]->material, 1);
 				}
 				else{
 					//allAsteroids[i]->hitbox.m_origin = Vector3(100000000, 100000000, 1000000);		//move asteroid out of worldspace. supposed to delete this
@@ -303,9 +302,17 @@ void OpenGalaxyScene::Update(double dt)
 	//Only when in DRILLING state, do we check for collision with drill
 	while (CURRENT_STATE == DRILLING){
 		for (int i = 0; i < allAsteroids.size(); i++){
-			allAsteroids[i]->count--;
-			SharedData::GetInstance()->PlayerInventory->GetItem(allAsteroids[i]->material, 1);
+			if (collision(Drill.drillHead, allAsteroids[i]->hitbox)){
+				if (allAsteroids[i]->count){
+					allAsteroids[i]->count--;
+					SharedData::GetInstance()->PlayerInventory->GetItem(allAsteroids[i]->material, 1);
+				}
+				else{
+					delete allAsteroids[i];
+				}
+			}
 		}
+		break;
 	}
 
 	//Light
@@ -400,7 +407,6 @@ void OpenGalaxyScene::Update(double dt)
 			break;
 
 		case DRILLING:
-			std::cout << Drill.camera.position << std::endl;
 			Drill.camera.target = Drill.position;
 			Drill.camera.Update(dt);
 			updateDrillMovement(dt);

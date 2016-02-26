@@ -72,7 +72,8 @@ void Application::Init()
 
 
 	//Create a window and create its OpenGL context
-	m_window = glfwCreateWindow(800, 600, "Computer Graphics", NULL, NULL);
+	m_window = glfwCreateWindow(1920, 1080, "Computer Graphics", NULL, NULL);	//For fixed screen size
+	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 	glfwSetWindowSizeCallback(m_window, resize_callback);
 
@@ -131,10 +132,6 @@ void Application::Run()
 			case(PLANET_JELLY):
 				currentScene = JellyPlanet;
 				break;
-		}
-
-		if (IsKeyPressed(VK_SPACE)){	//Temporary input - press space to return back to space(There needs to be an area in each planet to return to Open Galaxy)
-			SharedData::GetInstance()->SD_location = OPEN_GALAXY;
 		}
 
 		currentScene->Update(m_timer.getElapsedTime());
