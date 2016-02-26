@@ -36,6 +36,14 @@ public:
 
 	//PlayerAssests
 	int SD_hullIntegrity = 100;
+	int SD_hullmax = 100;
+
+	//upgrades
+	int SD_hullLevel = 0;
+	int SD_hullCost = 10;
+
+
+
 	int SD_bitcoins = 0;
 	//PlayerLocation
 	unsigned SD_location;

@@ -3,7 +3,7 @@
 
 Shop::Shop() 
 {
-	Shops TogaShop;
+	Shops TogaShop;//shop [0]
 	TogaShop.name = "TogaS MINERAL SHOP";
 	TogaShop.PID = 'A';
 	Item newGood1;
@@ -21,6 +21,20 @@ Shop::Shop()
 	newGood2.MaxStack = false;
 	TogaShop.GoodS.push_back(newGood2);
 	store.push_back(TogaShop);
+
+
+	//Shops TogaShop2;//shop [1]
+	//TogaShop2.name = "TogaS Upgrade SHOP";
+	//TogaShop2.PID = 'A';
+	//Item newItem1;
+	//newItem1.name = "Ship repair";
+	//newItem1.ID = 1;
+	//newItem1.PID = 0;
+	//newItem1.stack = 1;
+	//newItem1.bitcoin = 1;
+	//TogaShop2.GoodS.push_back(newItem1);
+	//store.push_back(TogaShop2);
+
 
 	Shops JellyShop;
 	JellyShop.name = " MINERAL SHOP";

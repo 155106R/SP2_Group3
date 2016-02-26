@@ -48,6 +48,8 @@ class PlanetJellyScene : public Scene
 		SHOP_UPGRADE,
 		SHIP,
 
+		GEO_AMOUNTBOX,
+		GEO_INVENTORY,
 		GEO_TEXT,
 		GEO_UI,
 		GEO_TEXT_BOX,
@@ -116,14 +118,13 @@ private:
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 	void generateSkybox();
 
+	//animation
 	void Init_animation_NPC();
 	void Update_animation_NPC(double dt);
-
+	// naming
 	void Init_Name_NPC();
 	void Update_Name_NPC(double dt);
-	void CheckQuadrants(float x, float z, float tempx, float tempz, float R, float tempR);
-	bool CheckMagnitude(float x, float z, float tempx, float tempz, float magnitude);
-	
+
 	//mini game
 	void Init_minigame();
 	void Updata_minigame(double dt);
@@ -139,6 +140,7 @@ private:
 	vector<falling_rocks> Rocks;
 
 	// bag/shop
+	void Init_Checker();
 	void Updata_Checker(double dt);
 	void Render_Checker();
 	int num;
@@ -147,6 +149,7 @@ private:
 	bool confirm;
 	int SellState;
 	int SBamount;
+	int PID;
 	
 	//For Light
 	bool enableLight;
@@ -181,8 +184,12 @@ private:
 	Mesh *meshList[NUM_GEOMETRY];
 
 
-	bool e_state;
+
+	//key states
 	bool button_prompt;
+	bool e_state;
+	bool i_state;
+
 
 
 	//ui states
@@ -194,8 +201,21 @@ private:
 		INVENTORY,
 		NUM_state
 	};
+
+
+	enum shopstates
+	{
+		BROWSING,
+		SELLING,
+		BUYING,
+		DROPPING,
+
+		NUM_shostates
+
+	};
 	//interactions
 	unsigned currentstate;
+	void inventory();
 	void interact_state();
 	void renderinteract();
 	void text();

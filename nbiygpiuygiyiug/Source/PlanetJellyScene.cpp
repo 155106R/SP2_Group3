@@ -210,14 +210,8 @@ void PlanetJellyScene::Init()
 	Init_Name_NPC();
 
 	Math::InitRNG();
+	Init_Checker();
 	
-	num = 0;
-	tempnum = 0;
-	shop = false;
-	confirm=false;
-	SellState = 0;
-	SBamount = 1;
-	SharedData::GetInstance()->PlayerInventory->IncreaseSlots(8);
 }
 
 void PlanetJellyScene::Init_Name_NPC()
@@ -561,7 +555,9 @@ void PlanetJellyScene::Update(double dt)
 
 	timer += dt;
 	resetKey();
+	inventory();
 	interactionUpdate(dt);
+	Updata_Checker(dt);
 	
 }
 
@@ -957,30 +953,26 @@ void PlanetJellyScene::generateSkybox(){
 	modelStack.PopMatrix();
 }
 
-bool PlanetJellyScene::CheckMagnitude(float x, float z, float tempx, float tempz, float magnitude)
+void PlanetJellyScene::Init_Checker()
 {
-	if(sqrt(pow((tempx - x), 2) + pow((tempz - z), 2)) > magnitude) return false; // less then magnitude
-	else true; // more then magnitude
+	num = 0;
+	tempnum = 0;
+	shop = false;
+	confirm = false;
+	SellState = 0;
+	SBamount = 1;
+	PID = 1; // jelly
 }
-
-void PlanetJellyScene::CheckQuadrants(float x, float z, float tempx, float tempz, float R ,float tempR)
-{
-	if (((tempx - x) < 0) && ((tempz - z) > 0)) tempR -= R; /*( z,-x) C*/
-	else if (((tempx - x) < 0) && ((tempz - z) < 0)) tempR -= (R + 180); /*(-z,-x) T*/
-	else if (((tempx - x) > 0) && ((tempz - z) > 0)) tempR -= R; /*( z, x) A*/
-	else if (((tempx - x) > 0) && ((tempz - z) < 0)) tempR -= (R - 180); /*(-z, x) S*/
-}
-
 void PlanetJellyScene::Updata_Checker(double dt)
 {
-
-	if (Application::IsKeyPressed('B') )
+	cout << SellState << endl;
+	if (Application::IsKeyPressed('B'))
 	{
 		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slot[0].name << endl;
 		/*SharedData::GetInstance()->PlayerInventory->Bag::GetItem(4, 10);*/
 		for (int i = 0; i < 3; i++)
 		{
-			cout << "Before " << i << " + "  << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+			cout << "Before " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
 		}
 		cout << SharedData::GetInstance()->SD_bitcoins << endl;
 		SharedData::GetInstance()->PlayerInventory->GetItem(4, 10);
@@ -994,222 +986,251 @@ void PlanetJellyScene::Updata_Checker(double dt)
 		}
 
 
-
-		SharedData::GetInstance()->PlayerInventory->sellItem(4, 1, 'A');
-		
-
-		SharedData::GetInstance()->PlayerInventory->sellItem(4, 9, 'B');
 		cout << SharedData::GetInstance()->SD_bitcoins << endl;
 		/*SharedData::GetInstance()->PlayerInventory->buyItem(6, 10, 'A');*/
 
 		cout << SharedData::GetInstance()->SD_bitcoins << endl;
-	/*	for (int i = 0; i < 3; i++)
+		/*	for (int i = 0; i < 3; i++)
 		{
-			cout << "After " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+		cout << "After " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
 		}*/
-	/*	cout << camera.target.x << endl;
+		/*	cout << camera.target.x << endl;
 		cout << camera.target.y << endl;*/
 		/*cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slots << endl;*/
 	}
 
-	if (Application::IsKeyPressed(VK_DOWN) && SellState == 0)
+	if (currentstate == TRADE || currentstate == INVENTORY)
 	{
-		if (num <SharedData::GetInstance()->PlayerInventory->Slots - 1 && shop == false)
+		if ((Application::IsKeyPressed(VK_DOWN) && SellState == 0) && timer > delay) // scroll down your list
 		{
-			num++;
-			if (num > 4)
+			delay = timer + 0.2;
+			if (num < SharedData::GetInstance()->PlayerInventory->Slots - 1 && shop == false)
 			{
-				tempnum++;
+				num++;
+				if (num > 4)
+				{
+					tempnum++;
+				}
 			}
-		}
-		
-		if (num <SharedData::GetInstance()->PlayerInventory->store[0].GoodS.size() - 1 && shop == true)
-		{
-			num++;
-			if (num > 4)
-			{
-				tempnum++;
-			}
-		}
-		
 
-	}
-	if (Application::IsKeyPressed(VK_UP) && SellState == 0)
-	{
-		if (num > 0)
-		{
-			num--;
-			if (num >3)
+			if (num < SharedData::GetInstance()->PlayerInventory->store[PID].GoodS.size() - 1 && shop == true)
 			{
-				tempnum--;
+				num++;
+				if (num > 4)
+				{
+					tempnum++;
+				}
 			}
+
+
 		}
-		
-	}
-	if (Application::IsKeyPressed(VK_LEFT) && shop != true && SellState == 0)
-	{
-		shop = true;
-		num = 0;
-		tempnum = 0;
-	}
-	if (Application::IsKeyPressed(VK_RIGHT) && shop != false && SellState == 0)
-	{
-		shop = false;
-		num = 0;
-		tempnum = 0;
-	}
-	if (Application::IsKeyPressed(VK_RETURN) && shop != true && SellState == 0)
-	{
-		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
+		if ((Application::IsKeyPressed(VK_UP) && SellState == 0) && timer > delay) // scroll up your list
 		{
-			SellState = 1;
-		}
-	}
-	if (Application::IsKeyPressed(VK_RETURN) && shop == true && SellState == 0)
-	{
-		if (SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].stack > 0)
-		{
-			SellState = 2;
+			delay = timer + 0.2;
+			if (num > 0)
+			{
+				num--;
+				if (num > 3)
+				{
+					tempnum--;
+				}
+			}
 
 		}
 	}
-	if (Application::IsKeyPressed(VK_UP) && SellState == 1)
+	if (currentstate == TRADE)
 	{
-		if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
+		if ((Application::IsKeyPressed(VK_LEFT) && shop != true && SellState == 0) && timer > delay) // switch to shop
 		{
-			SBamount++;
+			delay = timer + 0.2;
+			shop = true;
+			num = 0;
+			tempnum = 0;
 		}
-	}
-	if (Application::IsKeyPressed(VK_UP) && SellState == 2)
-	{
-		if (SBamount < SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].stack)
+
+		if ((Application::IsKeyPressed(VK_RIGHT) && shop != false && SellState == 0) && timer > delay) // switch to bag
 		{
-			SBamount++;
+			delay = timer + 0.2;
+			shop = false;
+			num = 0;
+			tempnum = 0;
 		}
-	}
-	if (Application::IsKeyPressed(VK_DOWN) && SellState != 0)
-	{
-		if (SBamount > 1)
+
+		if ((Application::IsKeyPressed(VK_RETURN) && shop != true && SellState == 0) && timer > delay) // press to sell from bag
 		{
-			SBamount--;
+			delay = timer + 0.2;
+			if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
+			{
+				SellState = 1;
+			}
 		}
-	}
-	if (Application::IsKeyPressed(VK_RETURN) && shop != true && SellState == 1 && confirm == true)
-	{
-		
-			SharedData::GetInstance()->PlayerInventory->sellItem(SharedData::GetInstance()->PlayerInventory->Slot[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[0].PID);
+
+		if ((Application::IsKeyPressed(VK_RETURN) && shop == true && SellState == 0) && timer > delay) // press to buy from shop
+		{
+			delay = timer + 0.2;
+			if (SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].stack > 0)
+			{
+				SellState = 2;
+
+			}
+		}
+
+		if (Application::IsKeyPressed(VK_UP) && SellState == 1 && timer > delay) // increase amount to sell
+		{
+			delay = timer + 0.2;
+			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
+			{
+				SBamount++;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_UP) && SellState == 2) && timer > delay) // increase amount to buy
+		{
+			delay = timer + 0.2;
+			if (SBamount < SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].stack)
+			{
+				SBamount++;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_DOWN) && SellState != 0) && timer > delay) // decrease amount to buy/sell
+		{
+			delay = timer + 0.2;
+			if (SBamount > 1)
+			{
+				SBamount--;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && shop != true && SellState == 1 && confirm == true) && timer > delay) // confirm selling
+		{
+			delay = timer + 0.2;
+			SharedData::GetInstance()->PlayerInventory->sellItem(SharedData::GetInstance()->PlayerInventory->Slot[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[PID].PID);
 			SellState = 0;
 			SBamount = 1;
 			confirm = false;
+		}
 
-			
-		
-	}
-	if (Application::IsKeyPressed(VK_RETURN) && shop == true && SellState == 2 && confirm == true)
-	{
-		SharedData::GetInstance()->PlayerInventory->buyItem(SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[0].PID,num);
-		SellState = 0;
-		SBamount = 1;
-		confirm = false;
-	}
-	if (Application::IsKeyPressed(VK_LEFT) && SellState != 0)
-	{
-		confirm = true;
-	}
-	if (Application::IsKeyPressed(VK_RIGHT) && SellState != 0)
-	{
-		confirm = false;
+		if (Application::IsKeyPressed(VK_RETURN) && shop == true && SellState == 2 && confirm == true) // confirm buying
+		{
+			delay = timer + 0.2;
+			SharedData::GetInstance()->PlayerInventory->buyItem(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[PID].PID, num);
+			SellState = 0;
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && SellState != 0 && confirm == false) && timer > delay) // cancel
+		{
+			delay = timer + 0.2;
+			SellState = 0;
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if (Application::IsKeyPressed(VK_LEFT) && SellState != 0) // confirm/cancel
+		{
+			confirm = true;
+		}
+
+		if (Application::IsKeyPressed(VK_RIGHT) && SellState != 0) // confirm/cancel
+		{
+			confirm = false;
+		}
+
 	}
 }
-
 void PlanetJellyScene::Render_Checker()
 {
-	RenderTextOnScreen(meshList[GEO_TEXT], "BagPack", Color(1, 0, 0), 2, 22, 25);
 
-	for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->Slots; i++)
+	if (SellState == BROWSING && (currentstate == TRADE || currentstate == INVENTORY))
 	{
-		
-		if (i<5)
+		////////////////////////////////////////////////////////// bag
+		RenderTextOnScreen(meshList[GEO_TEXT], "Slots :" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slots), Color(1, 0, 0), 2, 34, 26);
+		for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->Slots; i++)
 		{
-			if (shop == false)
+
+			if (i < 5)
 			{
-				RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 20, (22 - (num - tempnum) * 2));
-				RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1 + tempnum) + "-" + SharedData::GetInstance()->PlayerInventory->Slot[i + tempnum].name, Color(1, 0, 0), 2, 22, (22 - (i * 2)));
-				RenderTextOnScreen(meshList[GEO_TEXT], "X" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[i + tempnum].stack), Color(1, 0, 0), 2, 32, (22 - (i * 2)));
+				if (shop == false)
+				{
+					RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 25, (20 - (num - tempnum) * 2));
+					RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1 + tempnum) + "-" + SharedData::GetInstance()->PlayerInventory->Slot[i + tempnum].name, Color(1, 0, 0), 2, 27, (20 - (i * 2)));
+					RenderTextOnScreen(meshList[GEO_TEXT], "x" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[i + tempnum].stack), Color(1, 0, 0), 2, 38, (20 - (i * 2)));
+				}
+				else
+				{
+					RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1) + "-" + SharedData::GetInstance()->PlayerInventory->Slot[i].name, Color(1, 0, 0), 2, 27, (20 - (i * 2)));
+					RenderTextOnScreen(meshList[GEO_TEXT], "x" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[i].stack), Color(1, 0, 0), 2, 38, (20 - (i * 2)));
+				}
 			}
-			else 
-			{
-				RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1) + "-" + SharedData::GetInstance()->PlayerInventory->Slot[i].name, Color(1, 0, 0), 2, 22, (22 - (i * 2)));
-				RenderTextOnScreen(meshList[GEO_TEXT], "X" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[i].stack), Color(1, 0, 0), 2, 32, (22 - (i * 2)));
-			}
-		}
-		
-	}
-	
 
-
-	RenderTextOnScreen(meshList[GEO_TEXT], "Slots :" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slots), Color(1, 0, 0), 2, 22, 12);
-	RenderTextOnScreen(meshList[GEO_TEXT], "BitCoins :" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2, 22, 10);
-
-	//////////////////////////////////////////////////////////
-
-	RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->PlayerInventory->store[0].name, Color(1, 0, 0), 2, 7, 25);
-
-	for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->store[0].GoodS.size(); i++)
-	{
-
-		if (i<5)
-		{
-			if (shop == true)
-			{
-				RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 5, (22 - (num - tempnum) * 2));
-				RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1 + tempnum) + "-" + SharedData::GetInstance()->PlayerInventory->store[0].GoodS[i + tempnum].name, Color(1, 0, 0), 2, 7, (22 - (i * 2)));
-				RenderTextOnScreen(meshList[GEO_TEXT], "X" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[0].GoodS[i + tempnum].stack), Color(1, 0, 0), 2, 17, (22 - (i * 2)));
-			}
-			else
-			{
-				RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1) + "-" + SharedData::GetInstance()->PlayerInventory->store[0].GoodS[i].name, Color(1, 0, 0), 2, 7, (22 - (i * 2)));
-				RenderTextOnScreen(meshList[GEO_TEXT], "X" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[0].GoodS[i].stack), Color(1, 0, 0), 2, 17, (22 - (i * 2)));
-			}
 		}
 
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2, 30, 4);
 	}
-
-
-
-	RenderTextOnScreen(meshList[GEO_TEXT], "Items in shop :" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[0].GoodS.size()), Color(1, 0, 0), 2, 7, 12);
-
-	//////////////////////////////////////////////////////////
-	if (SellState == 1)
+	if (SellState == BROWSING && currentstate == TRADE)
 	{
-		RenderTextOnScreen(meshList[GEO_TEXT], "Do you want to Sell: " + std::to_string(SBamount) + " '" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + "'", Color(1, 0, 0), 2, 10, 5);
-		if (SharedData::GetInstance()->PlayerInventory->Slot[num].PID == SharedData::GetInstance()->PlayerInventory->store[0].PID)
+		////////////////////////////////////////////////////////// shop
+
+		RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->PlayerInventory->store[PID].name, Color(1, 0, 0), 2, 1, 25);
+
+		for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->store[PID].GoodS.size(); i++)
 		{
-			RenderTextOnScreen(meshList[GEO_TEXT], "For : " + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[num].bitcoin * SBamount), Color(1, 0, 0), 2, 12, 4);
+
+			if (i < 5)
+			{
+				if (shop == true)
+				{
+					RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 1, (22 - (num - tempnum) * 2));
+					RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i + tempnum].bitcoin * 2) + "-" + SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i + tempnum].name, Color(1, 0, 0), 2, 3, (22 - (i * 2)));
+					RenderTextOnScreen(meshList[GEO_TEXT], "x" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i + tempnum].stack), Color(1, 0, 0), 2, 14, (22 - (i * 2)));
+				}
+				else
+				{
+					RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i].bitcoin * 2) + "-" + SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i].name, Color(1, 0, 0), 2, 3, (22 - (i * 2)));
+					RenderTextOnScreen(meshList[GEO_TEXT], "x" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i].stack), Color(1, 0, 0), 2, 14, (22 - (i * 2)));
+				}
+			}
+
 		}
-		else 
-			RenderTextOnScreen(meshList[GEO_TEXT], "For : " + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[num].bitcoin * SBamount * 2), Color(1, 0, 0), 2, 12, 4);
+		//RenderTextOnScreen(meshList[GEO_TEXT], "Items in shop :" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS.size()), Color(1, 0, 0), 2, 7, 12);
 	}
-	if (SellState == 2)
+
+	////////////////////////////////////////////////////////// confirm
+	if (SellState == SELLING && currentstate == TRADE)
 	{
-		RenderTextOnScreen(meshList[GEO_TEXT], "Do you want to Buy: " + std::to_string(SBamount) + " '" + SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].name + "'", Color(1, 0, 0), 2, 10, 5);
-		RenderTextOnScreen(meshList[GEO_TEXT], "For : " + std::to_string(SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].bitcoin * SBamount * 2), Color(1, 0, 0), 2, 12, 4);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Sell: " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + ")", Color(1, 0, 0), 2, 16, 18);
+		if (SharedData::GetInstance()->PlayerInventory->Slot[num].PID == SharedData::GetInstance()->PlayerInventory->store[PID].PID)
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoin : " + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[num].bitcoin * SBamount), Color(1, 0, 0), 2, 14, 15);
+		}
+		else
+			RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoin : " + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[num].bitcoin * SBamount * 2), Color(1, 0, 0), 2, 14, 15);
+	}
+	if (SellState == BUYING && currentstate == TRADE)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Buy:   " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].name + ")", Color(1, 0, 0), 2, 16, 18);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoin : " + std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].bitcoin * SBamount * 2), Color(1, 0, 0), 2, 14, 15);
 
 	}
+	if (SellState == DROPPING && currentstate == INVENTORY)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Drop:  " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + ")", Color(1, 0, 0), 2, 16, 18);
+	}
 
-	if (SellState != 0)
+	if (SellState != BROWSING && (currentstate == TRADE || currentstate == INVENTORY))//not browsing
 	{
 		if (confirm == true)
 		{
-			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 8, 3);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 13, 13);
 		}
-		else RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 18, 3);
-		RenderTextOnScreen(meshList[GEO_TEXT], "Confirm", Color(1, 0, 0), 2, 10, 3);
-		RenderTextOnScreen(meshList[GEO_TEXT], "cernel", Color(1, 0, 0), 2, 20, 3);
+		else RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 23, 13);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Confirm", Color(1, 0, 0), 2, 15, 13);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Cancel", Color(1, 0, 0), 2, 25, 13);
 	}
 
 }
-
 
 
 
@@ -1413,3 +1434,81 @@ void PlanetJellyScene::checkCollision()
 
 }
 
+void PlanetJellyScene::inventory()
+{
+
+	if (Application::IsKeyPressed('I'))// && timer > delay) && e_state == 0)
+	{
+		i_state = 1;
+		if (timer > delay)
+		{
+			delay = timer + 0.5;
+			if (currentstate == 0)
+			{
+				currentstate = INVENTORY;
+			}
+			else
+			{
+				currentstate = FREEMOVE;
+			}
+		}
+
+	}
+	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == INVENTORY && SellState != DROPPING) && timer > delay)
+	{
+		delay = timer + 0.2;
+		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
+		{
+			SellState = DROPPING;
+			cout << "FUCCKCKCKCKCKCCK" << endl;
+		}
+	}
+	if (SellState == DROPPING)
+	{
+		if (Application::IsKeyPressed(VK_UP) && timer > delay) // increase amount to sell
+		{
+			delay = timer + 0.2;
+			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
+			{
+				SBamount++;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to buy/sell
+		{
+			delay = timer + 0.2;
+			if (SBamount > 1)
+			{
+				SBamount--;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm dropping
+		{
+			delay = timer + 0.2;
+			SellState = 0;
+			SharedData::GetInstance()->PlayerInventory->RemoveItem(SharedData::GetInstance()->PlayerInventory->Slot[num].ID, SBamount);
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		{
+			delay = timer + 0.2;
+			SellState = 0;
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		{
+			confirm = true;
+		}
+
+		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		{
+			confirm = false;
+		}
+	}
+
+}
