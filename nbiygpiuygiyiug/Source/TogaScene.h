@@ -63,6 +63,7 @@ class TogaScene : public Scene
 
 		CAVE,
 
+		GEO_AMOUNTBOX,
 		GEO_INVENTORY,
 		GEO_TEXT,
 		GEO_UI,
@@ -147,13 +148,32 @@ private:
 
 
 	void toganwalk(double dt);
-	void getWalktarget(double dt);
-	void Init_getWalktarget();
+
+	//animation
+	void Init_animation_NPC();
+	void Update_animation_NPC(double dt);
+	// naming
+	void Init_Name_NPC();
+	void Update_Name_NPC(double dt);
+
+	struct name {
+		int state;
+		float R_X;
+		float tempR;
+		Vector3 position;
+		string NPCname;
+	};
+	vector<name> nameS;
 	
-	//key states and prompts
-	bool e_state;
+	//key states and prompts	
+	
+	
 	bool button_prompt;
+	bool e_state;
 	bool i_state;
+	
+	
+
 
 	//ui states
 	enum state{
@@ -313,7 +333,28 @@ private:
 	vector<Togan> togan_NPC_Loop;
 	Togan togan;
 	
+	// bag/shop
+	void Init_Checker();
+	void Updata_Checker(double dt);
+	void Render_Checker();
+	int num;
+	int tempnum;
+	bool shop;
+	bool confirm;
+	int SellState;
+	int SBamount;
+	int PID;
 
+	enum shopstates
+	{
+		BROWSING,
+		SELLING,
+		BUYING,
+		DROPPING,
+
+		NUM_shostates
+
+	};
 	
 
 };

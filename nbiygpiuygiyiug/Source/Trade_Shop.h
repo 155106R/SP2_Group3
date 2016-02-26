@@ -14,6 +14,9 @@ public:
 	void RemoveStack(int ID, int amount, char PID); // remove stack from shop (pop)
 
 
+
+
+
 	struct Shops
 	{
 		string name;

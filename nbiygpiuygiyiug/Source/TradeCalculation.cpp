@@ -88,6 +88,8 @@ TradeCalculation::TradeCalculation()
 	newItem12.PID = 'O'; // O & 79
 	newItem12.bitcoin = 50;
 	ItemS.push_back(newItem12);
+
+
 }
 
 TradeCalculation::~TradeCalculation() {}

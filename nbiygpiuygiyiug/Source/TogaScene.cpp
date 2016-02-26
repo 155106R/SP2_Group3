@@ -48,8 +48,7 @@ void TogaScene::Init()
 	player = AABB::generateAABB(camera.nextPosition, 10, 30, 10, 0);//player
 
 
-	//npc togan spawning
-	Init_getWalktarget();
+
 
 	//random
 	Math::InitRNG();
@@ -274,15 +273,21 @@ void TogaScene::Init()
 	meshList[GEO_INVENTORY] = MeshBuilder::GenerateQuad("inventory", Color(0,0,0));
 	meshList[GEO_INVENTORY]->textureID = LoadTGA("Image//Inventory_screen.tga");
 
+	meshList[GEO_AMOUNTBOX] = MeshBuilder::GenerateQuad("amt box", Color(0, 0, 0));
+	meshList[GEO_AMOUNTBOX]->textureID = LoadTGA("Image//amount_screen.tga");
 
 	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("Light Cube", Color(1, 0.2509, 0));
+
+	Init_Checker();
+	Init_Name_NPC();
+	Init_animation_NPC();
 }
 
 float inc = 0;
 
 void TogaScene::Update(double dt)
 {
-	cout << SharedData::GetInstance()->SD_enableinteract << endl;
+	//cout << SharedData::GetInstance()->SD_enableinteract << endl;
 
 	button_prompt = 0;
 
@@ -355,10 +360,12 @@ void TogaScene::Update(double dt)
 	mineralAnimation(dt);
 	upgradeAnimation(dt);
 	toganwalk(dt);
-	getWalktarget(dt);
 	inventory();
 	interactionUpdate(dt);
+	Updata_Checker(dt);
 
+	Update_Name_NPC(dt);
+	Update_animation_NPC(dt);
 }
 
 
@@ -616,9 +623,23 @@ void TogaScene::Render()
 	for (int i = 0; i <= 1; i++)
 	{
 		modelStack.PushMatrix();
-		modelStack.Translate(togan_NPC_Loop[i].position.x, togan_NPC_Loop[i].position.y, 0);
-		modelStack.Rotate(togan_NPC_Loop[i].rotate_togan, 0, 1, 0);
+		modelStack.Translate(togan_NPC_Loop[i].position.x, togan_NPC_Loop[i].position.y, togan_NPC_Loop[i].position.z);
+		modelStack.Rotate(togan_NPC_Loop[i].rotate_togan-90, 0, 1, 0);
 		generateTogan();
+		modelStack.PopMatrix();
+	}
+
+	//render names
+	for (int i = 0; i < nameS.size(); i++)
+	{
+		//Render Text-NPC NAME x 2
+		//Render Text -DRONE SHOP
+		//Render Text -UPGRADE SHOP
+		modelStack.PushMatrix();
+		modelStack.Translate(nameS[i].position.x, nameS[i].position.y, nameS[i].position.z);
+		modelStack.Rotate(0 + nameS[i].R_X, 0, 1, 0);
+		modelStack.Scale(2, 2, 2);
+		RenderText(meshList[GEO_TEXT], nameS[i].NPCname, Color(0, 1, 0));
 		modelStack.PopMatrix();
 	}
 	
@@ -643,8 +664,15 @@ void TogaScene::Render()
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-90, 1, 0, 0);
 		modelStack.Scale(1.1, 0.8, 0.8);
-		RenderMesh(meshList[GEO_SHOP], false);
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		if (SellState == BROWSING)
+		{
+			RenderMesh(meshList[GEO_SHOP], false);
+			RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		}
+		else
+		{
+			RenderMesh(meshList[GEO_AMOUNTBOX], false);
+		}
 		case INVENTORY:
 		modelStack.Translate(-0.035, 0, -0.85);
 		modelStack.Rotate(-90, 1, 0, 0);
@@ -661,7 +689,7 @@ void TogaScene::Render()
 	
 	renderinteract();
 	text();
-
+	Render_Checker();
 }
 
 void TogaScene::Exit()
@@ -1055,125 +1083,6 @@ void TogaScene::toganwalk(double dt)
 
 }
 
-void TogaScene::getWalktarget(double dt)
-{
-	for (int i = 0; i <= 0; i++)
-	{
-		if (togan_NPC_Loop[i].state == 0)
-		{
-			if (togan_NPC_Loop[i].tempposition.x == 0)
-			{
-				togan_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-50, 50);
-				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-100, 100);
-			}
-			else if (togan_NPC_Loop[i].tempR == 0)
-			{
-				if (sqrt(pow((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x), 2) + pow((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z), 2)) > 5)
-				{
-					togan_NPC_Loop[i].tempR = Math::RadianToDegree(atan((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) / (togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z)));
-				}
-				else
-				{
-					togan_NPC_Loop[i].tempposition.x = 0;
-					togan_NPC_Loop[i].tempposition.z = 0;
-				}
-			}
-
-			else if (togan_NPC_Loop[i].tempR != 0)
-			{
-				if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) < 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) > 0)) togan_NPC_Loop[i].tempR -= togan_NPC_Loop[i].rotate_togan;
-				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) < 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) < 0)) togan_NPC_Loop[i].tempR -= (togan_NPC_Loop[i].rotate_togan + 180);
-				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) > 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) > 0)) togan_NPC_Loop[i].tempR -= togan_NPC_Loop[i].rotate_togan;
-				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) > 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) < 0)) togan_NPC_Loop[i].tempR -= (togan_NPC_Loop[i].rotate_togan - 180);
-				if (togan_NPC_Loop[i].tempR < 0)
-				{
-					togan_NPC_Loop[i].state = 2;
-				}
-				else if (togan_NPC_Loop[i].tempR > 0)
-				{
-					togan_NPC_Loop[i].state = 3;
-				}
-
-			}
-			else togan_NPC_Loop[i].state = 1;
-		}
-
-		if (togan_NPC_Loop[i].state == 1)//foward
-		{
-			if (sqrt(pow((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x), 2) + pow((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z), 2)) > 5)
-			{
-				togan_NPC_Loop[i].position.x += sin(DegreeToRadian(togan_NPC_Loop[i].rotate_togan)) * 5.f* dt;
-				togan_NPC_Loop[i].position.z += cos(DegreeToRadian(togan_NPC_Loop[i].rotate_togan)) * 5.f* dt;
-			}
-			else
-			{
-				togan_NPC_Loop[i].tempposition.x = 0;
-				togan_NPC_Loop[i].tempposition.z = 0;
-				togan_NPC_Loop[i].state = 0;
-			}
-		}
-		if (togan_NPC_Loop[i].state == 2)
-		{
-			if (togan_NPC_Loop[i].tempR < -180)
-			{
-				togan_NPC_Loop[i].tempR = 360 + togan_NPC_Loop[i].tempR;
-				togan_NPC_Loop[i].state = 3;
-			}
-			else if (togan_NPC_Loop[i].tempR < 0)//turinging right
-			{
-				togan_NPC_Loop[i].tempR += 18 * dt;
-				togan_NPC_Loop[i].rotate_togan -= 18 * dt;
-			}
-			else if (togan_NPC_Loop[i].tempR != 0)
-			{
-				togan_NPC_Loop[i].rotate_togan += togan_NPC_Loop[i].tempR;
-				togan_NPC_Loop[i].tempR = 0;
-			}
-			else togan_NPC_Loop[i].state = 1;
-		}
-		if (togan_NPC_Loop[i].state == 3)
-		{
-			if (togan_NPC_Loop[i].tempR > 180)
-			{
-				togan_NPC_Loop[i].tempR = 0 - 360 + togan_NPC_Loop[i].tempR;
-				togan_NPC_Loop[i].state = 2;
-			}
-			else if (togan_NPC_Loop[i].tempR > 0)//turn left
-			{
-				togan_NPC_Loop[i].tempR -= 18 * dt;
-				togan_NPC_Loop[i].rotate_togan += 18 * dt;
-			}
-			else if (togan_NPC_Loop[i].tempR != 0)
-			{
-				togan_NPC_Loop[i].rotate_togan += togan_NPC_Loop[i].tempR;
-				togan_NPC_Loop[i].state = 1;
-			}
-			else togan_NPC_Loop[i].state = 1;
-
-		}
-	}
-}
-
-void TogaScene::Init_getWalktarget()
-{
-
-
-	// init togan pos and state
-	togan.position = Vector3(0, -15, 0);
-	togan.state = 0;
-
-	//togan npc animation instances
-	for (int i = 0; i <= 1; i++)
-	{
-		Togan newtogan;
-		newtogan.position = Vector3(0, -15, 0);
-		newtogan.tempposition = Vector3(0, -15, 0);
-		newtogan.rotate_togan = 0;
-		newtogan.state = 0;
-		newtogan.tempR = 0;
-		togan_NPC_Loop.push_back(newtogan);
-	}
-}
 
 float TogaScene::checkDistance(Vector3 firstvector, Vector3 secondvector)
 {
@@ -1199,6 +1108,7 @@ void TogaScene::interactionUpdate(double dt)
 
 			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
 			{
+				PID = 0;
 				e_state = 1;
 				button_prompt = 0;
 				interact_state();
@@ -1218,7 +1128,7 @@ void TogaScene::interactionUpdate(double dt)
 		}
 
 
-		if ((collision(Shophitbox[1], camera.frontTarget) == true))//Mineral merchant
+		if ((collision(Shophitbox[1], camera.frontTarget) == true))//Upgrade merchant
 		{
 			if (currentstate == 0)
 			{
@@ -1226,6 +1136,7 @@ void TogaScene::interactionUpdate(double dt)
 			}
 			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
 			{
+				PID = 1;
 				e_state = 1;
 				button_prompt = 0;
 				interact_state();
@@ -1307,6 +1218,7 @@ void TogaScene::interact_state()
 	}
 	else if (currentstate == TRADE)
 	{
+		shop = false;
 		currentstate = FREEMOVE;
 		return;
 	}
@@ -1403,6 +1315,538 @@ void TogaScene::inventory()
 		}
 
 	}
+	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == INVENTORY && SellState != DROPPING) && timer > delay)
+	{
+		delay = timer + 0.2;
+		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
+		{
+			SellState = DROPPING;
+			cout << "FUCCKCKCKCKCKCCK" << endl;
+		}
+	}
+	if (SellState == DROPPING)
+	{
+		if (Application::IsKeyPressed(VK_UP) && timer > delay) // increase amount to sell
+		{
+			delay = timer + 0.2;
+			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
+			{
+				SBamount++;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to buy/sell
+		{
+			delay = timer + 0.2;
+			if (SBamount > 1)
+			{
+				SBamount--;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN)&& confirm == true) && timer > delay) // confirm dropping
+		{
+			delay = timer + 0.2;
+			SellState = 0;
+			SharedData::GetInstance()->PlayerInventory->RemoveItem(SharedData::GetInstance()->PlayerInventory->Slot[num].ID, SBamount);
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		{
+			delay = timer + 0.2;
+			SellState = 0;
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		{
+			confirm = true;
+		}
+
+		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		{
+			confirm = false;
+		}
+	}
+
+}
+
+void TogaScene::Init_Checker()
+{
+	num = 0;
+	tempnum = 0;
+	shop = false;
+	confirm = false;
+	SellState = 0;
+	SBamount = 1;
+	PID = 0; // toga
+}
+void TogaScene::Updata_Checker(double dt)
+{
+	cout << SellState << endl;
+	if (Application::IsKeyPressed('B'))
+	{
+		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slot[0].name << endl;
+		/*SharedData::GetInstance()->PlayerInventory->Bag::GetItem(4, 10);*/
+		for (int i = 0; i < 3; i++)
+		{
+			cout << "Before " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+		}
+		cout << SharedData::GetInstance()->SD_bitcoins << endl;
+		SharedData::GetInstance()->PlayerInventory->GetItem(4, 10);
+		SharedData::GetInstance()->PlayerInventory->GetItem(10, 10);
+		SharedData::GetInstance()->PlayerInventory->GetItem(7, 10);
 
 
+		for (int i = 0; i < 3; i++)
+		{
+			cout << "After " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+		}
+
+
+		cout << SharedData::GetInstance()->SD_bitcoins << endl;
+		/*SharedData::GetInstance()->PlayerInventory->buyItem(6, 10, 'A');*/
+
+		cout << SharedData::GetInstance()->SD_bitcoins << endl;
+		/*	for (int i = 0; i < 3; i++)
+		{
+		cout << "After " << i << " + " << SharedData::GetInstance()->PlayerInventory->Slot[i].name << endl;
+		}*/
+		/*	cout << camera.target.x << endl;
+		cout << camera.target.y << endl;*/
+		/*cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slots << endl;*/
+	}
+
+	if (currentstate == TRADE || currentstate == INVENTORY)
+	{
+		if ((Application::IsKeyPressed(VK_DOWN) && SellState == 0) && timer > delay) // scroll down your list
+		{
+			delay = timer + 0.2;
+			if (num < SharedData::GetInstance()->PlayerInventory->Slots - 1 && shop == false)
+			{
+				num++;
+				if (num > 4)
+				{
+					tempnum++;
+				}
+			}
+
+			if (num < SharedData::GetInstance()->PlayerInventory->store[PID].GoodS.size() - 1 && shop == true)
+			{
+				num++;
+				if (num > 4)
+				{
+					tempnum++;
+				}
+			}
+
+
+		}
+		if ((Application::IsKeyPressed(VK_UP) && SellState == 0) && timer > delay) // scroll up your list
+		{
+			delay = timer + 0.2;
+			if (num > 0)
+			{
+				num--;
+				if (num > 3)
+				{
+					tempnum--;
+				}
+			}
+
+		}
+	}
+	if (currentstate == TRADE)
+	{
+		if ((Application::IsKeyPressed(VK_LEFT) && shop != true && SellState == 0) && timer > delay) // switch to shop
+		{
+			delay = timer + 0.2;
+			shop = true;
+			num = 0;
+			tempnum = 0;
+		}
+
+		if ((Application::IsKeyPressed(VK_RIGHT) && shop != false && SellState == 0) && timer > delay) // switch to bag
+		{
+			delay = timer + 0.2;
+			shop = false;
+			num = 0;
+			tempnum = 0;
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && shop != true && SellState == 0) && timer > delay) // press to sell from bag
+		{
+			delay = timer + 0.2;
+			if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
+			{
+				SellState = 1;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && shop == true && SellState == 0) && timer > delay) // press to buy from shop
+		{
+			delay = timer + 0.2;
+			if (SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].stack > 0)
+			{
+				SellState = 2;
+
+			}
+		}
+
+		if (Application::IsKeyPressed(VK_UP) && SellState == 1 && timer > delay) // increase amount to sell
+		{
+			delay = timer + 0.2;
+			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
+			{
+				SBamount++;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_UP) && SellState == 2) && timer > delay) // increase amount to buy
+		{
+			delay = timer + 0.2;
+			if (SBamount < SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].stack)
+			{
+				SBamount++;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_DOWN) && SellState != 0) && timer > delay) // decrease amount to buy/sell
+		{
+			delay = timer + 0.2;
+			if (SBamount > 1)
+			{
+				SBamount--;
+			}
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && shop != true && SellState == 1 && confirm == true) && timer > delay) // confirm selling
+		{
+			delay = timer + 0.2;
+			SharedData::GetInstance()->PlayerInventory->sellItem(SharedData::GetInstance()->PlayerInventory->Slot[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[PID].PID);
+			SellState = 0;
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if (Application::IsKeyPressed(VK_RETURN) && shop == true && SellState == 2 && confirm == true) // confirm buying
+		{
+			delay = timer + 0.2;
+			SharedData::GetInstance()->PlayerInventory->buyItem(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[PID].PID, num);
+			SellState = 0;
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if ((Application::IsKeyPressed(VK_RETURN) && SellState != 0 && confirm == false) && timer > delay) // cancel
+		{
+			delay = timer + 0.2;
+			SellState = 0;
+			SBamount = 1;
+			confirm = false;
+		}
+
+		if (Application::IsKeyPressed(VK_LEFT) && SellState != 0) // confirm/cancel
+		{
+			confirm = true;
+		}
+
+		if (Application::IsKeyPressed(VK_RIGHT) && SellState != 0) // confirm/cancel
+		{
+			confirm = false;
+		}
+
+	}
+}
+void TogaScene::Render_Checker()
+{
+
+	if (SellState == BROWSING && (currentstate == TRADE || currentstate == INVENTORY))
+	{
+		////////////////////////////////////////////////////////// bag
+		RenderTextOnScreen(meshList[GEO_TEXT], "Slots :" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slots), Color(1, 0, 0), 2, 34, 26);
+		for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->Slots; i++)
+		{
+
+			if (i < 5)
+			{
+				if (shop == false)
+				{
+					RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 25, (20 - (num - tempnum) * 2));
+					RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1 + tempnum) + "-" + SharedData::GetInstance()->PlayerInventory->Slot[i + tempnum].name, Color(1, 0, 0), 2, 27, (20 - (i * 2)));
+					RenderTextOnScreen(meshList[GEO_TEXT], "x" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[i + tempnum].stack), Color(1, 0, 0), 2, 38, (20 - (i * 2)));
+				}
+				else
+				{
+					RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(i + 1) + "-" + SharedData::GetInstance()->PlayerInventory->Slot[i].name, Color(1, 0, 0), 2, 27, (20 - (i * 2)));
+					RenderTextOnScreen(meshList[GEO_TEXT], "x" + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[i].stack), Color(1, 0, 0), 2, 38, (20 - (i * 2)));
+				}
+			}
+
+		}
+
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2, 30, 4);
+	}
+	if (SellState == BROWSING && currentstate == TRADE)
+	{
+		////////////////////////////////////////////////////////// shop
+
+		RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->PlayerInventory->store[PID].name, Color(1, 0, 0), 2, 1, 25);
+
+		for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->store[PID].GoodS.size(); i++)
+		{
+
+			if (i < 5)
+			{
+				if (shop == true)
+				{
+					RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 1, (22 - (num - tempnum) * 2));
+					RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i + tempnum].bitcoin * 2) + "-" + SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i + tempnum].name, Color(1, 0, 0), 2, 3, (22 - (i * 2)));
+					RenderTextOnScreen(meshList[GEO_TEXT], "x" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i + tempnum].stack), Color(1, 0, 0), 2, 14, (22 - (i * 2)));
+				}
+				else
+				{
+					RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i].bitcoin * 2) + "-" + SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i].name, Color(1, 0, 0), 2, 3, (22 - (i * 2)));
+					RenderTextOnScreen(meshList[GEO_TEXT], "x" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[i].stack), Color(1, 0, 0), 2, 14, (22 - (i * 2)));
+				}
+			}
+
+		}
+		//RenderTextOnScreen(meshList[GEO_TEXT], "Items in shop :" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS.size()), Color(1, 0, 0), 2, 7, 12);
+	}
+
+	////////////////////////////////////////////////////////// confirm
+	if (SellState == SELLING && currentstate == TRADE)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Sell: " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + ")", Color(1, 0, 0), 2, 16, 18);
+		if (SharedData::GetInstance()->PlayerInventory->Slot[num].PID == SharedData::GetInstance()->PlayerInventory->store[PID].PID)
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoin : " + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[num].bitcoin * SBamount), Color(1, 0, 0), 2, 14, 15);
+		}
+		else
+			RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoin : " + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[num].bitcoin * SBamount * 2), Color(1, 0, 0), 2, 14, 15);
+	}
+	if (SellState == BUYING && currentstate == TRADE)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Buy:   " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].name + ")", Color(1, 0, 0), 2, 16, 18);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoin : " + std::to_string(SharedData::GetInstance()->PlayerInventory->store[PID].GoodS[num].bitcoin * SBamount * 2), Color(1, 0, 0), 2, 14, 15);
+
+	}
+	if (SellState == DROPPING && currentstate == INVENTORY)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Drop:  " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + ")", Color(1, 0, 0), 2, 16, 18);
+	}
+
+	if (SellState != BROWSING && (currentstate == TRADE || currentstate == INVENTORY))//not browsing
+	{
+		if (confirm == true)
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 13, 13);
+		}
+		else RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 23, 13);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Confirm", Color(1, 0, 0), 2, 15, 13);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Cancel", Color(1, 0, 0), 2, 25, 13);
+	}
+
+}
+
+void TogaScene::Init_Name_NPC()
+{
+
+	for (int i = 0; i < 2; i++)
+	{
+		name newname;
+		newname.position = Vector3(0, 25, 0);
+		newname.R_X = 0;
+		newname.state = 0;
+		newname.tempR = 0;
+		newname.NPCname = "Togan NPC";
+		nameS.push_back(newname);
+	}
+
+	name newname0;
+	newname0.position = Vector3(60, 10, -80);
+	newname0.R_X = 0;
+	newname0.state = 0;
+	newname0.tempR = 0;
+	newname0.NPCname = "DRONE SHOP";
+	nameS.push_back(newname0);
+
+	name newname2;
+	newname2.position = Vector3(-40, 10, 410);
+	newname2.R_X = 0;
+	newname2.state = 0;
+	newname2.tempR = 0;
+	newname2.NPCname = "UPGRADE SHOP";
+	nameS.push_back(newname2);
+
+	name newname1;
+	newname1.position = Vector3(-70, 10, -60);
+	newname1.R_X = 0;
+	newname1.state = 0;
+	newname1.tempR = 0;
+	newname1.NPCname = "MINERAL SHOP";
+	nameS.push_back(newname1);
+}
+void TogaScene::Update_Name_NPC(double dt)
+{
+	for (int i = 0; i < nameS.size(); i++)
+	{
+		if (i < (nameS.size() - 3)) // only for the moving npc
+		{
+			nameS[i].position.x = togan_NPC_Loop[i].position.x;
+			nameS[i].position.z = togan_NPC_Loop[i].position.z;
+		}
+		nameS[i].tempR = Math::RadianToDegree(atan((camera.position.x - nameS[i].position.x) / (camera.position.z - nameS[i].position.z)));
+		if (((camera.position.x - nameS[i].position.x) < 0) && ((camera.position.z - nameS[i].position.z) > 0)) nameS[i].tempR -= nameS[i].R_X; /*(z,-x) C*/
+		else if (((camera.position.x - nameS[i].position.x) < 0) && ((camera.position.z - nameS[i].position.z) < 0)) nameS[i].tempR -= (nameS[i].R_X + 180); /*(-z,-x) T*/
+		else if (((camera.position.x - nameS[i].position.x) > 0) && ((camera.position.z - nameS[i].position.z) > 0)) nameS[i].tempR -= nameS[i].R_X; /*(z,x) A*/
+		else if (((camera.position.x - nameS[i].position.x) > 0) && ((camera.position.z - nameS[i].position.z) < 0)) nameS[i].tempR -= (nameS[i].R_X - 180); /*(-z,x) S*/
+
+		if (nameS[i].tempR < -180)
+		{
+			nameS[i].tempR = 360 + nameS[i].tempR;
+		}
+		if (nameS[i].tempR > 180)
+		{
+			nameS[i].tempR = 0 - 360 + nameS[i].tempR;
+		}
+		if (nameS[i].tempR > 0) // trun left
+		{
+			nameS[i].tempR -= 360 * dt;
+			nameS[i].R_X += 360 * dt;
+		}
+		if (nameS[i].tempR < 0) // trun right
+		{
+			nameS[i].tempR += 360 * dt;
+			nameS[i].R_X -= 360 * dt;
+		}
+	}
+}
+
+void TogaScene::Init_animation_NPC()
+{
+	// jelly animation
+	togan.position = Vector3(0, 0, 0);
+
+
+	//jelly npc animation
+	for (int i = 0; i <= 1; i++)
+	{
+		Togan newtoga;
+		newtoga.position = Vector3(0, -15, 0);
+		newtoga.tempposition = Vector3(0, 0, 0);
+		newtoga.rotate_togan = 0;
+		newtoga.state = 0;
+		newtoga.tempR = 0;
+		togan_NPC_Loop.push_back(newtoga);
+	}
+}
+void TogaScene::Update_animation_NPC(double dt)
+{
+
+	// jelly npc animation
+	for (int i = 0; i <= 1; i++)
+	{
+		
+		if (togan_NPC_Loop[i].state == 0 )
+		{
+			if (togan_NPC_Loop[i].tempposition.x == 0 && togan_NPC_Loop[i].tempposition.z == 0)
+			{
+				togan_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-50, 50);
+				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-50, 50);
+			}
+			else if (togan_NPC_Loop[i].tempR == 0)
+			{
+				if (sqrt(pow((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x), 2) + pow((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z), 2)) > 5)
+				{
+					togan_NPC_Loop[i].tempR = Math::RadianToDegree(atan((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) / (togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z)));
+				}
+				else
+				{
+					togan_NPC_Loop[i].tempposition.x = 0;
+					togan_NPC_Loop[i].tempposition.z = 0;
+				}
+			}
+			else if (togan_NPC_Loop[i].tempR != 0)
+			{
+				if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) < 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) > 0)) togan_NPC_Loop[i].tempR -= togan_NPC_Loop[i].rotate_togan; /*(z,-x) C*/
+				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) < 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) < 0)) togan_NPC_Loop[i].tempR -= (togan_NPC_Loop[i].rotate_togan + 180); /*(-z,-x) T*/
+				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) > 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) > 0)) togan_NPC_Loop[i].tempR -= togan_NPC_Loop[i].rotate_togan; /*(z,x) A*/
+				else if (((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x) > 0) && ((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z) < 0)) togan_NPC_Loop[i].tempR -= (togan_NPC_Loop[i].rotate_togan - 180); /*(-z,x) S*/
+				if (togan_NPC_Loop[i].tempR < 0) // trun right
+				{
+					togan_NPC_Loop[i].state = 2;
+				}
+				else if (togan_NPC_Loop[i].tempR > 0) // trun left
+				{
+					togan_NPC_Loop[i].state = 3;
+				}
+
+			}
+			else togan_NPC_Loop[i].state = 1;
+		}
+
+		if (togan_NPC_Loop[i].state == 1 ) // move forward
+		{
+			if (sqrt(pow((togan_NPC_Loop[i].tempposition.x - togan_NPC_Loop[i].position.x), 2) + pow((togan_NPC_Loop[i].tempposition.z - togan_NPC_Loop[i].position.z), 2)) > 5)
+			{
+				togan_NPC_Loop[i].position.x += sin(DegreeToRadian(togan_NPC_Loop[i].rotate_togan)) * 5.f* dt;
+				togan_NPC_Loop[i].position.z += cos(DegreeToRadian(togan_NPC_Loop[i].rotate_togan)) * 5.f* dt;
+			}
+			else
+			{
+				togan_NPC_Loop[i].tempposition.x = 0;
+				togan_NPC_Loop[i].tempposition.z = 0;
+				togan_NPC_Loop[i].state = 0;
+			}
+		}
+		if (togan_NPC_Loop[i].state == 2 )
+		{
+			if (togan_NPC_Loop[i].tempR < -180)
+			{
+				togan_NPC_Loop[i].tempR = 360 + togan_NPC_Loop[i].tempR;
+				togan_NPC_Loop[i].state = 3;
+			}
+			else if (togan_NPC_Loop[i].tempR < 0) //turn right
+			{
+				togan_NPC_Loop[i].tempR += 18 * dt;
+				togan_NPC_Loop[i].rotate_togan -= 18 * dt;
+			}
+			else if (togan_NPC_Loop[i].tempR != 0)
+			{
+
+				togan_NPC_Loop[i].rotate_togan += togan_NPC_Loop[i].tempR;
+				togan_NPC_Loop[i].tempR = 0;
+
+			}
+			else togan_NPC_Loop[i].state = 1;
+
+		}
+		if (togan_NPC_Loop[i].state == 3 )
+		{
+
+			if (togan_NPC_Loop[i].tempR>180)
+			{
+				togan_NPC_Loop[i].tempR = 0 - 360 + togan_NPC_Loop[i].tempR;
+				togan_NPC_Loop[i].state = 2;
+			}
+			else if (togan_NPC_Loop[i].tempR > 0) //turn left
+			{
+				togan_NPC_Loop[i].tempR -= 18 * dt;
+				togan_NPC_Loop[i].rotate_togan += 18 * dt;
+			}
+			else if (togan_NPC_Loop[i].tempR != 0)
+			{
+
+				togan_NPC_Loop[i].rotate_togan += togan_NPC_Loop[i].tempR;
+				togan_NPC_Loop[i].tempR = 0;
+
+			}
+			else togan_NPC_Loop[i].state = 1;
+		}
+	}
 }

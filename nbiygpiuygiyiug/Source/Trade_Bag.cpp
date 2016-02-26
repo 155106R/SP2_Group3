@@ -103,10 +103,8 @@ void Bag::RemoveItem(int ID, int amount) // remove item from bag (pop)
 
 void Bag::buyItem(int ID, int amount, char PID, int num) // buy item from shop (push), PID of the shop
 {
-	if (SharedData::GetInstance()->SD_bitcoins > (ItemS[ID - 1].bitcoin * amount * 2) && SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].stack >= amount)
+	if (SharedData::GetInstance()->SD_bitcoins > (ItemS[ID - 1].bitcoin * amount * 2) && SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].stack >= amount && Slot_Full(ID,amount) == true)
 	{
-
-		TradeCalculation* tempList;
 
 		GetItem(ID, amount);
 		RemoveStack(ID, amount, PID);
@@ -163,4 +161,21 @@ void Bag::clearSlot_reLocation()
 			Slot[i].stack = 0;
 		}
 	}
+}
+
+bool Bag::Slot_Full(int ID, int amount)
+{
+	for (int i = 0; i < Slot.size(); i++)
+	{
+		if (isEmpty(i) == true)
+		{
+			return true;
+		}
+		else if (Slot[i].ID == ID && 99-Slot[i].stack > amount)
+		{
+			return true;
+		}
+	}
+	return false;
+
 }
