@@ -237,10 +237,16 @@ void OpenGalaxyScene::Init()
 
 void OpenGalaxyScene::Update(double dt)
 {
+	if (SharedData::GetInstance()->SD_enableinteract == false)
+	{
+		delay = timer + 1;
+		if (timer > delay)
+		{
+			SharedData::GetInstance()->SD_enableinteract = true;
+		}
 
-	//================================================================================================================================================================================//
-	//																					Update AABB																					  //
-	//================================================================================================================================================================================//
+	}
+
 	spaceshipHitbox.m_origin = *middleOfShip;
 	AABB::updateAABB(spaceshipHitbox);
 
@@ -360,25 +366,29 @@ void OpenGalaxyScene::Update(double dt)
 		land = true;
 		nameOfPlanet = "sean's planet";
 
-		if (Application::IsKeyPressed('E')){
+		if (Application::IsKeyPressed('E') && SharedData::GetInstance()->SD_enableinteract == true){
 			//SharedData::GetInstance()->location = 69; //Does not fucking exist 
+			SharedData::GetInstance()->SD_enableinteract = false;
 		}
 	}
 	else if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet B - YueXian's planet - Toga
 		land = true;
 		nameOfPlanet = "Toga";
 
-		if (Application::IsKeyPressed('E')){
+		if (Application::IsKeyPressed('E') && SharedData::GetInstance()->SD_enableinteract == true){
 			SharedData::GetInstance()->SD_location = PLANET_TOGA;
+			SharedData::GetInstance()->SD_enableinteract = false;
 		}
 	}
 	else if (((*middleOfShip - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C - ShuYu's planet - Jelly Planet
 		land = true;
 		nameOfPlanet = "Jelly Planet";
 
-		if (Application::IsKeyPressed('E') && e_state == 0){
+		if (Application::IsKeyPressed('E') && SharedData::GetInstance()->SD_enableinteract == true){
 			e_state = 1;
+			camera.position = Vector3(0, 0, -15);
 			SharedData::GetInstance()->SD_location = PLANET_JELLY;
+			SharedData::GetInstance()->SD_enableinteract = false;
 		}
 	}
 	else{
