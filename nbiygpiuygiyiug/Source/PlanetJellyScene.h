@@ -124,11 +124,29 @@ private:
 	void CheckQuadrants(float x, float z, float tempx, float tempz, float R, float tempR);
 	bool CheckMagnitude(float x, float z, float tempx, float tempz, float magnitude);
 	
+	//mini game
+	void Init_minigame();
+	void Updata_minigame(double dt);
+	void Render_minigame();
+
+	struct falling_rocks
+	{
+		Vector3 position;
+		bool state;
+		int score;
+	};
+
+	vector<falling_rocks> Rocks;
+
+	// bag/shop
 	void Updata_Checker(double dt);
 	void Render_Checker();
 	int num;
 	int tempnum;
 	bool shop;
+	bool confirm;
+	int SellState;
+	int SBamount;
 	
 	//For Light
 	bool enableLight;

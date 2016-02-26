@@ -1,51 +1,48 @@
 #include"Trade_Shop.h"
 #include "SharedData.h"
 
-Shop::Shop() {}
-
-Shop::~Shop() {}
-
-void Shop::setShopList() // item the shop sells
+Shop::Shop() 
 {
-	
 	Shops TogaShop;
 	TogaShop.name = "TogaS MINERAL SHOP";
 	TogaShop.PID = 'A';
-		Item newGood1;
-		newGood1.name = ItemS[1].name; // 1 = FFLINTIAU
-		newGood1.ID = ItemS[1].ID;
-		newGood1.bitcoin = ItemS[1].bitcoin;
-		newGood1.stack = 10;
-		newGood1.MaxStack = false;
+	Item newGood1;
+	newGood1.name = ItemS[1].name; // 1 = FFLINTIAU
+	newGood1.ID = ItemS[1].ID;
+	newGood1.bitcoin = ItemS[1].bitcoin;
+	newGood1.stack = 10;
+	newGood1.MaxStack = false;
 	TogaShop.GoodS.push_back(newGood1);
-		Item newGood2;
-		newGood2.name = ItemS[2].name; // 2 = CALCH
-		newGood2.ID = ItemS[2].ID;
-		newGood2.bitcoin = ItemS[2].bitcoin;
-		newGood2.stack = 10;
-		newGood2.MaxStack = false;
+	Item newGood2;
+	newGood2.name = ItemS[2].name; // 2 = CALCH
+	newGood2.ID = ItemS[2].ID;
+	newGood2.bitcoin = ItemS[2].bitcoin;
+	newGood2.stack = 10;
+	newGood2.MaxStack = false;
 	TogaShop.GoodS.push_back(newGood2);
 	store.push_back(TogaShop);
 
 	Shops JellyShop;
 	JellyShop.name = " MINERAL SHOP";
 	JellyShop.PID = 'B';
-		Item newGood3;
-		newGood3.name = ItemS[5].name; // 5 = CALSIWM
-		newGood3.ID = ItemS[5].ID;
-		newGood3.bitcoin = ItemS[5].bitcoin;
-		newGood3.stack = 10;
-		newGood3.MaxStack = false;
+	Item newGood3;
+	newGood3.name = ItemS[5].name; // 5 = CALSIWM
+	newGood3.ID = ItemS[5].ID;
+	newGood3.bitcoin = ItemS[5].bitcoin;
+	newGood3.stack = 10;
+	newGood3.MaxStack = false;
 	JellyShop.GoodS.push_back(newGood3);
-		Item newGood4;
-		newGood4.name = ItemS[6].name; // 6 = HAEARN
-		newGood4.ID = ItemS[6].ID;
-		newGood4.bitcoin = ItemS[6].bitcoin;
-		newGood4.stack = 10;
-		newGood4.MaxStack = false;
+	Item newGood4;
+	newGood4.name = ItemS[6].name; // 6 = HAEARN
+	newGood4.ID = ItemS[6].ID;
+	newGood4.bitcoin = ItemS[6].bitcoin;
+	newGood4.stack = 10;
+	newGood4.MaxStack = false;
 	JellyShop.GoodS.push_back(newGood4);
 	store.push_back(JellyShop);
 }
+
+Shop::~Shop() {}
 
 void Shop::AddStack(int ID, int amount, char PID) // Add stack into shop (push) PID of the shop
 {
@@ -100,20 +97,20 @@ void Shop::GetNewItem(int ID, int amount, char PID) // get new item into shop (p
 
 void Shop::RemoveStack(int ID, int amount, char PID) // remove stack from shop (pop) PID of the shop
 {
-	for (int i = 0; i < store.size(); i++)
+	for (int x = 0; x < store.size(); x++)
 	{
-		if (store[i].PID == PID)
+		if (store[x].PID == PID)
 		{
-			for (int i = 0; i < store[i].GoodS.size(); i++)
+			for (int y = 0; y < store[x].GoodS.size(); y++)
 			{
-				if (store[i].GoodS[i].ID == ID && store[i].GoodS[i].stack != 0)
+				if (store[x].GoodS[y].ID == ID && store[x].GoodS[y].stack != 0)
 				{
-					store[i].GoodS[i].MaxStack = false;
-					if ((store[i].GoodS[i].stack - amount) < 0)
+					store[x].GoodS[y].MaxStack = false;
+					if ((store[x].GoodS[y].stack - amount) < 0)
 					{
-						store[i].GoodS[i].stack = 0;
+						store[x].GoodS[y].stack = 0;
 					}
-					else store[i].GoodS[i].stack -= amount;
+					else store[x].GoodS[y].stack -= amount;
 				}
 			}
 		}

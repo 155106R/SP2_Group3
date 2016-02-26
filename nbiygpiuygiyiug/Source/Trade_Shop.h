@@ -9,7 +9,6 @@ class Shop : public TradeCalculation
 public:
 	Shop();
 	~Shop();
-	void setShopList();
 	void AddStack(int ID, int amount, char PID);
 	void GetNewItem(int ID, int amount, char PID); // get new item into shop (push)
 	void RemoveStack(int ID, int amount, char PID); // remove stack from shop (pop)

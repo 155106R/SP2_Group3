@@ -214,7 +214,9 @@ void PlanetJellyScene::Init()
 	num = 0;
 	tempnum = 0;
 	shop = false;
-
+	confirm=false;
+	SellState = 0;
+	SBamount = 1;
 	SharedData::GetInstance()->PlayerInventory->IncreaseSlots(8);
 }
 
@@ -465,7 +467,6 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 
 void PlanetJellyScene::Update(double dt)
 {
-	cout << camera.position << endl;
 	button_prompt = 0;
 
 	player.m_origin = camera.nextPosition;
@@ -970,18 +971,8 @@ void PlanetJellyScene::CheckQuadrants(float x, float z, float tempx, float tempz
 void PlanetJellyScene::Updata_Checker(double dt)
 {
 
-
-	
-
-	if (!Application::IsKeyPressed('B'))
+	if (Application::IsKeyPressed('B') )
 	{
-		e_state = 0;
-
-	}
-
-	if (Application::IsKeyPressed('B')  && e_state == 0)
-	{
-		e_state = 1;
 		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slot[0].name << endl;
 		/*SharedData::GetInstance()->PlayerInventory->Bag::GetItem(4, 10);*/
 		for (int i = 0; i < 3; i++)
@@ -1018,7 +1009,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 		/*cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slots << endl;*/
 	}
 
-	if (Application::IsKeyPressed(VK_DOWN))
+	if (Application::IsKeyPressed(VK_DOWN) && SellState == 0)
 	{
 		if (num <SharedData::GetInstance()->PlayerInventory->Slots - 1 && shop == false)
 		{
@@ -1040,7 +1031,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 		
 
 	}
-	if (Application::IsKeyPressed(VK_UP))
+	if (Application::IsKeyPressed(VK_UP) && SellState == 0)
 	{
 		if (num > 0)
 		{
@@ -1052,31 +1043,85 @@ void PlanetJellyScene::Updata_Checker(double dt)
 		}
 		
 	}
-	if (Application::IsKeyPressed(VK_LEFT) && shop!=true)
+	if (Application::IsKeyPressed(VK_LEFT) && shop != true && SellState == 0)
 	{
 		shop = true;
 		num = 0;
 		tempnum = 0;
 	}
-	if (Application::IsKeyPressed(VK_RIGHT) && shop != false)
+	if (Application::IsKeyPressed(VK_RIGHT) && shop != false && SellState == 0)
 	{
 		shop = false;
 		num = 0;
 		tempnum = 0;
 	}
-
-
-	//cout << num << endl;
-	/*	if (Application::IsKeyPressed('N'))
+	if (Application::IsKeyPressed(VK_RETURN) && shop != true && SellState == 0)
+	{
+		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
 		{
+			SellState = 1;
+		}
+	}
+	if (Application::IsKeyPressed(VK_RETURN) && shop == true && SellState == 0)
+	{
+		if (SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].stack > 0)
+		{
+			SellState = 2;
 
-			if (Application::IsKeyPressed('M'))
-			{*/
+		}
+	}
+	if (Application::IsKeyPressed(VK_UP) && SellState == 1)
+	{
+		if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
+		{
+			SBamount++;
+		}
+	}
+	if (Application::IsKeyPressed(VK_UP) && SellState == 2)
+	{
+		if (SBamount < SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].stack)
+		{
+			SBamount++;
+		}
+	}
+	if (Application::IsKeyPressed(VK_DOWN) && SellState != 0)
+	{
+		if (SBamount > 1)
+		{
+			SBamount--;
+		}
+	}
+	if (Application::IsKeyPressed(VK_RETURN) && shop != true && SellState == 1 && confirm == true)
+	{
+		
+			SharedData::GetInstance()->PlayerInventory->sellItem(SharedData::GetInstance()->PlayerInventory->Slot[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[0].PID);
+			SellState = 0;
+			SBamount = 1;
+			confirm = false;
+
+			
+		
+	}
+	if (Application::IsKeyPressed(VK_RETURN) && shop == true && SellState == 2 && confirm == true)
+	{
+		SharedData::GetInstance()->PlayerInventory->buyItem(SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[0].PID,num);
+		SellState = 0;
+		SBamount = 1;
+		confirm = false;
+	}
+	if (Application::IsKeyPressed(VK_LEFT) && SellState != 0)
+	{
+		confirm = true;
+	}
+	if (Application::IsKeyPressed(VK_RIGHT) && SellState != 0)
+	{
+		confirm = false;
+	}
 }
 
 void PlanetJellyScene::Render_Checker()
 {
-	RenderTextOnScreen(meshList[GEO_TEXT], "BagPack", Color(1, 0, 0), 3, 15, 17);
+	RenderTextOnScreen(meshList[GEO_TEXT], "BagPack", Color(1, 0, 0), 2, 22, 25);
 
 	for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->Slots; i++)
 	{
@@ -1105,7 +1150,7 @@ void PlanetJellyScene::Render_Checker()
 
 	//////////////////////////////////////////////////////////
 
-	RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->PlayerInventory->store[0].name, Color(1, 0, 0), 3, 5, 17);
+	RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->PlayerInventory->store[0].name, Color(1, 0, 0), 2, 7, 25);
 
 	for (int i = 0; i < SharedData::GetInstance()->PlayerInventory->store[0].GoodS.size(); i++)
 	{
@@ -1130,7 +1175,36 @@ void PlanetJellyScene::Render_Checker()
 
 
 	RenderTextOnScreen(meshList[GEO_TEXT], "Items in shop :" + std::to_string(SharedData::GetInstance()->PlayerInventory->store[0].GoodS.size()), Color(1, 0, 0), 2, 7, 12);
-	//RenderTextOnScreen(meshList[GEO_TEXT], "Sell At" + , Color(1, 0, 0), 2, 7, 10);
+
+	//////////////////////////////////////////////////////////
+	if (SellState == 1)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Do you want to Sell: " + std::to_string(SBamount) + " '" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + "'", Color(1, 0, 0), 2, 10, 5);
+		if (SharedData::GetInstance()->PlayerInventory->Slot[num].PID == SharedData::GetInstance()->PlayerInventory->store[0].PID)
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "For : " + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[num].bitcoin * SBamount), Color(1, 0, 0), 2, 12, 4);
+		}
+		else 
+			RenderTextOnScreen(meshList[GEO_TEXT], "For : " + std::to_string(SharedData::GetInstance()->PlayerInventory->Slot[num].bitcoin * SBamount * 2), Color(1, 0, 0), 2, 12, 4);
+	}
+	if (SellState == 2)
+	{
+		RenderTextOnScreen(meshList[GEO_TEXT], "Do you want to Buy: " + std::to_string(SBamount) + " '" + SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].name + "'", Color(1, 0, 0), 2, 10, 5);
+		RenderTextOnScreen(meshList[GEO_TEXT], "For : " + std::to_string(SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].bitcoin * SBamount * 2), Color(1, 0, 0), 2, 12, 4);
+
+	}
+
+	if (SellState != 0)
+	{
+		if (confirm == true)
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 8, 3);
+		}
+		else RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 18, 3);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Confirm", Color(1, 0, 0), 2, 10, 3);
+		RenderTextOnScreen(meshList[GEO_TEXT], "cernel", Color(1, 0, 0), 2, 20, 3);
+	}
+
 }
 
 void PlanetJellyScene::interactionUpdate(double dt)

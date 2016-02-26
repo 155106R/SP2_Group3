@@ -20,7 +20,6 @@ public:
 	TradeCalculation();
 	~TradeCalculation();
 
-	void setItemsList();
 
 	enum Minerals
 	{
