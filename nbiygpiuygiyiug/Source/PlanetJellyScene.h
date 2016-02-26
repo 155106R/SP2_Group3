@@ -191,6 +191,7 @@ private:
 		FREEMOVE,
 		CONVERSE,
 		TRADE,
+		INVENTORY,
 		NUM_state
 	};
 	//interactions

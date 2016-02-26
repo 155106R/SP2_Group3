@@ -30,7 +30,7 @@ void TogaScene::Init()
 
 {
 	e_state = 0;
-
+	i_state = 0;
 	currentstate = FREEMOVE;
 
 	rendertext = 0;
@@ -271,6 +271,9 @@ void TogaScene::Init()
 	meshList[SHIP] = MeshBuilder::GenerateOBJ("player ship", "OBJ//ship.obj");
 	meshList[SHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
 
+	meshList[GEO_INVENTORY] = MeshBuilder::GenerateQuad("inventory", Color(0,0,0));
+	meshList[GEO_INVENTORY]->textureID = LoadTGA("Image//Inventory_screen.tga");
+
 
 	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("Light Cube", Color(1, 0.2509, 0));
 }
@@ -347,14 +350,15 @@ void TogaScene::Update(double dt)
 	timer += dt;
 	//tempPosition = camera.position;
 
-
+	resetKey();
 	droneAnimation(dt);
 	mineralAnimation(dt);
 	upgradeAnimation(dt);
 	toganwalk(dt);
 	getWalktarget(dt);
+	inventory();
 	interactionUpdate(dt);
-	resetKey();
+
 }
 
 
@@ -621,26 +625,32 @@ void TogaScene::Render()
 		viewStack.LoadIdentity();
 		modelStack.PushMatrix();
 		switch (currentstate){
-		case 0:	
+		case FREEMOVE:	
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-92.5, 90, 1, 0);
 		modelStack.Scale(1.1, 0.8, 0.8);
 		RenderMesh(meshList[GEO_UI], false);
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 1.6, 1.7);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 1.9, 1.7);
 		RenderTextOnScreen(meshList[GEO_TEXT], "TOGA", Color(1, 0, 0), 3.5, 20.4, 16.2);
 		break;
-		case 1:
+		case CONVERSE:
 		modelStack.Translate(0, -0.3, -1);
 		modelStack.Rotate(90, 1, 0, 0);
 		modelStack.Scale(1, 1, 0.3);
 		RenderMesh(meshList[GEO_TEXT_BOX], false);
 		break;
-		case 2:
+		case TRADE:
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-90, 1, 0, 0);
 		modelStack.Scale(1.1, 0.8, 0.8);
 		RenderMesh(meshList[GEO_SHOP], false);
 		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		case INVENTORY:
+		modelStack.Translate(-0.035, 0, -0.85);
+		modelStack.Rotate(-90, 1, 0, 0);
+		modelStack.Scale(1, 1, 0.7);
+		RenderMesh(meshList[GEO_INVENTORY], false);
+		//RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
 		break;
 
 		};
@@ -648,7 +658,7 @@ void TogaScene::Render()
 
 
 	
-
+	
 	renderinteract();
 	text();
 
@@ -1176,17 +1186,10 @@ void TogaScene::interactionUpdate(double dt)
 	//cout <<"view : " << camera.view << endl;
 	//cout << "Target : " << camera.target << endl;
 
-	if (SharedData::GetInstance()->SD_enableinteract == false)
+	
+
+	if (SharedData::GetInstance()->SD_enableinteract)
 	{
-		delay = timer + 1;
-		if (timer > delay)
-		{
-			SharedData::GetInstance()->SD_enableinteract = true;
-		}
-
-	}
-
-
 		if ((collision(Shophitbox[0], camera.frontTarget) == true))//Mineral merchant
 		{
 			if (currentstate == 0)
@@ -1274,19 +1277,19 @@ void TogaScene::interactionUpdate(double dt)
 
 		}
 
-		if (((collision(Shophitbox[4], camera.frontTarget) == true)) && e_state == 0)//ship
+		if (collision(Shophitbox[4], camera.frontTarget) && e_state == 0)//ship
 		{
 			button_prompt = 1;
-
+			
 			if (Application::IsKeyPressed('E'))
 			{
-				e_state = 1;
 				SharedData::GetInstance()->SD_enableinteract = false;
+				e_state = 1;
+				
 				SharedData::GetInstance()->SD_location = OPEN_GALAXY;
-
-
 			}
 		}
+	}
 	
 }
 
@@ -1349,7 +1352,20 @@ void TogaScene::resetKey()
 	{
 		e_state = 0;
 	}
+	if (!Application::IsKeyPressed('I'))
+	{
+		i_state = 0;
+	}
+	if (SharedData::GetInstance()->SD_enableinteract == false)
+	{
 
+		if (timer > delay)
+		{
+			delay = timer + 3;
+			SharedData::GetInstance()->SD_enableinteract = true;
+		}
+
+	}
 
 }
 
@@ -1364,5 +1380,29 @@ void TogaScene::checkCollision()
 		}
 	}
 	
+
+}
+
+void TogaScene::inventory()
+{
+
+	if (Application::IsKeyPressed('I'))// && timer > delay) && e_state == 0)
+	{
+		i_state = 1;
+		if (timer > delay)
+		{
+			delay = timer + 0.5;
+				if (currentstate == 0)
+				{
+					currentstate = INVENTORY;
+				}
+				else
+				{
+					currentstate = FREEMOVE;
+				}
+		}
+
+	}
+
 
 }

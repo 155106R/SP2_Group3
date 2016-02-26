@@ -237,15 +237,8 @@ void OpenGalaxyScene::Init()
 
 void OpenGalaxyScene::Update(double dt)
 {
-	if (SharedData::GetInstance()->SD_enableinteract == false)
-	{
-		delay = timer + 1;
-		if (timer > delay)
-		{
-			SharedData::GetInstance()->SD_enableinteract = true;
-		}
+	timer += dt;
 
-	}
 
 	spaceshipHitbox.m_origin = *middleOfShip;
 	AABB::updateAABB(spaceshipHitbox);
@@ -324,7 +317,7 @@ void OpenGalaxyScene::Update(double dt)
 	//================================================================================================================================================================================//
 	//																			Ship interior/exterior																				  //
 	//================================================================================================================================================================================//
-	std::cout << *middleOfShip << std::endl;
+	std::cout << SharedData::GetInstance()->SD_enableinteract << std::endl;
 	*middleOfShip += (*noseOfShip) * accelerateShip * dt;	//Move ship in a direction(Nose is a directional vector)
 
 	if (Application::IsKeyPressed(VK_SPACE)){
@@ -361,38 +354,46 @@ void OpenGalaxyScene::Update(double dt)
 	//																			Planet Landing																						  //
 	//================================================================================================================================================================================//
 
+
 	//Planet interaction/docking
-	if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){			//for planet A - sean's planet - ????????
-		land = true;
-		nameOfPlanet = "sean's planet";
+	if (SharedData::GetInstance()->SD_enableinteract)
+	{
+		if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){			//for planet A - sean's planet - ????????
+			land = true;
+			nameOfPlanet = "sean's planet";
 
-		if (Application::IsKeyPressed('E') && SharedData::GetInstance()->SD_enableinteract == true){
-			//SharedData::GetInstance()->location = 69; //Does not fucking exist 
-			SharedData::GetInstance()->SD_enableinteract = false;
+			if (Application::IsKeyPressed('E')){
+				//SharedData::GetInstance()->location = 69; //Does not fucking exist 
+				//SharedData::GetInstance()->SD_enableinteract = false;
+			//	return;
+			}
 		}
-	}
-	else if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet B - YueXian's planet - Toga
-		land = true;
-		nameOfPlanet = "Toga";
+		else if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet B - YueXian's planet - Toga
+			land = true;
+			nameOfPlanet = "Toga";
+		
+			if (Application::IsKeyPressed('E'))
+			{
+				SharedData::GetInstance()->SD_enableinteract = false;
+				SharedData::GetInstance()->SD_location = PLANET_TOGA;
+				
+			}
+		}
+		else if (((*middleOfShip - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C - ShuYu's planet - Jelly Planet
+			land = true;
+			nameOfPlanet = "Jelly Planet";
 
-		if (Application::IsKeyPressed('E') && SharedData::GetInstance()->SD_enableinteract == true){
-			SharedData::GetInstance()->SD_location = PLANET_TOGA;
-			SharedData::GetInstance()->SD_enableinteract = false;
+			if (Application::IsKeyPressed('E'))
+			{
+				SharedData::GetInstance()->SD_enableinteract = false;
+				SharedData::GetInstance()->SD_location = PLANET_JELLY;
+				return;
+			}
 		}
-	}
-	else if (((*middleOfShip - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C - ShuYu's planet - Jelly Planet
-		land = true;
-		nameOfPlanet = "Jelly Planet";
-
-		if (Application::IsKeyPressed('E') && SharedData::GetInstance()->SD_enableinteract == true){
-			e_state = 1;
-			camera.position = Vector3(0, 0, -15);
-			SharedData::GetInstance()->SD_location = PLANET_JELLY;
-			SharedData::GetInstance()->SD_enableinteract = false;
+		else{
+			land = false;
+			
 		}
-	}
-	else{
-		land = false;
 	}
 	resetKey();
 }
@@ -932,11 +933,20 @@ void OpenGalaxyScene::resetKey()
 		e_state = 0;
 	}
 
+	if (SharedData::GetInstance()->SD_enableinteract == false)
+	{
+		
+		if (timer > delay)
+		{
+			delay = timer + 1;
+			SharedData::GetInstance()->SD_enableinteract = true;
+		}
+
+	}
 }
 
 //Author: Randall (155106R)
 //Updated 22/2/2016 - Randall
-
 
 //Note to self: We are gonna make the ship interior smaller and of a more regular shape so that the hit box stuff is much better
 //Currently we can't do much cause of the irregular shape - so wait for the new interior and fix it

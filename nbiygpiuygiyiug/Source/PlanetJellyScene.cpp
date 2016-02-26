@@ -467,6 +467,8 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 
 void PlanetJellyScene::Update(double dt)
 {
+	cout << SharedData::GetInstance()->SD_enableinteract << endl;
+	//cout << camera.position << endl;
 	button_prompt = 0;
 
 	player.m_origin = camera.nextPosition;
@@ -558,8 +560,9 @@ void PlanetJellyScene::Update(double dt)
 	}
 
 	timer += dt;
-	interactionUpdate(dt);
 	resetKey();
+	interactionUpdate(dt);
+	
 }
 
 void PlanetJellyScene::RenderText(Mesh* mesh, std::string text, Color color)
@@ -1207,109 +1210,118 @@ void PlanetJellyScene::Render_Checker()
 
 }
 
+
+
+
 void PlanetJellyScene::interactionUpdate(double dt)
 {
 	//cout <<"view : " << camera.view << endl;
 	//cout << "Target : " << camera.target << endl;
-
-	if ((collision(hitbox[0], camera.frontTarget) == true))//Mineral merchant
+	if (SharedData::GetInstance()->SD_enableinteract)
 	{
-		if (currentstate == 0)
+
+		if ((collision(hitbox[0], camera.frontTarget) == true))//Mineral merchant
 		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				e_state = 1;
+				button_prompt = 0;
+				interact_state();
+				if (rendertext == 0 && currentstate == 1)
+				{
+					rendertext = 1;
+				}
+				else
+				{
+					rendertext = 0;
+				}
+
+				delay = timer + 0.5;//set delay offset
+
+			}
+		}
+
+
+		if ((collision(hitbox[1], camera.frontTarget) == true))//upgrade merchant
+		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				e_state = 1;
+				button_prompt = 0;
+				interact_state();
+				if (rendertext == 0 && currentstate == 1)
+				{
+					rendertext = 2;
+				}
+				else
+				{
+					rendertext = 0;
+				}
+
+				delay = timer + 0.5;//set delay offset
+
+
+			}
+		}
+
+
+		if ((collision(hitbox[2], camera.frontTarget) == true))//Drone merchant
+		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				e_state = 1;
+				button_prompt = 0;
+				interact_state();
+				if (rendertext == 0 && currentstate == 1)
+				{
+					rendertext = 3;
+				}
+				else
+				{
+					rendertext = 0;
+				}
+
+				delay = timer + 0.5;//set delay offset
+
+
+			}
+		}
+
+		if (((collision(hitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
+		{
+			e_state = 1;
+
+		}
+
+		if (((collision(hitbox[4], camera.frontTarget) == true)) && e_state == 0)//ship
+		{
+
 			button_prompt = 1;
-		}
 
-		if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
-		{
-			e_state = 1;
-			button_prompt = 0;
-			interact_state();
-			if (rendertext == 0 && currentstate == 1)
+			if (Application::IsKeyPressed('E'))
 			{
-				rendertext = 1;
-			}
-			else
-			{
-				rendertext = 0;
+				cout << "no" << endl;
+				SharedData::GetInstance()->SD_enableinteract = false;
+				e_state = 1;
+				SharedData::GetInstance()->SD_location = OPEN_GALAXY;
+				
+
 			}
 
-			delay = timer + 0.5;//set delay offset
-
 		}
-	}
-
-
-	if ((collision(hitbox[1], camera.frontTarget) == true))//upgrade merchant
-	{
-		if (currentstate == 0)
-		{
-			button_prompt = 1;
-		}
-		if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
-		{
-			e_state = 1;
-			button_prompt = 0;
-			interact_state();
-			if (rendertext == 0 && currentstate == 1)
-			{
-				rendertext = 2;
-			}
-			else
-			{
-				rendertext = 0;
-			}
-
-			delay = timer + 0.5;//set delay offset
-
-
-		}
-	}
-
-
-	if ((collision(hitbox[2], camera.frontTarget) == true))//Drone merchant
-	{
-		if (currentstate == 0)
-		{
-			button_prompt = 1;
-		}
-		if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
-		{
-			e_state = 1;
-			button_prompt = 0;
-			interact_state();
-			if (rendertext == 0 && currentstate == 1)
-			{
-				rendertext = 3;
-			}
-			else
-			{
-				rendertext = 0;
-			}
-
-			delay = timer + 0.5;//set delay offset
-
-
-		}
-	}
-
-	if (((collision(hitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
-	{
-		e_state = 1;
-
-	}
-
-	if (((collision(hitbox[4], camera.frontTarget) == true)) && e_state == 0)//ship
-	{
-		
-		button_prompt = 1;
-		
-		if (Application::IsKeyPressed('E') )
-		{
-			e_state = 1;
-			SharedData::GetInstance()->SD_location = OPEN_GALAXY;
-
-		}
-			
 	}
 }
 
@@ -1373,6 +1385,16 @@ void PlanetJellyScene::resetKey()
 	if (!Application::IsKeyPressed('E'))
 	{
 		e_state = 0;
+	}
+	if (SharedData::GetInstance()->SD_enableinteract == false)
+	{
+
+		if (timer > delay)
+		{
+			delay = timer + 3;
+			SharedData::GetInstance()->SD_enableinteract = true;
+		}
+
 	}
 
 }

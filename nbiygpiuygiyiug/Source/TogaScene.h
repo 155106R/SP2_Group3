@@ -63,7 +63,7 @@ class TogaScene : public Scene
 
 		CAVE,
 
-
+		GEO_INVENTORY,
 		GEO_TEXT,
 		GEO_UI,
 		GEO_TEXT_BOX,
@@ -150,9 +150,10 @@ private:
 	void getWalktarget(double dt);
 	void Init_getWalktarget();
 	
+	//key states and prompts
 	bool e_state;
 	bool button_prompt;
-	
+	bool i_state;
 
 	//ui states
 	enum state{
@@ -160,12 +161,14 @@ private:
 		FREEMOVE,
 		CONVERSE,
 		TRADE,
+		INVENTORY,
 		NUM_state
 	};
 
 
 	//interactions
 	unsigned currentstate;
+	void inventory();
 	void interact_state();
 	void renderinteract();
 	void text();
