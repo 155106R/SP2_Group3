@@ -207,6 +207,9 @@ void PlanetJellyScene::Init()
 
 	meshList[SHIP] = MeshBuilder::GenerateOBJ("player ship", "OBJ//ship.obj");
 	meshList[SHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
+
+	meshList[GEO_INVENTORY] = MeshBuilder::GenerateQuad("inventory", Color(0, 0, 0));
+	meshList[GEO_INVENTORY]->textureID = LoadTGA("Image//Inventory_screen.tga");
 	
 	//Render NCP
 	Init_animation_NPC();
@@ -889,11 +892,19 @@ void PlanetJellyScene::Render()
 		}
 		break;
 	case INVENTORY:
-	//	modelStack.Translate(-0.035, 0, -0.85);
-	//	modelStack.Rotate(-90, 1, 0, 0);
-	//	modelStack.Scale(1, 1, 0.7);
-	//	RenderMesh(meshList[GEO_INVENTORY], false);
-	//	//RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		modelStack.Translate(-0.035, 0, -0.85);
+		modelStack.Rotate(-90, 1, 0, 0);
+		modelStack.Scale(1, 1, 0.7);
+		if (SellState == DROPPING)
+		{
+			RenderMesh(meshList[GEO_AMOUNTBOX], false);
+		}
+		else
+		{
+			RenderMesh(meshList[GEO_INVENTORY], false);
+		}
+
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
 		break;
 
 	};
@@ -989,7 +1000,7 @@ void PlanetJellyScene::Init_Checker()
 }
 void PlanetJellyScene::Updata_Checker(double dt)
 {
-	cout << SellState << endl;
+	//cout << SellState << endl;
 	if (Application::IsKeyPressed('B'))
 	{
 		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slot[0].name << endl;
@@ -1240,18 +1251,18 @@ void PlanetJellyScene::Render_Checker()
 	}
 	if (SellState == DROPPING && currentstate == INVENTORY)
 	{
-		RenderTextOnScreen(meshList[GEO_TEXT], "Drop:  " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + ")", Color(1, 0, 0), 2, 16, 18);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Drop:  " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + ")", Color(1, 0, 0), 2, 14, 18);
 	}
 
 	if (SellState != BROWSING && (currentstate == TRADE || currentstate == INVENTORY))//not browsing
 	{
 		if (confirm == true)
 		{
-			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 13, 13);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 11, 13);
 		}
-		else RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 23, 13);
-		RenderTextOnScreen(meshList[GEO_TEXT], "Confirm", Color(1, 0, 0), 2, 15, 13);
-		RenderTextOnScreen(meshList[GEO_TEXT], "Cancel", Color(1, 0, 0), 2, 25, 13);
+		else RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 21, 13);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Confirm", Color(1, 0, 0), 2, 13, 13);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Cancel", Color(1, 0, 0), 2, 23, 13);
 	}
 
 }

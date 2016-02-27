@@ -35,14 +35,16 @@ public:
 	}
 
 	//PlayerAssests
-	int SD_hullIntegrity = 100;
+	float SD_hullIntegrity = 100;
 	int SD_hullmax = 100;
 
 	//upgrades
 	int SD_hullLevel = 0;
 	int SD_hullCost = 10;
-
-
+	
+	
+	//drones
+	bool SD_RepairDrone = 1;//for testing  purposes set true, would be defaulted to zero
 
 	int SD_bitcoins = 0;
 	//PlayerLocation

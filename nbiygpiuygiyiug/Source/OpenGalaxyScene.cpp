@@ -22,6 +22,7 @@ OpenGalaxyScene::~OpenGalaxyScene()
 
 void OpenGalaxyScene::Init()
 {
+	SharedData::GetInstance()->SD_RepairDrone = 1;
 	//Gets new seed
 	Math::InitRNG();
 
@@ -207,8 +208,15 @@ void OpenGalaxyScene::Init()
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//Galaxy//galaxy-Z.tga");
 
 	//Spaceship
+	meshList[SPACESHIP_DRONE] = MeshBuilder::GenerateOBJ("Spaceship", "OBJ//repair_drone.obj");
+	meshList[SPACESHIP_DRONE]->textureID = LoadTGA("Image//repair_drone_texture.tga");
+
 	meshList[SPACESHIP] = MeshBuilder::GenerateOBJ("Spaceship", "OBJ//ship.obj");
 	meshList[SPACESHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
+
+	meshList[PARTICLES] = MeshBuilder::GenerateQuad("fire-things", Color(0, 0, 0));
+	meshList[PARTICLES]->textureID = LoadTGA("Image//sprite_ship.tga");
+
 
 	//Spaceship Interior
 	meshList[SPACESHIP_INTERIOR] = MeshBuilder::GenerateOBJ("Spaceship", "OBJ//ship_interior.obj");
@@ -433,6 +441,21 @@ void OpenGalaxyScene::Update(double dt)
 	}
 
 
+	if (SharedData::GetInstance()->SD_RepairDrone == 1)
+	{
+		if (SharedData::GetInstance()->SD_hullIntegrity < (SharedData::GetInstance()->SD_hullmax*0.8))//ship has less than 4/5ths of its hp
+		{
+			rdrone_active = true;
+			Repairdrone(dt);//runs the animation code for repair drone
+			rdrone_radrotate += dt * 20;
+			rdrone_yrotate += dt * 20;
+			SharedData::GetInstance()->SD_hullIntegrity += 2 * dt;
+		}
+		else
+		{
+			rdrone_active = false;
+		}
+	}
 	//================================================================================================================================================================================//
 	//																			Planet Landing																						  //
 	//================================================================================================================================================================================//
@@ -621,7 +644,7 @@ void OpenGalaxyScene::Render()
 	viewStack.LoadIdentity();
 
 	//Change viewstack for each camera
-	
+
 	switch (CURRENT_STATE){
 	case PILOTING:
 		viewStack.LookAt(shipCamera.position.x, shipCamera.position.y, shipCamera.position.z,
@@ -673,29 +696,29 @@ void OpenGalaxyScene::Render()
 
 	//Render Asteroids
 	for (unsigned i = 0; i < allAsteroids.size(); i++){
-			modelStack.PushMatrix();
-			modelStack.Translate(allAsteroids[i]->hitbox.m_origin.x, allAsteroids[i]->hitbox.m_origin.y, allAsteroids[i]->hitbox.m_origin.z);	//Move asteroids to their positions
-			modelStack.Scale(allAsteroids[i]->length, allAsteroids[i]->height, allAsteroids[i]->width);											//Give them their appearance
-			RenderMesh(meshList[ASTEROIDS], true);
-			modelStack.PopMatrix();
+		modelStack.PushMatrix();
+		modelStack.Translate(allAsteroids[i]->hitbox.m_origin.x, allAsteroids[i]->hitbox.m_origin.y, allAsteroids[i]->hitbox.m_origin.z);	//Move asteroids to their positions
+		modelStack.Scale(allAsteroids[i]->length, allAsteroids[i]->height, allAsteroids[i]->width);											//Give them their appearance
+		RenderMesh(meshList[ASTEROIDS], true);
+		modelStack.PopMatrix();
 
-			//Render hitbox for Astroid
-			modelStack.PushMatrix();
-			modelStack.Translate(
-				(allAsteroids[i]->hitbox.m_origin.x),
-				(allAsteroids[i]->hitbox.m_origin.y),
-				(allAsteroids[i]->hitbox.m_origin.z)
-				);
-			modelStack.Scale(
-				(allAsteroids[i]->hitbox.m_length),
-				(allAsteroids[i]->hitbox.m_height),
-				(allAsteroids[i]->hitbox.m_width)
-				);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-			RenderMesh(meshList[GEO_LIGHTCUBE], false);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-			modelStack.PopMatrix();
-			//Render hitbox for Astroid end
+		//Render hitbox for Astroid
+		modelStack.PushMatrix();
+		modelStack.Translate(
+			(allAsteroids[i]->hitbox.m_origin.x),
+			(allAsteroids[i]->hitbox.m_origin.y),
+			(allAsteroids[i]->hitbox.m_origin.z)
+			);
+		modelStack.Scale(
+			(allAsteroids[i]->hitbox.m_length),
+			(allAsteroids[i]->hitbox.m_height),
+			(allAsteroids[i]->hitbox.m_width)
+			);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
+		RenderMesh(meshList[GEO_LIGHTCUBE], false);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
+		modelStack.PopMatrix();
+		//Render hitbox for Astroid end
 	}
 
 	//================================================================================================================================================================================//
@@ -708,51 +731,68 @@ void OpenGalaxyScene::Render()
 	modelStack.Rotate(rotateShip, 0, 1, 0);
 	modelStack.Rotate(rotateShipZ, 0, 0, 1);
 
+
+
 	switch (CURRENT_STATE){
-		case PILOTING:
-			RenderMesh(meshList[SPACESHIP], true);	//To render ship
-			//Drill		//Need to do another check for if in drilling mode or not
-			modelStack.Translate(-3.5, 3, 0);
-			RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
-			RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
+	case PILOTING:
+		RenderMesh(meshList[SPACESHIP], true);	//To render ship
+		//Drill		//Need to do another check for if in drilling mode or not
+		modelStack.Translate(-3.5, 3, 0);
+		RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
+		RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
 
-			//Particle effects
-			for (int i = 0; i < accelerateShip * 3; i++){
-				modelStack.PushMatrix();
-				modelStack.Translate(Math::RandFloatMinMax(-10, -15), Math::RandFloatMinMax(-2, 2), Math::RandFloatMinMax(-8, 8));
-				RenderMesh(meshList[GEO_LIGHTCUBE], false);
-				modelStack.PopMatrix();
-			}
-			break;
-
-		case IN_SHIP:
-			modelStack.Rotate(90, 0, 1, 0);
-			modelStack.Scale(10, 10, 10);
-			RenderMesh(meshList[SPACESHIP_INTERIOR], true);	//To render ship interior
-			break;
-
-		case DRILLING:
-			RenderMesh(meshList[SPACESHIP], true);	//To render ship
-			modelStack.PopMatrix();
+		//Particle effects
+		for (int i = 0; i < accelerateShip; i++){
 			modelStack.PushMatrix();
-			modelStack.Translate(Drill.position.x, Drill.position.y, Drill.position.z);
-			//modelStack.Translate(0, -1.8, num);
-			//modelStack.Rotate(12, 0, 1, 0);
-			//modelStack.Rotate(rotateShip, 0, 1, 0);
-			modelStack.Rotate(Drill.camera.cameraRotationY +80, 0, 1, 0);
-			modelStack.Rotate(Drill.camera.cameraRotationX , 0, 0, 1);
-			modelStack.Translate(1.8, -1.8, 0);
-			modelStack.Rotate(13, 0, 1, 0);
-			modelStack.Rotate(7, 0, 0, 1);
-			
-			RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
-			//modelStack.Rotate(Drill.rotate, 0, 1, 0);
-			modelStack.Rotate(Drill.rotate, 1, 0, 0);
-			RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
-			
+			modelStack.Translate(Math::RandFloatMinMax(-7, -15), Math::RandFloatMinMax(-4, 1), Math::RandFloatMinMax(-8, 8));
+			float scale = Math::RandFloatMinMax(1, 0.3);
+			modelStack.Scale(scale, scale, scale);
+			generateParticles();
+			modelStack.PopMatrix();
+		}
+		break;
+
+	case IN_SHIP:
+		modelStack.Rotate(90, 0, 1, 0);
+		modelStack.Scale(10, 10, 10);
+		RenderMesh(meshList[SPACESHIP_INTERIOR], true);	//To render ship interior
+		break;
+
+	case DRILLING:
+		RenderMesh(meshList[SPACESHIP], true);	//To render ship
+		modelStack.PopMatrix();
+		modelStack.PushMatrix();
+		modelStack.Translate(Drill.position.x, Drill.position.y, Drill.position.z);
+		//modelStack.Translate(0, -1.8, num);
+		//modelStack.Rotate(12, 0, 1, 0);
+		//modelStack.Rotate(rotateShip, 0, 1, 0);
+		modelStack.Rotate(Drill.camera.cameraRotationY + 80, 0, 1, 0);
+		modelStack.Rotate(Drill.camera.cameraRotationX, 0, 0, 1);
+		modelStack.Translate(1.8, -1.8, 0);
+		modelStack.Rotate(13, 0, 1, 0);
+		modelStack.Rotate(7, 0, 0, 1);
+
+		RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
+		//modelStack.Rotate(Drill.rotate, 0, 1, 0);
+		modelStack.Rotate(Drill.rotate, 1, 0, 0);
+		RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
+
 	}
 
 	modelStack.PopMatrix();
+
+
+	//Repair drone
+	if (rdrone_active)
+	{
+		modelStack.PushMatrix();
+		modelStack.Translate(rdrone_pos.x, middleOfShip->y + 1.5, rdrone_pos.z);
+		modelStack.Rotate(rdrone_yrotate, 0, 1, 0);
+		modelStack.Rotate(180, 0, 1, 0);
+		modelStack.Scale(0.6, 0.6, 0.6);
+		RenderMesh(meshList[SPACESHIP_DRONE], true);
+		modelStack.PopMatrix();
+	}
 
 	//================================================================================================================================================================================//
 	//																				Hitbox																							  //
@@ -949,6 +989,18 @@ void OpenGalaxyScene::generateSkybox(){
 
 }
 
+void OpenGalaxyScene::generateParticles()
+{
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(1, 1, 1);
+	RenderMesh(meshList[PARTICLES], false);
+	modelStack.Rotate(-90, 0, 0, 1);
+	RenderMesh(meshList[PARTICLES], false);	
+	modelStack.Rotate(-90, 1, 0, 0);
+	modelStack.PopMatrix();
+}
+
 void OpenGalaxyScene::updateShipMovement(double dt){
 	//For stabilisation
 	if (rotateShipZ && (!Application::IsKeyPressed('U')) && (!Application::IsKeyPressed('O'))){	//to "stabilize" ship
@@ -1056,6 +1108,19 @@ void OpenGalaxyScene::updateDrillMovement(double dt){
 	if (Application::IsKeyPressed('O')){
 		Drill.position.y -= 1.f;
 	}*/
+
+}
+
+
+void OpenGalaxyScene::Repairdrone(double dt)
+{
+	//rdrone_yrotate = 0;
+	float theta = rdrone_radrotate;
+	float offsetx = (float)(7*sin(DegreeToRadian(theta)));
+	float offsetz = (float)(7*cos(DegreeToRadian(theta)));
+	rdrone_pos.x = middleOfShip->x - offsetx;
+	rdrone_pos.z = middleOfShip->z - offsetz;
+	
 
 }
 

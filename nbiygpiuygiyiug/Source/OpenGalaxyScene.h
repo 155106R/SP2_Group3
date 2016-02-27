@@ -18,6 +18,8 @@ using std::ifstream;
 #include "Light.h"
 #include "AABB.h"
 #include <map>
+#include "MyMath.h"
+using Math::DegreeToRadian;
 
 class Asteroid{
 public:
@@ -97,11 +99,13 @@ class OpenGalaxyScene : public Scene
 		PLANET_SUN,
 
 		ASTEROIDS,
+		PARTICLES,
 
 		SPACESHIP,
 		SPACESHIP_INTERIOR,
 		SPACESHIP_DRILL_BODY,
 		SPACESHIP_DRILL_HEAD,
+		SPACESHIP_DRONE,
 
 		GEO_TEXT,
 		GEO_HUD,
@@ -171,6 +175,7 @@ public:
 	virtual void Render();
 	virtual void Exit();
 
+
 	//Ship movement stuff
 	Vector3 *noseOfShip;
 	Vector3 *middleOfShip;
@@ -188,7 +193,16 @@ private:
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 
 	void generateSkybox();
-	
+	void generateParticles();
+
+
+	//DRONE STUFF
+	void Repairdrone(double dt);
+	float rdrone_yrotate = 0;
+	Vector3 rdrone_pos;
+	float rdrone_radrotate = 0;
+	bool rdrone_active = 0;
+
 	//For Planet Interactions
 	bool e_state;
 	float timer = 0;
