@@ -10,6 +10,7 @@ using std::ifstream;
 
 #include "Scene.h"
 #include "FPCamera.h"
+#include "Camera_drill.h"
 #include "Camera_Mouse.h"
 #include "OpenGalaxyCamera.h"
 #include "Mesh.h"
@@ -69,7 +70,7 @@ class OpenGalaxyScene : public Scene
 
 		AABB drillHead;
 
-		OpenGalaxyCamera camera;
+		Camera_drill camera;
 	}Drill;
 
 	enum GEOMETRY_TYPE
@@ -77,6 +78,7 @@ class OpenGalaxyScene : public Scene
 		GEO_AXES,
 		GEO_LIGHTCUBE,
 		GEO_TEXTBOX,
+		GEO_DRILL_UI,
 
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,

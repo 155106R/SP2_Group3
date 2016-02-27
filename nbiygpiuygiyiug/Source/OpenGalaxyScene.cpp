@@ -242,10 +242,26 @@ void OpenGalaxyScene::Init()
 	meshList[GEO_HUD] = MeshBuilder::GenerateQuad("HUD", Color(0, 0, 0));
 	meshList[GEO_HUD]->textureID = LoadTGA("Image//HUD.tga");
 
+	meshList[GEO_DRILL_UI] = MeshBuilder::GenerateQuad("Drill ui", Color(0, 0, 0));
+	meshList[GEO_DRILL_UI]->textureID = LoadTGA("Image//drill_UI.tga");
+
 }
+
+float num = 0 ;
 
 void OpenGalaxyScene::Update(double dt)
 {
+	if (Application::IsKeyPressed('Z'))
+	{
+		num += 3 * dt;
+		std::cout << num << endl;
+	}
+	if (Application::IsKeyPressed('X'))
+	{
+		num -= 3 * dt;
+		std::cout << num << endl;
+	}
+
 	timer += dt;
 
 	Drill.drillHead.m_origin = Drill.position + (Drill.facing * 3.5);//Vector3(Drill.position.x + 10, Drill.position.y, Drill.position.z) + (Drill.facing * 5);
@@ -254,7 +270,7 @@ void OpenGalaxyScene::Update(double dt)
 	spaceshipHitbox.m_origin = *middleOfShip;
 	AABB::updateAABB(spaceshipHitbox);
 
-	std::cout << SharedData::GetInstance()->PlayerInventory->Slot[0].name << " " << SharedData::GetInstance()->PlayerInventory->Slot[0].stack << std::endl;
+	//std::cout << SharedData::GetInstance()->PlayerInventory->Slot[0].name << " " << SharedData::GetInstance()->PlayerInventory->Slot[0].stack << std::endl;
 
 
 	for (int i = 0; i < allAsteroids.size(); i++){
@@ -380,7 +396,7 @@ void OpenGalaxyScene::Update(double dt)
 				Drill.rotate = 0;
 				Drill.position = Vector3(middleOfShip->x, middleOfShip->y + 5, middleOfShip->z);
 				Drill.camera.Init(Vector3(10, 10, 10), Drill.position, Vector3(0, 10, 0));
-				Drill.camera.distance = 25;
+				Drill.camera.position = Vector3(middleOfShip->x, middleOfShip->y + 10, middleOfShip->z);
 				CURRENT_STATE = DRILLING;
 			break;
 			case DRILLING:
@@ -407,8 +423,10 @@ void OpenGalaxyScene::Update(double dt)
 			break;
 
 		case DRILLING:
+			Drill.camera.colliding = false;
 			Drill.camera.target = Drill.position;
 			Drill.camera.Update(dt);
+			Drill.camera.movement();
 			updateDrillMovement(dt);
 			//Need input for drill movement
 			break;
@@ -718,12 +736,20 @@ void OpenGalaxyScene::Render()
 			modelStack.PopMatrix();
 			modelStack.PushMatrix();
 			modelStack.Translate(Drill.position.x, Drill.position.y, Drill.position.z);
-			modelStack.Rotate(rotateShip, 0, 1, 0);
-			modelStack.Rotate(Drill.rotate, 0, 1, 0);
+			//modelStack.Translate(0, -1.8, num);
+			//modelStack.Rotate(12, 0, 1, 0);
+			//modelStack.Rotate(rotateShip, 0, 1, 0);
+			modelStack.Rotate(Drill.camera.cameraRotationY +80, 0, 1, 0);
+			modelStack.Rotate(Drill.camera.cameraRotationX , 0, 0, 1);
+			modelStack.Translate(1.8, -1.8, 0);
+			modelStack.Rotate(13, 0, 1, 0);
+			modelStack.Rotate(7, 0, 0, 1);
+			
 			RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
+			//modelStack.Rotate(Drill.rotate, 0, 1, 0);
+			modelStack.Rotate(Drill.rotate, 1, 0, 0);
 			RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
-			modelStack.PopMatrix();
-			modelStack.PushMatrix();
+			
 	}
 
 	modelStack.PopMatrix();
@@ -849,14 +875,13 @@ void OpenGalaxyScene::Render()
 	//================================================================================================================================================================================//
 
 	//Generate HUD
-	while (CURRENT_STATE != DRILLING){
+
 		drawHUD();
-		break;
-	}
+
 
 	//Text if ship is within range of landing on planets
 	while (land){
-		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 3, 3, 10);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 4, 3.5, 8.5);
 		break;
 	}
 
@@ -993,7 +1018,18 @@ void OpenGalaxyScene::updateShipMovement(double dt){
 void OpenGalaxyScene::updateDrillMovement(double dt){
 
 	//For ship movement
-	if (Application::IsKeyPressed('J')){
+	Drill.position = Drill.camera.position;
+//	Drill.position.y 20;
+
+	if(Application::IsKeyPressed(VK_SPACE))
+	{
+		Drill.rotate += 600 * dt;
+		//put colision detection here
+		//collision between asteroid and Drill.Camera.frontTarget
+	
+	}
+
+	/*(Application::IsKeyPressed('J')){
 		Drill.rotate += 1.0f;
 		Mtx44 rotate;
 		rotate.SetToRotation(1, 0, 1, 0);
@@ -1019,27 +1055,41 @@ void OpenGalaxyScene::updateDrillMovement(double dt){
 	}
 	if (Application::IsKeyPressed('O')){
 		Drill.position.y -= 1.f;
-	}
+	}*/
 
 }
 
 void OpenGalaxyScene::drawHUD()
 {
-	viewStack.LoadIdentity();
-	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, -1);
-	modelStack.Rotate(-92.5, 90, 1, 0);
-	modelStack.Scale(1.1, 0.8, 0.8);
-	RenderMesh(meshList[GEO_HUD], false);
-	modelStack.PopMatrix();
+	switch (CURRENT_STATE){
+	case(PILOTING) :
+		viewStack.LoadIdentity();
+		modelStack.PushMatrix();
+		modelStack.Translate(0, 0, -1);
+		modelStack.Rotate(-92.5, 90, 1, 0);
+		modelStack.Scale(1.1, 0.8, 0.8);
+		RenderMesh(meshList[GEO_HUD], false);
+		modelStack.PopMatrix();
 
-	RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoins:" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 3, 0.5, 18);
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)SharedData::GetInstance()->SD_hullIntegrity), Color(1, 0, 0), 3, 22.5, 3.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoins:" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 3, 0.5, 18);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)SharedData::GetInstance()->SD_hullIntegrity), Color(1, 0, 0), 3, 22.5, 3.5);
 
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->x), Color(1, 0, 0), 3, 4.5, 6.5);
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->y), Color(1, 0, 0), 3, 4.5, 5.5);
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->z), Color(1, 0, 0), 3, 4.5, 4.5);
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)accelerateShip), Color(1, 0, 0), 4, 18.0, 5.7);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->x), Color(1, 0, 0), 3, 4.5, 6.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->y), Color(1, 0, 0), 3, 4.5, 5.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->z), Color(1, 0, 0), 3, 4.5, 4.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)accelerateShip), Color(1, 0, 0), 4, 18.0, 5.7);
+		break;
+
+	case(DRILLING) :
+		viewStack.LoadIdentity();
+		modelStack.PushMatrix();
+		modelStack.Translate(0, 0, -1);
+		modelStack.Rotate(-90, 1, 0, 0);
+		modelStack.Scale(1.1, 0.8, 0.8);
+		RenderMesh(meshList[GEO_DRILL_UI], false);
+		modelStack.PopMatrix();
+		break;
+	}
 }
 
 void OpenGalaxyScene::resetKey()

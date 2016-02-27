@@ -620,7 +620,7 @@ void TogaScene::Render()
 
 	// render NPC
 	//NPC-NPC
-	for (int i = 0; i <= 1; i++)
+	for (int i = 0; i <= 3; i++)
 	{
 		modelStack.PushMatrix();
 		modelStack.Translate(togan_NPC_Loop[i].position.x, togan_NPC_Loop[i].position.y, togan_NPC_Loop[i].position.z);
@@ -859,6 +859,7 @@ void TogaScene::generateTogan()
 
 	//body
 	modelStack.PushMatrix();
+	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_BODY], true);
@@ -866,7 +867,7 @@ void TogaScene::generateTogan()
 
 	//head
 	modelStack.PushMatrix();
-	modelStack.Rotate(0, 1, 1, 1);
+	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_HEAD], true);
@@ -875,14 +876,14 @@ void TogaScene::generateTogan()
 	//legs
 	//left leg
 	modelStack.PushMatrix();
-	modelStack.Translate(0, 10, 3.5);
+	modelStack.Translate(0, 10, 2);
 	modelStack.Rotate(rotate_legL, 0, 0, 1);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_LEG], true);
 	modelStack.PopMatrix();
 	//right leg
 	modelStack.PushMatrix();	
-	modelStack.Translate(0, 10, -3.5);
+	modelStack.Translate(0, 10, -2);
 	modelStack.Rotate(rotate_legR, 0, 0, 1);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_LEG], true);
@@ -1013,7 +1014,7 @@ void TogaScene::toganwalk(double dt)
 {
 	if (armR_max ==0 )
 	{
-		rotate_armR += 7 * dt;
+		rotate_armR += 20 * dt;
 			if(rotate_armR > 35)
 			{
 				armR_max = 1;
@@ -1021,7 +1022,7 @@ void TogaScene::toganwalk(double dt)
 	}
 	else if(armR_max == 1)
 	{
-		rotate_armR -= 7 * dt ;
+		rotate_armR -= 20 * dt ;
 		if (rotate_armR < -3)
 		{
 			armR_max = 0;
@@ -1030,7 +1031,7 @@ void TogaScene::toganwalk(double dt)
 
 	if (armL_max == 0)
 	{
-		rotate_armL += 7 * dt;
+		rotate_armL += 20 * dt;
 		if (rotate_armL > 35)
 		{
 			armL_max = 1;
@@ -1038,7 +1039,7 @@ void TogaScene::toganwalk(double dt)
 	}
 	else if (armL_max == 1)
 	{
-		rotate_armL -= 7 * dt;
+		rotate_armL -= 20 * dt;
 		if (rotate_armL < -3)
 		{
 			armL_max = 0;
@@ -1048,7 +1049,7 @@ void TogaScene::toganwalk(double dt)
 
 	if (legR_max == 0)
 	{
-		rotate_legR += 7 * dt;
+		rotate_legR += 20 * dt;
 		if (rotate_legR > 40)
 		{
 			legR_max = 1;
@@ -1056,7 +1057,7 @@ void TogaScene::toganwalk(double dt)
 	}
 	else if (legR_max == 1)
 	{
-		rotate_legR -= 7 * dt;
+		rotate_legR -= 20 * dt;
 		if (rotate_legR < -5)
 		{
 			legR_max = 0;
@@ -1065,7 +1066,7 @@ void TogaScene::toganwalk(double dt)
 
 	if (legL_max == 0)
 	{
-		rotate_legL += 7 * dt;
+		rotate_legL += 20 * dt;
 		if (rotate_legL > 40)
 		{
 			legL_max = 1;
@@ -1073,7 +1074,7 @@ void TogaScene::toganwalk(double dt)
 	}
 	else if (legL_max == 1)
 	{
-		rotate_legL -= 7 * dt;
+		rotate_legL -= 20 * dt;
 		if (rotate_legL < -5)
 		{
 			legL_max = 0;
@@ -1734,7 +1735,7 @@ void TogaScene::Init_animation_NPC()
 
 
 	//jelly npc animation
-	for (int i = 0; i <= 1; i++)
+	for (int i = 0; i <= 3; i++)
 	{
 		Togan newtoga;
 		newtoga.position = Vector3(0, -15, 0);
@@ -1749,7 +1750,7 @@ void TogaScene::Update_animation_NPC(double dt)
 {
 
 	// jelly npc animation
-	for (int i = 0; i <= 1; i++)
+	for (int i = 0; i <= 3; i++)
 	{
 		
 		if (togan_NPC_Loop[i].state == 0 )

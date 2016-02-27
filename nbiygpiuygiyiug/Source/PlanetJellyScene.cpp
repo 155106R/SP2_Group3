@@ -23,6 +23,7 @@ void PlanetJellyScene::Init()
 	//interactions
 
 	e_state = 0;
+	i_state = 0;
 
 	currentstate = FREEMOVE;
 
@@ -200,6 +201,9 @@ void PlanetJellyScene::Init()
 
 	meshList[GEO_SHOP] = MeshBuilder::GenerateQuad("shop screen", Color(0, 0, 0));
 	meshList[GEO_SHOP]->textureID = LoadTGA("Image//shop_screen.tga");
+
+	meshList[GEO_AMOUNTBOX] = MeshBuilder::GenerateQuad("amt box", Color(0, 0, 0));
+	meshList[GEO_AMOUNTBOX]->textureID = LoadTGA("Image//amount_screen.tga");
 
 	meshList[SHIP] = MeshBuilder::GenerateOBJ("player ship", "OBJ//ship.obj");
 	meshList[SHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
@@ -506,10 +510,10 @@ void PlanetJellyScene::Update(double dt)
 	{
 		enableLight = true;
 	}
-	if (Application::IsKeyPressed('I'))
-	{
-		light[0].position.z -= (float)(LSPEED*dt);
-	}
+	//if (Application::IsKeyPressed('I'))
+	//{
+	//	light[0].position.z -= (float)(LSPEED*dt);
+	//}
 	if (Application::IsKeyPressed('K'))
 	{
 		light[0].position.z += (float)(LSPEED*dt);
@@ -554,6 +558,8 @@ void PlanetJellyScene::Update(double dt)
 	}
 
 	timer += dt;
+
+
 	resetKey();
 	inventory();
 	interactionUpdate(dt);
@@ -854,32 +860,50 @@ void PlanetJellyScene::Render()
 	viewStack.LoadIdentity();
 	modelStack.PushMatrix();
 	switch (currentstate){
-	case 0:
+	case FREEMOVE:
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-92.5, 90, 1, 0);
 		modelStack.Scale(1.1, 0.8, 0.8);
 		RenderMesh(meshList[GEO_UI], false);
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 1.6, 1.7);
-		RenderTextOnScreen(meshList[GEO_TEXT], "JELLO", Color(1, 0, 0), 3.5, 20.4, 16.2);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 2.1, 1.7);
+		RenderTextOnScreen(meshList[GEO_TEXT], "JELLO", Color(1, 0, 0), 3.5, 19.4, 16.2);
 		break;
-	case 1:
+	case CONVERSE:
 		modelStack.Translate(0, -0.3, -1);
 		modelStack.Rotate(90, 1, 0, 0);
 		modelStack.Scale(1, 1, 0.3);
 		RenderMesh(meshList[GEO_TEXT_BOX], false);
 		break;
-	case 2:
+	case TRADE:
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-90, 1, 0, 0);
 		modelStack.Scale(1.1, 0.8, 0.8);
-		RenderMesh(meshList[GEO_SHOP], false);
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		if (SellState == BROWSING)
+		{
+			RenderMesh(meshList[GEO_SHOP], false);
+			//RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		}
+		else
+		{
+			RenderMesh(meshList[GEO_AMOUNTBOX], false);
+		}
+		break;
+	case INVENTORY:
+	//	modelStack.Translate(-0.035, 0, -0.85);
+	//	modelStack.Rotate(-90, 1, 0, 0);
+	//	modelStack.Scale(1, 1, 0.7);
+	//	RenderMesh(meshList[GEO_INVENTORY], false);
+	//	//RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
 		break;
 
 	};
 	Render_Checker();
 	modelStack.PopMatrix();
+
+
 	renderinteract();
+
+
 	text();
 
 }
@@ -1437,7 +1461,7 @@ void PlanetJellyScene::checkCollision()
 void PlanetJellyScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I'))// && timer > delay) && e_state == 0)
+	if (Application::IsKeyPressed('I'))
 	{
 		i_state = 1;
 		if (timer > delay)
@@ -1460,7 +1484,7 @@ void PlanetJellyScene::inventory()
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
 		{
 			SellState = DROPPING;
-			cout << "FUCCKCKCKCKCKCCK" << endl;
+		
 		}
 	}
 	if (SellState == DROPPING)
