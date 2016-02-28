@@ -44,9 +44,14 @@ public:
 	
 	
 	//drones
-	bool SD_RepairDrone = 1;//for testing  purposes set true, would be defaulted to zero
+	bool SD_RepairDrone = false;//defaulted to zero
 
 	int SD_bitcoins = 0;
+
+	bool SD_MiningDrone = true;
+	int  SD_MiningDrone_stash=0;
+
+
 	//PlayerLocation
 	unsigned SD_location;
 	bool SD_enableinteract = true;

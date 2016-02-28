@@ -26,7 +26,7 @@ void OpenGalaxyScene::Init()
 	//Gets new seed
 	Math::InitRNG();
 
-	//Definations
+	//Definationsm
 	e_state = 0;//e key state
 
 	land = false;						//If player is within bounds of landing on a planet
@@ -480,6 +480,7 @@ void OpenGalaxyScene::Update(double dt)
 		
 			if (Application::IsKeyPressed('E'))
 			{
+				accelerateShip = 1;
 				SharedData::GetInstance()->SD_enableinteract = false;
 				SharedData::GetInstance()->SD_location = PLANET_TOGA;
 				
@@ -491,9 +492,10 @@ void OpenGalaxyScene::Update(double dt)
 
 			if (Application::IsKeyPressed('E'))
 			{
+				accelerateShip = 1;
 				SharedData::GetInstance()->SD_enableinteract = false;
 				SharedData::GetInstance()->SD_location = PLANET_JELLY;
-				return;
+				//return;
 			}
 		}
 		else{
@@ -921,7 +923,7 @@ void OpenGalaxyScene::Render()
 
 	//Text if ship is within range of landing on planets
 	while (land){
-		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 4, 3.5, 8.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 2.5, 6.2, 10);
 		break;
 	}
 

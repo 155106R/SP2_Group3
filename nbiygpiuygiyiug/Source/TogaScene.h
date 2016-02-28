@@ -58,7 +58,8 @@ class TogaScene : public Scene
 		NPC_TOGAN_ARM,
 		NPC_TOGAN_LEG,
 
-
+		DRONE_PROPELLER,
+		DRONE_BODY,
 
 
 		CAVE,
@@ -312,6 +313,15 @@ private:
 	float targetxz;
 
 	float boxRange;
+
+	//mining drone
+	void generate_mdrone();
+	void mdrone_animation(double dt);
+	float mdrone_spin = 0;
+	float mdrone_y = 0;
+	bool mdrone_ymax = false;
+
+
 
 	//collision checking
 	void checkCollision();

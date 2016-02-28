@@ -44,6 +44,8 @@ void TogaScene::Init()
 	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 200, 200, 0));// Cave [3]
 	
 	Shophitbox.push_back(AABB::generateAABB(Vector3(-56, 0, 664), 450 ,30, 340, 0));// ship [4]
+
+	Shophitbox.push_back(AABB::generateAABB(Vector3(10, 8, -400), 5, 15, 5, 0));// mdrone [5]
 	
 	player = AABB::generateAABB(camera.nextPosition, 10, 30, 10, 0);//player
 
@@ -255,6 +257,14 @@ void TogaScene::Init()
 	meshList[NPC_TOGAN_LEG] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_leg.obj");
 	meshList[NPC_TOGAN_LEG]->textureID = LoadTGA("Image//toga_texture.tga");
 
+	//repair drone
+	meshList[DRONE_BODY] = MeshBuilder::GenerateOBJ("player ship", "OBJ//mining_drone_body.obj");
+	meshList[DRONE_BODY]->textureID = LoadTGA("Image//miningdrone_texture.tga");
+
+	meshList[DRONE_PROPELLER] = MeshBuilder::GenerateOBJ("player ship", "OBJ//mining_drone_propeller.obj");
+	meshList[DRONE_PROPELLER]->textureID = LoadTGA("Image//miningdrone_texture.tga");
+
+	//ui stuff
 	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
 	meshList[GEO_UI]->textureID = LoadTGA("Image//planet_UI.tga");
 
@@ -335,7 +345,8 @@ void TogaScene::Update(double dt)
 	}
 	
 
-
+	//if miningdrone bool == mining
+	mdrone_animation(dt);
 
 
 	//Light
@@ -598,6 +609,8 @@ void TogaScene::Render()
 	generateUpgrademerchant();
 	modelStack.PopMatrix();
 
+	//if statement here
+	generate_mdrone();//renders mining drone
 
 	modelStack.PushMatrix();
 	modelStack.Translate(
@@ -686,7 +699,7 @@ void TogaScene::Render()
 			RenderMesh(meshList[GEO_INVENTORY], false);
 		}
 		
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		
 		break;
 
 		};
@@ -916,6 +929,47 @@ void TogaScene::generateTogan()
 	modelStack.PopMatrix();
 
 }
+
+void TogaScene::generate_mdrone()
+{
+	modelStack.PushMatrix();
+	//modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
+	//modelStack.Rotate(-90, 1, 0, 0);
+	modelStack.Translate(10, mdrone_y, -400);
+	modelStack.Scale(2, 2, 2);
+	//modelStack.Rotate(-90, 0, 1, 0);
+	RenderMesh(meshList[DRONE_BODY], true);
+	modelStack.Rotate(mdrone_spin, 0, 1, 0);
+	RenderMesh(meshList[DRONE_PROPELLER], true);
+	modelStack.PopMatrix();
+
+
+}
+
+void TogaScene::mdrone_animation(double dt)
+{
+	mdrone_spin += 800 * dt;
+
+	if (mdrone_ymax == false)
+	{
+		mdrone_y += 4 * dt;
+		if (mdrone_y > 5)
+		{
+			mdrone_ymax = true;
+		}
+
+	}
+	else if (mdrone_ymax == true)
+	{
+		mdrone_y -= 4 * dt;
+		if (mdrone_y < -3)
+		{
+			mdrone_ymax = false;
+		}
+
+	}
+}
+
 
 void TogaScene::droneAnimation(double dt)
 {
@@ -1209,6 +1263,15 @@ void TogaScene::interactionUpdate(double dt)
 				SharedData::GetInstance()->SD_location = OPEN_GALAXY;
 			}
 		}
+
+		if ((collision(Shophitbox[5], camera.frontTarget) == true))//Mining drone
+		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+		}
+			
 	}
 	
 }
