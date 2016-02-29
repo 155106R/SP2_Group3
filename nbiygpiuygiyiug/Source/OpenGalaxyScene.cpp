@@ -295,12 +295,14 @@ void OpenGalaxyScene::Update(double dt)
 		Asteroid *tempAst = *iter;
 		AABB::updateAABB(tempAst->hitbox);
 
-		if (collision(tempAst->hitbox, spaceshipHitbox)){
+		if (collision(tempAst->hitbox, spaceshipHitbox))
+		{
 			SharedData::GetInstance()->SD_hullIntegrity--;												//Hull takes damage when you run into an asteroid
 			tempAst->hitbox.m_velocity = (Spaceship.direction) * (Spaceship.acceleration * 0.5) * dt;	//Asteroids are dragged along the path of the ship because the ship passes ONLY HALF it's velocity onto the asteroid upon collison, else it should have the ship's velocity
 			tempAst->hitbox.m_origin += Spaceship.direction;											//Get the astroid to move in the same direction as the ship upon collision (after passing the ship's velocity)
 
-			if (tempAst->count > 0){
+			if (tempAst->count > 0)
+			{
 				tempAst->count--;
 			}
 			else {
@@ -322,13 +324,17 @@ void OpenGalaxyScene::Update(double dt)
 	}
 
 	//Only when in DRILLING state AND space is pressed, do we check for collision with drill
-	while (CURRENT_STATE == DRILLING && Application::IsKeyPressed(VK_SPACE)){
+	while (CURRENT_STATE == DRILLING && Application::IsKeyPressed(VK_SPACE))
+	{
 		int i = 0;
-		for (vector<Asteroid*>::iterator iter = allAsteroids.begin(); iter != allAsteroids.end(); ++iter){
+		for (vector<Asteroid*>::iterator iter = allAsteroids.begin(); iter != allAsteroids.end(); ++iter)
+		{
 			Asteroid *tempAst = *iter;
-			if (collision(allAsteroids[i]->hitbox, Drill.drillHead)){
+			if (collision(allAsteroids[i]->hitbox, Drill.drillHead))
+			{
 
-				if (tempAst->count > 0){
+				if (tempAst->count > 0)
+				{
 					tempAst->hitbox.m_velocity = Vector3(0, 0, 0);
 					tempAst->count--;
 					if (timer > delay)
@@ -340,7 +346,9 @@ void OpenGalaxyScene::Update(double dt)
 					}
 					SharedData::GetInstance()->PlayerInventory->GetItem(allAsteroids[i]->material, 1);	//Give 1 material per drill
 				}
-				else{
+
+				else
+				{
 					delete allAsteroids[i];
 					allAsteroids.erase(iter);
 					break;
@@ -398,7 +406,8 @@ void OpenGalaxyScene::Update(double dt)
 	if ((Application::IsKeyPressed(VK_SPACE) && CURRENT_STATE != DRILLING) && timer > delay)
 	{
 		delay = timer + 0.5;
-		switch (CURRENT_STATE){
+		switch (CURRENT_STATE)
+		{
 		case PILOTING:
 			inShipCamera.position = Spaceship.position;
 			CURRENT_STATE = IN_SHIP;
@@ -413,7 +422,8 @@ void OpenGalaxyScene::Update(double dt)
 	{
 
 		delay = timer + 0.5;
-		switch (CURRENT_STATE){
+		switch (CURRENT_STATE)
+		{
 		case IN_SHIP:
 			Spaceship.acceleration = 0;
 			Drill.direction = Spaceship.direction;
@@ -424,10 +434,12 @@ void OpenGalaxyScene::Update(double dt)
 			CURRENT_STATE = DRILLING;
 			break;
 		case DRILLING:
-			while ((Drill.position - Spaceship.position).Length() < 15){
+			while ((Drill.position - Spaceship.position).Length() < 15)
+			{
 				CURRENT_STATE = IN_SHIP;
 				break;
-			break;
+				break;
+			}
 		}
 	}
 
@@ -449,8 +461,8 @@ void OpenGalaxyScene::Update(double dt)
 		if ((inShipCamera.position.x > 9) ||
 			(inShipCamera.position.x < -9) ||
 			(inShipCamera.position.z > 9) ||
-			(inShipCamera.position.z < -9)
-			){
+			(inShipCamera.position.z < -9))
+		{
 			inShipCamera.position = tempInShipPosition;
 		}
 		break;
@@ -463,24 +475,27 @@ void OpenGalaxyScene::Update(double dt)
 		Drill.camera.Update(dt);
 		Drill.camera.movement();
 		updateDrillMovement(dt);
-		if ((Drill.position - Spaceship.position).Length() < 15){
+		if ((Drill.position - Spaceship.position).Length() < 15)
+		{
 			Drill.returnToShip = true;
-			if ((Drill.position - Spaceship.position).Length() < 9){
+			if ((Drill.position - Spaceship.position).Length() < 9)
+			{
 				Drill.position = tempDrillPosition;
 				Drill.camera.position = tempDrillCameraPosition;
 			}
 		}
-		else if ((Spaceship.position - Drill.position).Length() > 100){
+		else if ((Spaceship.position - Drill.position).Length() > 100)
+		{
 			Drill.position = tempDrillPosition;
 			Drill.camera.position = tempDrillCameraPosition;
 			Drill.drillTooFarFromShip = true;
 		}
-		else{
+		else
+		{
 			Drill.drillTooFarFromShip = false;
 			Drill.returnToShip = false;
 		}
 
->>>>>>> 7caa2c4d57056ed04d55498998f11294e1786ae9
 		break;
 	}
 	if (SharedData::GetInstance()->SD_RepairDrone == 1)
@@ -556,16 +571,20 @@ void OpenGalaxyScene::Update(double dt)
 	
 
 	//Hull < 0 explosion effect	//can probably optimize
-	if (SharedData::GetInstance()->SD_hullIntegrity < 1){
-		for (int i = 0; i < 5; ++i){
-			if (ex_scale[i] > ex_scaleMax[i]){
+	if (SharedData::GetInstance()->SD_hullIntegrity < 1)
+	{
+		for (int i = 0; i < 5; ++i)
+		{
+			if (ex_scale[i] > ex_scaleMax[i])
+			{
 				ex_x[i] = Spaceship.position.x + Math::RandFloatMinMax(-8, 8);
 				ex_y[i] = Spaceship.position.y + Math::RandFloatMinMax(-2, 2);
 				ex_z[i] = Spaceship.position.z + Math::RandFloatMinMax(-8, 8);
 				ex_scale[i] = 1;
 				ex_scaleMax[i] = Math::RandFloatMinMax(2, 5);
 			}
-			else{
+			else
+			{
 				ex_scale[i] += ex_scale[i] * 5 * dt;
 			}
 		}
