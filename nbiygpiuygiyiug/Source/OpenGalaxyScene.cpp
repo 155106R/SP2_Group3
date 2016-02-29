@@ -331,9 +331,13 @@ void OpenGalaxyScene::Update(double dt)
 				if (tempAst->count > 0){
 					tempAst->hitbox.m_velocity = Vector3(0, 0, 0);
 					tempAst->count--;
-					tempAst->length -= 0.1f;
-					tempAst->height -= 0.1f;
-					tempAst->width -= 0.1f;
+					if (timer > delay)
+					{
+						tempAst->length /= 2;
+						tempAst->height /= 2;
+						tempAst->width /= 2;
+						delay = timer + 0.6;
+					}
 					SharedData::GetInstance()->PlayerInventory->GetItem(allAsteroids[i]->material, 1);	//Give 1 material per drill
 				}
 				else{
@@ -391,7 +395,9 @@ void OpenGalaxyScene::Update(double dt)
 	//================================================================================================================================================================================//
 	Spaceship.position += (Spaceship.direction) * Spaceship.acceleration * dt;	//Move ship in a direction(Nose is a directional vector)
 
-	if (Application::IsKeyPressed(VK_SPACE) && CURRENT_STATE != DRILLING){
+	if ((Application::IsKeyPressed(VK_SPACE) && CURRENT_STATE != DRILLING) && timer > delay)
+	{
+		delay = timer + 0.5;
 		switch (CURRENT_STATE){
 		case PILOTING:
 			inShipCamera.position = Spaceship.position;
@@ -403,7 +409,10 @@ void OpenGalaxyScene::Update(double dt)
 		}
 	}
 
-	if (Application::IsKeyPressed('B')){
+	if (Application::IsKeyPressed('B') && timer > delay)
+	{
+
+		delay = timer + 0.5;
 		switch (CURRENT_STATE){
 		case IN_SHIP:
 			Spaceship.acceleration = 0;
@@ -418,7 +427,6 @@ void OpenGalaxyScene::Update(double dt)
 			while ((Drill.position - Spaceship.position).Length() < 15){
 				CURRENT_STATE = IN_SHIP;
 				break;
-			}
 			break;
 		}
 	}
@@ -472,6 +480,7 @@ void OpenGalaxyScene::Update(double dt)
 			Drill.returnToShip = false;
 		}
 
+>>>>>>> 7caa2c4d57056ed04d55498998f11294e1786ae9
 		break;
 	}
 	if (SharedData::GetInstance()->SD_RepairDrone == 1)
@@ -1137,13 +1146,24 @@ void OpenGalaxyScene::updateDrillMovement(double dt){
 
 	//For ship movement
 	Drill.position = Drill.camera.position;
+	Drill.rotate += Drill.drillspeed * dt;
 
 	if (Application::IsKeyPressed(VK_SPACE))
 	{
-		Drill.rotate += 2000 * dt;
+		if (Drill.drillspeed < 2000)
+		{
+			Drill.drillspeed += 300 * dt;
+		}
 		//put colision detection here
 		//collision between asteroid and Drill.Camera.frontTarget
 
+	}
+	else
+	{
+		if (Drill.drillspeed > 0)
+		{
+			Drill.drillspeed -= 600 * dt;
+		}
 	}
 
 }
@@ -1193,6 +1213,10 @@ void OpenGalaxyScene::resetKey()
 	if (!Application::IsKeyPressed('E'))
 	{
 		e_state = 0;
+	}
+	if (!Application::IsKeyPressed(VK_SPACE))
+	{
+		space_state = 0;
 	}
 
 	if (SharedData::GetInstance()->SD_enableinteract == false)

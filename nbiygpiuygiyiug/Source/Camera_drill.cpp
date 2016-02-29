@@ -87,7 +87,12 @@ void Camera_drill::Update(double dt)
 	}
 
 	cameraRotationY -= (mousePosition.x - screenMidX) / rotationSpeed;
-	cameraRotationX -= (mousePosition.y - screenMidY) / rotationSpeed;
+	float newpitch = cameraRotationX - (mousePosition.y - screenMidY) / rotationSpeed;
+
+	if (newpitch < 50 && newpitch > -50)
+	{
+		cameraRotationX -= (mousePosition.y - screenMidY) / rotationSpeed;
+	}
 
 	if (cameraRotationX > maxCameraRotationX) {
 

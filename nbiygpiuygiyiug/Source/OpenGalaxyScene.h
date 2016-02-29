@@ -66,6 +66,7 @@ class OpenGalaxyScene : public Scene
 		Vector3 direction;
 		float rotate;
 		float moveSpeed = 5;
+		float drillspeed = 0;
 		std::map<unsigned, unsigned> storage;	//Drill's storage of materials in a map <unsigned materialID, unsigned count/stack>
 
 		AABB drillHead;
@@ -218,7 +219,13 @@ private:
 	bool rdrone_active = 0;
 
 	//For Planet Interactions
+	//keystates
 	bool e_state;
+	bool space_state;
+
+
+
+	//////////
 	float timer = 0;
 	float delay;
 	void resetKey();
