@@ -503,6 +503,8 @@ void OpenGalaxyScene::Update(double dt)
 			
 		}
 	}
+
+	SharedData::GetInstance()->SD_timecounter += dt;//add time to the timer
 	resetKey();
 }
 

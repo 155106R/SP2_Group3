@@ -477,7 +477,7 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 
 void PlanetJellyScene::Update(double dt)
 {
-	cout << SharedData::GetInstance()->SD_enableinteract << endl;
+	//cout << SharedData::GetInstance()->SD_enableinteract << endl;
 	//cout << camera.position << endl;
 	button_prompt = 0;
 
@@ -553,8 +553,23 @@ void PlanetJellyScene::Update(double dt)
 		checkCollision();
 		camera.movement();
 	}
-	//if miningdrone bool == mining
-	mdrone_animation(dt);
+	// miningdrone code
+	if (SharedData::GetInstance()->SD_MiningDrone_J)
+	{
+		mdrone_animation(dt);
+		if (mdrone_mineralcount < 99)
+		{
+			if (mdrone_added == false)
+			{
+				mdrone_mineralcount += ((SharedData::GetInstance()->SD_timecounter - mdrone_starttime) / 60);//increase mineral count using time away from planet
+				//every 30 secs, get 10 to 30 minerals
+				mdrone_added = true;
+			}
+			mdrone_starttime = SharedData::GetInstance()->SD_timecounter;
+		}
+
+	}
+
 
 
 
@@ -579,7 +594,7 @@ void PlanetJellyScene::Update(double dt)
 	inventory();
 	interactionUpdate(dt);
 	Updata_Checker(dt);
-	
+	SharedData::GetInstance()->SD_timecounter += dt;//add time to the timer
 }
 
 void PlanetJellyScene::RenderText(Mesh* mesh, std::string text, Color color)
@@ -1419,7 +1434,7 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 		if (((collision(hitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
 		{
-			e_state = 1;
+			//e_state = 1;
 			//mingame shit
 		}
 
@@ -1430,14 +1445,14 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 			if (Application::IsKeyPressed('E'))
 			{
-				cout << "no" << endl;
+				mdrone_added = false;
 				SharedData::GetInstance()->SD_enableinteract = false;
 				e_state = 1;
 				SharedData::GetInstance()->SD_location = OPEN_GALAXY;
-				
+
 
 			}
-			
+
 		}
 
 		if ((collision(hitbox[5], camera.frontTarget) == true))//Mining drone
@@ -1445,6 +1460,49 @@ void PlanetJellyScene::interactionUpdate(double dt)
 			if (currentstate == 0)
 			{
 				button_prompt = 1;
+			}
+		}
+
+		if ((collision(hitbox[5], camera.frontTarget) == true))//Mining drone
+		{
+
+			//cout << "no" << endl;
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+
+				//cout << "no" << endl;
+				e_state = 1;
+				button_prompt = 0;
+				if (currentstate == CONVERSE)
+				{
+				currentstate = FREEMOVE;
+				rendertext = 0;
+				button_prompt = 1;
+				return;
+				}
+
+
+				cout << "no" << endl;
+				currentstate = CONVERSE;
+				if (rendertext == 0 && mdrone_mineralcount <= 0)//empty mining drone
+				{
+					rendertext = 4;
+				}
+				else if (mdrone_mineralcount > 0)
+				{
+					rendertext = 5;
+					//add minerals to inventory slots
+					//what if no empty slots??
+				}
+
+			
+				delay = timer + 0.5;//set delay offset
+
+
 			}
 		}
 	}
@@ -1501,6 +1559,13 @@ void PlanetJellyScene::text()
 	case(3) :
 		RenderTextOnScreen(meshList[GEO_TEXT], "Please do not feed purchased drones to the natives.", Color(1, 0, 0), 2, 4.2, 5.8);//drone shop
 		break;
+	case(4) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "BEGINNING MINING OPERATIONS.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (empty)
+		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
+		break;
+	case(5) :
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
+		break;
 	};
 
 }
@@ -1531,7 +1596,6 @@ void PlanetJellyScene::checkCollision()
 		if ((collision(hitbox[i], camera.nextPosition)))
 		{
 			camera.colliding = true;
-			cout << "fuck" << endl;
 		}
 	}
 

@@ -239,9 +239,12 @@ void TogaScene::Init()
 	meshList[UPGRADE_SHOP]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
 
 	//cave
-	meshList[CAVE] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//Cave_A.obj");
+	meshList[CAVE] = MeshBuilder::GenerateOBJ("muh cave", "OBJ//Cave_A.obj");
 	meshList[CAVE]->textureID = LoadTGA("Image//cave_textureA.tga");
-
+	
+	//rock
+	meshList[GEO_ROCK] = MeshBuilder::GenerateOBJ("muh rock", "OBJ//rock.obj");
+	meshList[GEO_ROCK]->textureID = LoadTGA("Image//rock_texture.tga");
 
 	//togan wandering npc
 	meshList[NPC_TOGAN_BODY] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_body.obj");
@@ -297,7 +300,7 @@ float inc = 0;
 
 void TogaScene::Update(double dt)
 {
-	//cout << SharedData::GetInstance()->SD_enableinteract << endl;
+	cout << mdrone_mineralcount << endl;
 
 	button_prompt = 0;
 
@@ -346,8 +349,21 @@ void TogaScene::Update(double dt)
 	
 
 	//if miningdrone bool == mining
-	mdrone_animation(dt);
+	if (SharedData::GetInstance()->SD_MiningDrone_T)
+	{
+		mdrone_animation(dt);
+		if (mdrone_mineralcount < 99)
+		{
+			if (mdrone_added == false)
+			{
+				mdrone_mineralcount +=  ((SharedData::GetInstance()->SD_timecounter - mdrone_starttime)/60);//increase mineral count using time away from planet
+				//every 30 secs, get 10 to 30 minerals
+				mdrone_added = true;
+			}
+			mdrone_starttime = SharedData::GetInstance()->SD_timecounter;
+		}
 
+	}
 
 	//Light
 	if (Application::IsKeyPressed('8')){
@@ -370,6 +386,7 @@ void TogaScene::Update(double dt)
 	droneAnimation(dt);
 	mineralAnimation(dt);
 	upgradeAnimation(dt);
+	camera.boundCheck(-400, -554, 400, 554);
 	toganwalk(dt);
 	inventory();
 	interactionUpdate(dt);
@@ -377,6 +394,9 @@ void TogaScene::Update(double dt)
 
 	Update_Name_NPC(dt);
 	Update_animation_NPC(dt);
+
+
+	SharedData::GetInstance()->SD_timecounter += dt;//add time to the timer
 }
 
 
@@ -579,6 +599,55 @@ void TogaScene::Render()
 	modelStack.Scale(150, 150, 150);
 	RenderMesh(meshList[CAVE], true);
 	modelStack.PopMatrix();
+
+
+	//rock wall/z->
+	for (int i = 0; i <= 10; ++i)
+	{
+
+		float x = -480;
+		float z = 554;
+
+		modelStack.PushMatrix();
+		modelStack.Translate(x, 0, z - (110.8*i));
+		modelStack.Rotate(20 * i, 0, 1, 0);
+		modelStack.Scale(60, 60, 60);
+		RenderMesh(meshList[GEO_ROCK], true);
+		modelStack.PopMatrix();
+
+	
+		modelStack.PushMatrix();
+		modelStack.Translate(-x, 0, z - (110.8*i));
+		modelStack.Rotate(20 * i, 0, 1, 0);
+		modelStack.Scale(60, 60, 60);
+		RenderMesh(meshList[GEO_ROCK], true);
+		modelStack.PopMatrix();
+	}
+
+	for (int i = 0; i <= 12; ++i)
+	{
+
+		float x = -480;
+		float z = 574;
+
+		modelStack.PushMatrix();
+		modelStack.Translate(x+(80*i), -8, z);
+		modelStack.Rotate(20 * i, 0, 1, 0);
+		modelStack.Scale(40, 20, 40);
+		RenderMesh(meshList[GEO_ROCK], true);
+		modelStack.PopMatrix();
+
+
+		modelStack.PushMatrix();
+		modelStack.Translate(x + (80 * i), -3, -z-20);
+		modelStack.Rotate(20 * i, 0, 1, 0);
+		modelStack.Scale(60, 65, 40);
+		RenderMesh(meshList[GEO_ROCK], true);
+		modelStack.PopMatrix();
+	}
+
+
+
 
 	//render ship
 	modelStack.PushMatrix();
@@ -1257,6 +1326,7 @@ void TogaScene::interactionUpdate(double dt)
 			
 			if (Application::IsKeyPressed('E'))
 			{
+				mdrone_added = false;
 				SharedData::GetInstance()->SD_enableinteract = false;
 				e_state = 1;
 				
@@ -1269,6 +1339,34 @@ void TogaScene::interactionUpdate(double dt)
 			if (currentstate == 0)
 			{
 				button_prompt = 1;
+			}
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				e_state = 1;
+				button_prompt = 0;
+				if (currentstate == CONVERSE)
+				{
+					currentstate = FREEMOVE;
+					rendertext = 0;
+					button_prompt = 1;
+					return;
+					
+				}
+				currentstate = CONVERSE;
+				if (rendertext == 0 && mdrone_mineralcount <= 0)//empty mining drone
+				{
+					rendertext = 4;
+				}
+				else if (mdrone_mineralcount >  0 )
+				{
+					rendertext = 5;
+					//add minerals to inventory slots
+					//what if no empty slots??
+				}
+
+				delay = timer + 0.5;//set delay offset
+
+
 			}
 		}
 			
@@ -1325,6 +1423,14 @@ void TogaScene::text()
 
 	case(3) :
 		RenderTextOnScreen(meshList[GEO_TEXT], "Drone prices are non-negotiable.", Color(1, 0, 0), 2, 4.2, 5.8);//drone shop
+		break;
+
+	case(4) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "BEGINNING MINING OPERATIONS.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (empty)
+		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
+		break;
+	case(5):
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount)+ " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
 		break;
 	};
 
@@ -1393,7 +1499,7 @@ void TogaScene::inventory()
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
 		{
 			SellState = DROPPING;
-			cout << "FUCCKCKCKCKCKCCK" << endl;
+			
 		}
 	}
 	if (SellState == DROPPING)
@@ -1458,7 +1564,7 @@ void TogaScene::Init_Checker()
 }
 void TogaScene::Updata_Checker(double dt)
 {
-	cout << SellState << endl;
+	
 	if (Application::IsKeyPressed('B'))
 	{
 		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slot[0].name << endl;
