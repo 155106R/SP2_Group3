@@ -34,15 +34,30 @@ public:
 		return &data;
 	}
 
+
+	//game assets
+	float SD_timecounter = 0;
+
+
 	//PlayerAssests
-	int SD_hullIntegrity = 0;
+	float SD_hullIntegrity = 100;
 	int SD_hullmax = 100;
 
 	//upgrades
 	int SD_hullLevel = 0;
 	int SD_hullCost = 10;
+	
+	
+	//drones
+	bool SD_RepairDrone = false;//defaulted to zero
 
 	int SD_bitcoins = 0;
+
+	bool SD_MiningDrone_T = true;
+	bool SD_MiningDrone_J = true;
+	int  SD_MiningDrone_stash=0;
+
+
 	//PlayerLocation
 	unsigned SD_location;
 	bool SD_enableinteract = true;

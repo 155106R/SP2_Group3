@@ -1,5 +1,6 @@
 #include"Trade_Bag.h"
 #include "SharedData.h"
+#include "Application.h"
 
 Bag::Bag() 
 {
@@ -84,7 +85,7 @@ void Bag::RemoveItem(int ID, int amount) // remove item from bag (pop)
 {
 	int tempAmount = amount;
 
-	for (int i = 0; i < Slots; i++)
+	for (int i = Slots-1; i >= 0; i--)
 	{
 		if (Slot[i].ID == ID)
 		{
@@ -101,31 +102,31 @@ void Bag::RemoveItem(int ID, int amount) // remove item from bag (pop)
 	clearSlot_reLocation();
 }
 
-void Bag::buyItem(int ID, int amount, char PID, int num) // buy item from shop (push), PID of the shop
+void Bag::buyItem(int ID, int amount, char SID, int num) // buy item from shop (push), SID of the shop
 {
-	if (SharedData::GetInstance()->SD_bitcoins > (ItemS[ID - 1].bitcoin * amount * 2) && SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].stack >= amount && Slot_Full(ID,amount) == true)
+	if (SharedData::GetInstance()->SD_bitcoins >= (ItemS[ID - 1].bitcoin * amount * 2) && SharedData::GetInstance()->PlayerInventory->store[0].GoodS[num].stack >= amount && Slot_Full(ID,amount) == true)
 	{
 
 		GetItem(ID, amount);
-		RemoveStack(ID, amount, PID);
+		RemoveStack(ID, amount, SID);
 
 		SharedData::GetInstance()->SD_bitcoins -= (ItemS[ID - 1].bitcoin * amount * 2);
 	}
 }
 
-void Bag::sellItem(int ID, int amount, char PID) // sell item in bag (pop), PID of the shop
+void Bag::sellItem(int ID, int amount, char SID) // sell item in bag (pop), SID of the shop
 {
 	TradeCalculation* tempList;
 
 	RemoveItem(ID, amount);
 
-	if (ItemS[ID - 1].PID != PID)
+	if (ItemS[ID - 1].PID != SID)
 	{
 		SharedData::GetInstance()->SD_bitcoins += (ItemS[ID - 1].bitcoin * amount * 2);
 	}
 	else
 	{
-		AddStack(ID, amount, PID);
+		AddStack(ID, amount, SID);
 		SharedData::GetInstance()->SD_bitcoins += (ItemS[ID - 1].bitcoin * amount);
 	}
 	clearSlot_reLocation();
@@ -179,3 +180,4 @@ bool Bag::Slot_Full(int ID, int amount)
 	return false;
 
 }
+

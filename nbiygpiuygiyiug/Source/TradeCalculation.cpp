@@ -1,5 +1,6 @@
 #include "TradeCalculation.h"
 
+
 TradeCalculation::TradeCalculation() 
 {
 	// item from planet toga
@@ -89,9 +90,46 @@ TradeCalculation::TradeCalculation()
 	newItem12.bitcoin = 50;
 	ItemS.push_back(newItem12);
 
+	Upgrade newUpgrade0;
+	newUpgrade0.name = "Ship Repair";
+	newUpgrade0.ID = 0;
+	newUpgrade0.bitcoin = 2;
+	UpgradeS.push_back(newUpgrade0);
+
+	Upgrade newUpgrade1; // only on toga
+	newUpgrade1.name = "Ship Hull Upgrade";
+	newUpgrade1.ID = 1;
+	newUpgrade1.bitcoin = 100;
+	newUpgrade1.level = 1;
+	UpgradeS.push_back(newUpgrade1);
+
+	Upgrade newUpgrade2; // only on jelly
+	newUpgrade2.name = "Inventory slots Upgrade";
+	newUpgrade2.ID = 2;
+	newUpgrade2.bitcoin = 1000;
+	newUpgrade2.level = 1;
+	UpgradeS.push_back(newUpgrade2);
+
+	Drone newDrone1;
+	newDrone1.name = "Repair Drone";
+	newDrone1.ID = 1;
+	newDrone1.bitcoin = 12000;
+	newDrone1.Sold = false;
+	DroneS.push_back(newDrone1);
+
+	Drone newDrone2;
+	newDrone2.name = "Mining Drone";
+	newDrone2.ID = 2;
+	newDrone2.bitcoin = 6000;
+	newDrone2.Sold = false;
+	DroneS.push_back(newDrone2);
+
+
 
 }
 
-TradeCalculation::~TradeCalculation() {}
+TradeCalculation::~TradeCalculation() 
+{}
+
 
 

@@ -11,8 +11,6 @@ using std::cout;
 using std::endl;
 using std::cin;
 
-
-
 class TradeCalculation
 {
 
@@ -51,6 +49,24 @@ public:
 		bool MaxStack; // one stack x99
 	};
 	vector<Item> ItemS;
+
+	struct Upgrade {
+
+		int ID;
+		string name;
+		int bitcoin;
+		int level;
+	};
+	vector<Upgrade> UpgradeS;
+
+	struct Drone{
+
+		int ID;
+		string name;
+		int bitcoin;
+		bool Sold;
+	};
+	vector<Drone> DroneS;
 
 	//struct Bag {
 	//	int bitcoin;

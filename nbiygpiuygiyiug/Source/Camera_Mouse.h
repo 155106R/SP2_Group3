@@ -1,6 +1,6 @@
+
 #ifndef CAMERA_MOUSE_H
 #define CAMERA_MOUSE_H
-
 #include "Camera.h"
 #include "MyMath.h"
 
@@ -19,6 +19,7 @@ public:
 	Vector3 frontTarget;
 	Vector3 tempPosition;
 	Vector3 nextPosition;
+
 	float cameraRotationX, cameraRotationY;
 	int Counter;
 	int screenMidX;
