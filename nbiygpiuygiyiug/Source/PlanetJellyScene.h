@@ -149,7 +149,7 @@ private:
 	bool confirm;
 	int SellState;
 	int SBamount;
-	int PID;
+	int SID; // shop ID
 	
 	//For Light
 	bool enableLight;
@@ -209,6 +209,8 @@ private:
 		SELLING,
 		BUYING,
 		DROPPING,
+		UPGRADING,
+		DRONES,
 
 		NUM_shostates
 

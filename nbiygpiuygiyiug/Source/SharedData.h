@@ -36,13 +36,11 @@ public:
 
 	//PlayerAssests
 	int SD_hullIntegrity = 100;
-	int SD_hullmax = 100;
+	int SD_hullmax = 120;
 
-	//upgrades
-	int SD_hullLevel = 0;
-	int SD_hullCost = 10;
-
-
+	bool SD_RepairDrone = 0;
+	bool SD_MiningDrone_T = 0;
+	bool SD_MiningDrone_J = 0;
 
 	int SD_bitcoins = 0;
 	//PlayerLocation

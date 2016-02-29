@@ -52,6 +52,24 @@ public:
 	};
 	vector<Item> ItemS;
 
+	struct Upgrade {
+
+		int ID;
+		string name;
+		int bitcoin;
+		int level;
+	};
+	vector<Upgrade> UpgradeS;
+
+	struct Drone{
+
+		int ID;
+		string name;
+		int bitcoin;
+		bool Sold;
+	};
+	vector<Drone> DroneS;
+
 	//struct Bag {
 	//	int bitcoin;
 	//	bool MaxSlot; //one bag have x3 slot
