@@ -35,7 +35,7 @@ void PlanetJellyScene::Init()
 
 	hitbox.push_back(AABB::generateAABB(Vector3(-135, 0, 0), 45, 60, 70, 0));// drone shop [2]
 
-	hitbox.push_back(AABB::generateAABB(Vector3(180, 0, 0), 90, 80, 75, 0));// cave [3]
+	hitbox.push_back(AABB::generateAABB(Vector3(180, -7, 0), 90, 15, 75, 0));// cave [3]
 
 	hitbox.push_back(AABB::generateAABB(Vector3(-55, 0, -270), 90, 30, 75, 0));// ship [4]
 
@@ -191,7 +191,7 @@ void PlanetJellyScene::Init()
 	meshList[SHOP_DRONE]->textureID = LoadTGA("Image//droneshop_textureA.tga");
 	meshList[SHOP_UPGRADE] = MeshBuilder::GenerateOBJ("upgrade shop", "OBJ//upgradeshopA.obj");
 	meshList[SHOP_UPGRADE]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
-	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("hitbox", Color(0,1,0));
+	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("hitbox", Color(0,0,0));
 	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
 	meshList[GEO_UI]->textureID = LoadTGA("Image//planet_UI.tga");
 
@@ -557,6 +557,7 @@ void PlanetJellyScene::Update(double dt)
 	if (SharedData::GetInstance()->SD_MiningDrone_J)
 	{
 		mdrone_animation(dt);
+
 		if (mdrone_mineralcount < 99)
 		{
 			if (mdrone_added == false)
@@ -567,7 +568,6 @@ void PlanetJellyScene::Update(double dt)
 			}
 			mdrone_starttime = SharedData::GetInstance()->SD_timecounter;
 		}
-
 	}
 
 
@@ -765,7 +765,15 @@ void PlanetJellyScene::Render()
 	modelStack.Scale(500, 400, 500);
 	RenderMesh(meshList[GROUND_MESH], true);
 	modelStack.PopMatrix();
-	
+
+	if (currentstate == CAVEGAME)
+	{
+		modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
+		//modelStack.Rotate(90, 1, 0, 0);
+		modelStack.Scale(20, 20, 20);
+		RenderMesh(meshList[GEO_CUBE], false);
+	}
+
 	//render cave
 	modelStack.PushMatrix();
 	modelStack.Translate(200, 43, 0);
@@ -822,9 +830,11 @@ void PlanetJellyScene::Render()
 		
 	
 	//if statement here
-	generate_mdrone();//renders mining drone
-
-	// NPC-DRONE
+	if (SharedData::GetInstance()->SD_MiningDrone_J)
+	{
+		generate_mdrone();//renders mining drone
+	}
+//NPC - DRONE
 	modelStack.PushMatrix();
 	modelStack.Translate(-115, -10 + jelly.position.y + jelly_jumping.position.y, -15);
 	modelStack.Rotate(90, 0, 1, 0);
@@ -881,14 +891,14 @@ void PlanetJellyScene::Render()
 
 	modelStack.PushMatrix();
 	modelStack.Translate(
-		(hitbox[5].m_origin.x),
-		(hitbox[5].m_origin.y),
-		(hitbox[5].m_origin.z)
+		(hitbox[3].m_origin.x),
+		(hitbox[3].m_origin.y),
+		(hitbox[3].m_origin.z)
 		);
 	modelStack.Scale(
-		(hitbox[5].m_length),
-		(hitbox[5].m_height),
-		(hitbox[5].m_width)
+		(hitbox[3].m_length),
+		(hitbox[3].m_height),
+		(hitbox[3].m_width)
 		);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
 	RenderMesh(meshList[GEO_CUBE], false);
@@ -1685,8 +1695,23 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 		if (((collision(hitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
 		{
-			//e_state = 1;
-			//mingame shit
+			if (currentstate == FREEMOVE)
+			{
+				button_prompt = 1;
+			}
+
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				delay = timer + 0.5;//set delay offset
+
+				e_state = 1;
+				button_prompt = 0;
+				currentstate = CAVEGAME;
+				//run your game code
+			}
+
+				//to quit
+				//change currenstate =0;
 		}
 
 		if (((collision(hitbox[4], camera.frontTarget) == true)) && e_state == 0)//ship
@@ -1714,47 +1739,51 @@ void PlanetJellyScene::interactionUpdate(double dt)
 			}
 		}
 
-		if ((collision(hitbox[5], camera.frontTarget) == true))//Mining drone
+		if ((collision(hitbox[5], camera.frontTarget)) && SharedData::GetInstance()->SD_MiningDrone_J)//Mining drone
 		{
-
-			//cout << "no" << endl;
 			if (currentstate == 0)
 			{
 				button_prompt = 1;
 			}
 			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
 			{
-
-				//cout << "no" << endl;
+				delay = timer + 0.5;//set delay offset
 				e_state = 1;
 				button_prompt = 0;
 				if (currentstate == CONVERSE)
 				{
-				currentstate = FREEMOVE;
-				rendertext = 0;
-				button_prompt = 1;
-				return;
+					SharedData::GetInstance()->PlayerInventory->GetItem(mdrone_mineraltype, mdrone_mineralcount);//add to player inventory
+
+					mdrone_mineralcount = 0;//empty mining drone storage
+
+					mdrone_mineraltype = Math::RandFloatMinMax(1, 4);//switch mineral type to be mined next
+
+					currentstate = FREEMOVE;
+
+					rendertext = 0;
+					button_prompt = 1;
+					return;
+
+
 				}
-
-
-				cout << "no" << endl;
 				currentstate = CONVERSE;
 				if (rendertext == 0 && mdrone_mineralcount <= 0)//empty mining drone
 				{
 					rendertext = 4;
 				}
-				else if (mdrone_mineralcount > 0)
+				else if (mdrone_mineralcount > 0)//give mined minerals to player
 				{
 					rendertext = 5;
-					//add minerals to inventory slots
-					//what if no empty slots??
 				}
 
-			
-				delay = timer + 0.5;//set delay offset
+
+
 
 
 			}
+
+
+
 		}
 	}
 }
@@ -1818,7 +1847,7 @@ void PlanetJellyScene::text()
 		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
 		break;
 	case(5) :
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + "x" + std::to_string(mdrone_mineraltype) + " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
 		break;
 	};
 

@@ -136,13 +136,15 @@ private:
 	//mining drone
 	void generate_mdrone();
 	void mdrone_animation(double dt);
-	float mdrone_spin=0;
+	float mdrone_spin = 0;
 	float mdrone_y = 0;
 	bool mdrone_ymax = false;
 
-		int mdrone_mineralcount=0;
+	float mdrone_mineraltype = 1;
+	int mdrone_mineralcount = 0;
 	float mdrone_starttime;
-	bool mdrone_added=true;
+	bool mdrone_added = true;
+
 
 	struct falling_rocks
 	{
@@ -213,6 +215,7 @@ private:
 		CONVERSE,
 		TRADE,
 		INVENTORY,
+		CAVEGAME,
 		NUM_state
 	};
 

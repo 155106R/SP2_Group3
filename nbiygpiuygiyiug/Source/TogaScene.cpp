@@ -41,7 +41,7 @@ void TogaScene::Init()
 
 	Shophitbox.push_back(AABB::generateAABB(Vector3(90, 0, -80), 60, 24, 60, 0));// drone shop [2]
 
-	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 200, 200, 0));// Cave [3]
+	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 10, 200, 0));// Cave [3]
 	
 	Shophitbox.push_back(AABB::generateAABB(Vector3(-56, 0, 664), 450 ,30, 340, 0));// ship [4]
 
@@ -85,6 +85,8 @@ void TogaScene::Init()
 	armL_max = 0;
 	legR_max = 0;
 	legL_max = 0;
+
+	//mining drone
 
 
 	Mtx44 projection;
@@ -289,7 +291,7 @@ void TogaScene::Init()
 	meshList[GEO_AMOUNTBOX] = MeshBuilder::GenerateQuad("amt box", Color(0, 0, 0));
 	meshList[GEO_AMOUNTBOX]->textureID = LoadTGA("Image//amount_screen.tga");
 
-	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("Light Cube", Color(1, 0.2509, 0));
+	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("Light Cube", Color(0, 0, 0));
 
 	Init_Checker();
 	Init_Name_NPC();
@@ -352,6 +354,7 @@ void TogaScene::Update(double dt)
 	if (SharedData::GetInstance()->SD_MiningDrone_T)
 	{
 		mdrone_animation(dt);
+
 		if (mdrone_mineralcount < 99)
 		{
 			if (mdrone_added == false)
@@ -679,23 +682,27 @@ void TogaScene::Render()
 	modelStack.PopMatrix();
 
 	//if statement here
-	generate_mdrone();//renders mining drone
+	if (SharedData::GetInstance()->SD_MiningDrone_T)
+	{
+		generate_mdrone();//renders mining drone
+	}
 
-	modelStack.PushMatrix();
-	modelStack.Translate(
-		(Shophitbox[2].m_origin.x),
-		(Shophitbox[2].m_origin.y),
-		(Shophitbox[2].m_origin.z)
-		);
-	modelStack.Scale(
-		(Shophitbox[2].m_length),
-		(Shophitbox[2].m_height),
-		(Shophitbox[2].m_width)
-		);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	RenderMesh(meshList[GEO_CUBE], false);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-	modelStack.PopMatrix();
+	//This is for checking hitboxes
+	//modelStack.PushMatrix();
+	//modelStack.Translate(
+	//	(Shophitbox[2].m_origin.x),
+	//	(Shophitbox[2].m_origin.y),
+	//	(Shophitbox[2].m_origin.z)
+	//	);
+	//modelStack.Scale(
+	//	(Shophitbox[2].m_length),
+	//	(Shophitbox[2].m_height),
+	//	(Shophitbox[2].m_width)
+	//	);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
+	//RenderMesh(meshList[GEO_CUBE], false);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
+	//modelStack.PopMatrix();
 
 
 
@@ -724,6 +731,14 @@ void TogaScene::Render()
 		RenderText(meshList[GEO_TEXT], nameS[i].NPCname, Color(0, 1, 0));
 		modelStack.PopMatrix();
 	}
+
+	if (currentstate == CAVEGAME)
+	{
+		modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
+		//modelStack.Rotate(90, 1, 0, 0);
+		modelStack.Scale(20, 20, 20);
+		RenderMesh(meshList[GEO_CUBE], false);
+	}
 	
 		viewStack.LoadIdentity();
 		modelStack.PushMatrix();
@@ -749,7 +764,7 @@ void TogaScene::Render()
 		if (SellState == BROWSING)
 		{
 			RenderMesh(meshList[GEO_SHOP], false);
-			RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+			//RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
 		}
 		else
 		{
@@ -767,10 +782,10 @@ void TogaScene::Render()
 		{
 			RenderMesh(meshList[GEO_INVENTORY], false);
 		}
-		
-		
 		break;
+		case CAVEGAME:
 
+			break;
 		};
 		modelStack.PopMatrix();
 
@@ -1317,8 +1332,25 @@ void TogaScene::interactionUpdate(double dt)
 
 		if (((collision(Shophitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
 		{
-			e_state = 1;
+			if (currentstate == FREEMOVE)
+			{
+				button_prompt = 1;
+			}
 
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				delay = timer + 0.5;//set delay offset
+
+				e_state = 1;
+				button_prompt = 0;
+				currentstate = CAVEGAME;
+				//run your game code
+
+				//to quit
+				//change currenstate =0;
+
+			}
+		
 		}
 
 		if (collision(Shophitbox[4], camera.frontTarget) && e_state == 0)//ship
@@ -1335,7 +1367,7 @@ void TogaScene::interactionUpdate(double dt)
 			}
 		}
 
-		if ((collision(Shophitbox[5], camera.frontTarget) == true))//Mining drone
+		if ((collision(Shophitbox[5], camera.frontTarget)) && SharedData::GetInstance()->SD_MiningDrone_T)//Mining drone
 		{
 			if (currentstate == 0)
 			{
@@ -1343,14 +1375,23 @@ void TogaScene::interactionUpdate(double dt)
 			}
 			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
 			{
+				delay = timer + 0.5;//set delay offset
 				e_state = 1;
 				button_prompt = 0;
 				if (currentstate == CONVERSE)
 				{
+					SharedData::GetInstance()->PlayerInventory->GetItem(mdrone_mineraltype, mdrone_mineralcount);//add to player inventory
+
+					mdrone_mineralcount = 0;//empty mining drone storage
+
+					mdrone_mineraltype = Math::RandFloatMinMax(1, 4);//switch mineral type to be mined next
+
 					currentstate = FREEMOVE;
+	
 					rendertext = 0;
 					button_prompt = 1;
 					return;
+					
 					
 				}
 				currentstate = CONVERSE;
@@ -1358,22 +1399,25 @@ void TogaScene::interactionUpdate(double dt)
 				{
 					rendertext = 4;
 				}
-				else if (mdrone_mineralcount >  0 )
+				else if (mdrone_mineralcount > 0)//give mined minerals to player
 				{
 					rendertext = 5;
-					//add minerals to inventory slots
-					//what if no empty slots??
 				}
 
-				delay = timer + 0.5;//set delay offset
+			
+				
+					
+				
+			}
+				
 
 
 			}
 		}
 			
-	}
-	
 }
+	
+
 
 void TogaScene::interact_state()
 {
@@ -1431,7 +1475,7 @@ void TogaScene::text()
 		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
 		break;
 	case(5):
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount)+ " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + "x" + std::to_string(mdrone_mineraltype)+ " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
 		break;
 	};
 
