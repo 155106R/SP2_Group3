@@ -358,7 +358,7 @@ private:
 	bool confirm;
 	int SellState;
 	int SBamount;
-	int PID;
+	int SID;
 
 	enum shopstates
 	{
@@ -366,6 +366,8 @@ private:
 		SELLING,
 		BUYING,
 		DROPPING,
+		UPGRADING,
+		DRONES,
 
 		NUM_shostates
 

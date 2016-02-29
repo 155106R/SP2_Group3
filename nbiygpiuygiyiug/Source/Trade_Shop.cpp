@@ -192,7 +192,8 @@ void Shop::BuyDrone(int num, int SID)
 	if (store[SID].RebotS[num].ID == 1 && SharedData::GetInstance()->SD_bitcoins >= store[SID].RebotS[num].bitcoin)
 	{
 		SharedData::GetInstance()->SD_bitcoins -= store[SID].RebotS[num].bitcoin;
-		store[SID].RebotS[num].Sold = true;
+		store[4].RebotS[num].Sold = true;
+		store[5].RebotS[num].Sold = true;
 		SharedData::GetInstance()->SD_RepairDrone = true;
 	}
 	if (store[SID].RebotS[num].ID == 2 && SharedData::GetInstance()->SD_bitcoins >= store[SID].RebotS[num].bitcoin)
@@ -220,9 +221,9 @@ void Shop::BuyUpgrade(int ID, char SID)
 		{
 			for (int y = 0; y < store[x].PowerS.size(); y++)
 			{
-				if (ID == 0 && store[x].PowerS[y].ID == ID && SharedData::GetInstance()->SD_bitcoins >= ((SharedData::GetInstance()->SD_hullmax - SharedData::GetInstance()->SD_hullIntegrity)*store[x].PowerS[y].bitcoin))
+				if (ID == 0 && store[x].PowerS[y].ID == ID && SharedData::GetInstance()->SD_bitcoins >= ((SharedData::GetInstance()->SD_hullmax - (int)(SharedData::GetInstance()->SD_hullIntegrity))*store[x].PowerS[y].bitcoin))
 				{
-					SharedData::GetInstance()->SD_bitcoins -= ((SharedData::GetInstance()->SD_hullmax - SharedData::GetInstance()->SD_hullIntegrity)*store[x].PowerS[y].bitcoin);
+					SharedData::GetInstance()->SD_bitcoins -= ((SharedData::GetInstance()->SD_hullmax - (int)(SharedData::GetInstance()->SD_hullIntegrity))*store[x].PowerS[y].bitcoin);
 					SharedData::GetInstance()->SD_hullIntegrity = SharedData::GetInstance()->SD_hullmax;
 					break;
 				}

@@ -1489,13 +1489,13 @@ void PlanetJellyScene::Render_Checker()
 						RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 1, (22 - (num) * 2));
 						if (SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i + tempnum].ID != 0)
 							RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i + tempnum].bitcoin) + "-" + SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i + tempnum].name + std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i + tempnum].level), Color(1, 0, 0), 2, 3, (22 - (i * 2)));
-						else RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i + tempnum].bitcoin) + "-" + SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i + tempnum].name, Color(1, 0, 0), 2, 3, (22 - (i * 2)));
+						else RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i + tempnum].bitcoin* (SharedData::GetInstance()->SD_hullmax - (int)(SharedData::GetInstance()->SD_hullIntegrity))) + "-" + SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i + tempnum].name, Color(1, 0, 0), 2, 3, (22 - (i * 2)));
 					}
 					else
 					{
 						if (SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i].ID != 0)
 							RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i].bitcoin) + "-" + SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i].name + std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i].level), Color(1, 0, 0), 2, 3, (22 - (i * 2)));
-						else RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i].bitcoin) + "-" + SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i].name, Color(1, 0, 0), 2, 3, (22 - (i * 2)));
+						else RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i].bitcoin* (SharedData::GetInstance()->SD_hullmax - (int)(SharedData::GetInstance()->SD_hullIntegrity))) + "-" + SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[i].name, Color(1, 0, 0), 2, 3, (22 - (i * 2)));
 					}
 				}
 			}
@@ -1567,7 +1567,7 @@ void PlanetJellyScene::Render_Checker()
 		else
 		{
 			RenderTextOnScreen(meshList[GEO_TEXT], "Buy:  (" + SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[num].name + ")", Color(1, 0, 0), 2, 16, 18);
-			RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoin : " + std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[num].bitcoin* (SharedData::GetInstance()->SD_hullmax - SharedData::GetInstance()->SD_hullIntegrity)), Color(1, 0, 0), 2, 14, 15);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoin : " + std::to_string(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[num].bitcoin* (SharedData::GetInstance()->SD_hullmax - (int)(SharedData::GetInstance()->SD_hullIntegrity))), Color(1, 0, 0), 2, 14, 15);
 		}
 	}
 
