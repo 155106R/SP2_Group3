@@ -72,7 +72,7 @@ void Application::Init()
 
 
 	//Create a window and create its OpenGL context
-	m_window = glfwCreateWindow(1920, 1080, "Computer Graphics", NULL, NULL);	//For fixed screen size
+	m_window = glfwCreateWindow(960, 640, "Computer Graphics", NULL, NULL);	//For fixed screen size
 	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 	glfwSetWindowSizeCallback(m_window, resize_callback);
@@ -115,8 +115,8 @@ void Application::Run()
 
 	//Main Loop
 	OpenGalaxy->Init();
-	TogaPlanet->Init();
-	JellyPlanet->Init();
+	//TogaPlanet->Init();
+	//JellyPlanet->Init();
 
 	m_timer.startTimer();    // Start timer to calculate how long it takes to render this frame
 	while (!glfwWindowShouldClose(m_window) && !IsKeyPressed(VK_ESCAPE))

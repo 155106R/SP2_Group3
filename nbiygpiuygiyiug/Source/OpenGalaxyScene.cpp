@@ -22,31 +22,42 @@ OpenGalaxyScene::~OpenGalaxyScene()
 
 void OpenGalaxyScene::Init()
 {
+	DronePosition = Vector3(1, 0, 0);
 	//Gets new seed
 	Math::InitRNG();
 
 	//Definations
 	e_state = 0;//e key state
 
-	land = false;						//If player is within bounds of landing on a planet
-	rotateShip = 0;						//Rotates the ship accordingly to input
-	rotateShipZ = 0;					//Rotates when ship travels along y-axis
-	noseOfShip = new Vector3(1, 0, 0);	//Directional vector of which direction player is moving in
-	middleOfShip = new Vector3(0, 0, 0);//Ship position
-	accelerateShip = 0;
-	CURRENT_STATE = PILOTING;			//Piloting state by default
+	land = false;							//If player is within bounds of landing on a planet
+	Spaceship.rotateY = 0;					//Rotates the ship accordingly to input
+	Spaceship.rotateZ = 0;					//Rotates when ship travels along y-axis
+	Spaceship.direction = Vector3(1, 0, 0);	//Directional vector of which direction player is moving in(Should also be the nose of the ship)
+	Spaceship.position = Vector3(0, 0, 0);	//Ship position
+	Spaceship.acceleration = 0;
+	CURRENT_STATE = PILOTING;				//Piloting state by default
+	ex_scale[0] = 1;
+	ex_scaleMax[0] = 0;
+	ex_scale[1] = 1;
+	ex_scaleMax[1] = 0;
+	ex_scale[2] = 1;
+	ex_scaleMax[2] = 0;
+	ex_scale[3] = 1;
+	ex_scaleMax[3] = 0;
+	ex_scale[4] = 1;
+	ex_scaleMax[4] = 0;
 
 	//Hardcoded hitbox
-	spaceshipHitbox = AABB::generateAABB(*middleOfShip, 20, 5, 17.5, NULL);
+	spaceshipHitbox = AABB::generateAABB(Spaceship.position, 20, 5, 17.5, NULL);
 	planetA_Hitbox = AABB::generateAABB(Vector3(250, 250, 0), 100, 100, 100, NULL);		//---]
 	planetB_Hitbox = AABB::generateAABB(Vector3(250, 0, 250), 100, 100, 100, NULL);		//   |}> This might be kind of retarded. just do a length check??
 	planetC_Hitbox = AABB::generateAABB(Vector3(-250, 0, -250), 100, 100, 100, NULL);	//---]
 
-	Drill.drillHead = AABB::generateAABB(Vector3(Drill.position.x, Drill.position.y, Drill.position.z), 2, 1, 2, 0);
-	//shipInterior = AABB::generateAABB(Vector3(middleOfShip->x, middleOfShip->y, middleOfShip->z), 41, 12, 20.5, NULL);
+	Drill.drillHead = AABB::generateAABB(Vector3(Drill.position.x, Drill.position.y, Drill.position.z), 4, 2, 4, 0);
+	//shipInterior = AABB::generateAABB(Vector3(Spaceship.position->x, Spaceship.position->y, Spaceship.position->z), 41, 12, 20.5, NULL);
 
 	//Generate asteroids
-	for (unsigned i = 0; i < 200; i++){	//change loop number for how many asteroids you want to random
+	for (unsigned i = 0; i < 200; ++i){	//change loop number for how many asteroids you want to random
 		allAsteroids.push_back(new Asteroid());
 	}
 
@@ -65,11 +76,11 @@ void OpenGalaxyScene::Init()
 	glEnable(GL_DEPTH_TEST);
 
 	//Camera
-	shipCamera.Init(Vector3(30, 30, 30), *middleOfShip, Vector3(0, 10, 0));
-	shipCamera.Reset();
+	Spaceship.camera.Init(Vector3(30, 30, 30), Spaceship.position, Vector3(0, 10, 0));
+	Spaceship.camera.Reset();
 	inShipCamera.Init(Vector3(0, 0, 1), Vector3(0, 0, 0), Vector3(0, 1, 0)); //if using Camera_Mouse
 	inShipCamera.Reset();
-	//Drill.camera.Init(Vector3(10, 10, 10), Vector3(middleOfShip->x, middleOfShip->y + 5, middleOfShip->z), Vector3(0, 10, 0));
+	//Drill.camera.Init(Vector3(10, 10, 10), Vector3(Spaceship.position->x, Spaceship.position->y + 5, Spaceship.position->z), Vector3(0, 10, 0));
 	//Drill.camera.Reset();
 
 	glGenVertexArrays(1, &m_vertexArrayID);
@@ -102,10 +113,10 @@ void OpenGalaxyScene::Init()
 	light[0].spotDirection.Set(0.f, 1.f, 0.f);
 
 	//Spaceship interior
-	light[1].type = Light::LIGHT_DIRECTIONAL;
-	light[1].position.Set(middleOfShip->x, middleOfShip->y + 5, middleOfShip->z);
+	light[1].type = Light::LIGHT_POINT;
+	light[1].position.Set(Spaceship.position.x, Spaceship.position.y + 2, Spaceship.position.z);
 	light[1].color.Set(1, 1, 1);
-	light[1].power = 100;
+	light[1].power = 1;
 	light[1].kC = 1.0f;
 	light[1].kL = 1.0f;
 	light[1].kQ = 1.0f;
@@ -238,95 +249,93 @@ void OpenGalaxyScene::Init()
 	meshList[SPACESHIP_DRILL_HEAD] = MeshBuilder::GenerateOBJ("Drill Head", "OBJ//Drillbit_1.obj");
 	meshList[SPACESHIP_DRILL_HEAD]->textureID = LoadTGA("Image//drill1_texture.tga");
 
+	meshList[DRILL_MAXDISTANCE] = MeshBuilder::GenerateSphere("Drill Max Distance", Color(0, 1, 0), 9, 18);
+	meshList[ASTEROIDS]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
+	meshList[ASTEROIDS]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
+	meshList[ASTEROIDS]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
+	meshList[ASTEROIDS]->material.kShininess = 0.1f;
+
 	//RenderHUD
 	meshList[GEO_HUD] = MeshBuilder::GenerateQuad("HUD", Color(0, 0, 0));
 	meshList[GEO_HUD]->textureID = LoadTGA("Image//HUD.tga");
+
+	meshList[GEO_DRILL_UI] = MeshBuilder::GenerateQuad("Drill ui", Color(0, 0, 0));
+	meshList[GEO_DRILL_UI]->textureID = LoadTGA("Image//drill_UI.tga");
 
 }
 
 void OpenGalaxyScene::Update(double dt)
 {
+
 	timer += dt;
 
-	Drill.drillHead.m_origin = Drill.position + (Drill.facing * 3.5);//Vector3(Drill.position.x + 10, Drill.position.y, Drill.position.z) + (Drill.facing * 5);
+	//update hitbox
+	Drill.drillHead.m_origin = Drill.camera.frontTarget;// +Drill.camera.cameraRotationY;// +(Drill.direction * 5);
 	AABB::updateAABB(Drill.drillHead);
 
-	spaceshipHitbox.m_origin = *middleOfShip;
+	spaceshipHitbox.m_origin = Spaceship.position;
 	AABB::updateAABB(spaceshipHitbox);
 
-	std::cout << SharedData::GetInstance()->PlayerInventory->Slot[0].name << " " << SharedData::GetInstance()->PlayerInventory->Slot[0].stack << std::endl;
+	//Currently updating the translate for asteroids in render according to the asteroid's hitbox position
 
+	////================================================================================================================================================================================//
+	////																					Collision																					  //
+	////================================================================================================================================================================================//
+	int i = 0;
+	for (vector<Asteroid*>::iterator iter = allAsteroids.begin(); iter != allAsteroids.end(); ++iter){
+		Asteroid *tempAst = *iter;
+		AABB::updateAABB(tempAst->hitbox);
 
-	for (int i = 0; i < allAsteroids.size(); i++){
-		AABB::updateAABB(allAsteroids[i]->hitbox);//Currently updating the translate for asteroids in render according to the asteroid's hitbox position
+		if (collision(tempAst->hitbox, spaceshipHitbox)){
+			SharedData::GetInstance()->SD_hullIntegrity--;												//Hull takes damage when you run into an asteroid
+			tempAst->hitbox.m_velocity = (Spaceship.direction) * (Spaceship.acceleration * 0.5) * dt;	//Asteroids are dragged along the path of the ship because the ship passes ONLY HALF it's velocity onto the asteroid upon collison, else it should have the ship's velocity
+			tempAst->hitbox.m_origin += Spaceship.direction;											//Get the astroid to move in the same direction as the ship upon collision (after passing the ship's velocity)
 
-		//================================================================================================================================================================================//
-		//																					Collision																					  //
-		//================================================================================================================================================================================//
-
-		if (collision(allAsteroids[i]->hitbox, spaceshipHitbox)){
-			SharedData::GetInstance()->SD_hullIntegrity--;
-
-			if (accelerateShip == 0){
-				allAsteroids[i]->hitbox.m_velocity = -(allAsteroids[i]->hitbox.m_velocity);			//Asteroids bounce off ship if it's not moving
-			}else{
-				allAsteroids[i]->hitbox.m_velocity = (*noseOfShip) * (accelerateShip * 0.5) * dt;	//Asteroids are dragged along the path of the ship because the ship passes ONLY HALF it's velocity onto the asteroid upon collison
-				allAsteroids[i]->hitbox.m_origin += *noseOfShip;									//Get the astroid to move in the same direction as the ship upon collision (after passing the ship's velocity)
-
-				if (allAsteroids[i]->count){														//If the asteroid still has any minerals in it
-					allAsteroids[i]->count--;
-				}
-				else{
-					//allAsteroids[i]->hitbox.m_origin = Vector3(100000000, 100000000, 1000000);		//move asteroid out of worldspace. supposed to delete this
-					//allAsteroids[i]->hitbox.m_velocity = Vector3(0, 0, 0);
-					//allAsteroids.erase(i);
-					delete allAsteroids[i];	//need to erase and fix the vector before deleting
-				}
-			}
-		}
-
-		for (int a = 0; a < allAsteroids.size(); a++){
-			if (a == i){	//Don't check for asteroid collision with itself (obviously)
+			if (tempAst->count > 0){
+				tempAst->count--;
+			} else {
+				delete allAsteroids[i];
+				iter = allAsteroids.erase(iter);
 				break;
 			}
-			else if (collision(allAsteroids[a]->hitbox, allAsteroids[i]->hitbox)){
 
-				allAsteroids[a]->hitbox.m_velocity = allAsteroids[i]->hitbox.m_velocity;
-				allAsteroids[i]->hitbox.m_velocity = allAsteroids[a]->hitbox.m_velocity;
+		}
 
+		for (int a = 0; a < allAsteroids.size(); ++a){
+			if (collision(allAsteroids[i]->hitbox, allAsteroids[a]->hitbox) && a != i) {
+				allAsteroids[i]->velocity = allAsteroids[a]->velocity;
+				allAsteroids[a]->velocity = allAsteroids[i]->velocity;
 			}
 		}
 
+		++i;
 	}
 
-	//Only when in DRILLING state, do we check for collision with drill
-	while (CURRENT_STATE == DRILLING){
-		for (int i = 0; i < allAsteroids.size(); i++){
-			if (collision(Drill.drillHead, allAsteroids[i]->hitbox)){
-				if (allAsteroids[i]->count){
-					allAsteroids[i]->count--;
-					SharedData::GetInstance()->PlayerInventory->GetItem(allAsteroids[i]->material, 1);
+	//Only when in DRILLING state AND space is pressed, do we check for collision with drill
+	while (CURRENT_STATE == DRILLING && Application::IsKeyPressed(VK_SPACE)){
+		int i = 0;
+		for (vector<Asteroid*>::iterator iter = allAsteroids.begin(); iter != allAsteroids.end(); ++iter){
+			Asteroid *tempAst = *iter;
+			if (collision(allAsteroids[i]->hitbox, Drill.drillHead)){
+
+				if (tempAst->count > 0){
+					tempAst->hitbox.m_velocity = Vector3(0, 0, 0); 
+					tempAst->count--;
+					tempAst->length -= 0.1f;
+					tempAst->height -= 0.1f;
+					tempAst->width -= 0.1f;
+					SharedData::GetInstance()->PlayerInventory->GetItem(allAsteroids[i]->material, 1);	//Give 1 material per drill
 				}
 				else{
 					delete allAsteroids[i];
+					allAsteroids.erase(iter);
+					break;
 				}
+
 			}
+			++i;
 		}
 		break;
-	}
-
-	//Light
-	if (Application::IsKeyPressed('8')){
-		light[0].type = Light::LIGHT_POINT;
-		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
-	}
-	if (Application::IsKeyPressed('9')){
-		light[0].type = Light::LIGHT_DIRECTIONAL;
-		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
-	}
-	if (Application::IsKeyPressed('0')){
-		light[0].type = Light::LIGHT_SPOT;
-		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
 	}
 
 
@@ -354,16 +363,29 @@ void OpenGalaxyScene::Update(double dt)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
+	//Light
+	if (Application::IsKeyPressed('8')){
+		light[0].type = Light::LIGHT_POINT;
+		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
+	}
+	if (Application::IsKeyPressed('9')){
+		light[0].type = Light::LIGHT_DIRECTIONAL;
+		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
+	}
+	if (Application::IsKeyPressed('0')){
+		light[0].type = Light::LIGHT_SPOT;
+		glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
+	}
 
 	//================================================================================================================================================================================//
 	//																			Ship interior/exterior																				  //
 	//================================================================================================================================================================================//
-	*middleOfShip += (*noseOfShip) * accelerateShip * dt;	//Move ship in a direction(Nose is a directional vector)
+	Spaceship.position += (Spaceship.direction) * Spaceship.acceleration * dt;	//Move ship in a direction(Nose is a directional vector)
 
 	if (Application::IsKeyPressed(VK_SPACE) && CURRENT_STATE != DRILLING){
 		switch (CURRENT_STATE){
 			case PILOTING:
-				inShipCamera.position = *middleOfShip;
+				inShipCamera.position = Spaceship.position;
 				CURRENT_STATE = IN_SHIP;
 				break;
 			case IN_SHIP:
@@ -375,42 +397,71 @@ void OpenGalaxyScene::Update(double dt)
 	if (Application::IsKeyPressed('B')){
 		switch (CURRENT_STATE){
 			case IN_SHIP:
-				accelerateShip = 0;				
-				Drill.facing = *noseOfShip;
+				Spaceship.acceleration = 0;				
+				Drill.direction = Spaceship.direction;
 				Drill.rotate = 0;
-				Drill.position = Vector3(middleOfShip->x, middleOfShip->y + 5, middleOfShip->z);
+				Drill.position = Vector3(Spaceship.position.x, Spaceship.position.y + 5, Spaceship.position.z);
 				Drill.camera.Init(Vector3(10, 10, 10), Drill.position, Vector3(0, 10, 0));
-				Drill.camera.distance = 25;
+				Drill.camera.position = Vector3(Spaceship.position.x, Spaceship.position.y + 10, Spaceship.position.z);
 				CURRENT_STATE = DRILLING;
 			break;
 			case DRILLING:
-				while ((Drill.position - *middleOfShip).Length() < 15){
+				while ((Drill.position - Spaceship.position).Length() < 15){
 					CURRENT_STATE = IN_SHIP;
 					break;
 				}
 			break;
 		}
 	}
-
+	
+	Vector3 tempInShipPosition; 
+	//Camera updates
 	switch (CURRENT_STATE){
 		case PILOTING:
-			shipCamera.target = *middleOfShip;
-			shipCamera.Update(dt);
+			Spaceship.camera.target = Spaceship.position;
+			Spaceship.camera.Update(dt);
 			updateShipMovement(dt);
 			break;
 
 		case IN_SHIP:
-			inShipCamera.position.y = middleOfShip->y + 2;					//Player height
-			inShipCamera.position += (*noseOfShip) * accelerateShip * dt;	//Adds the ship's velocity to the player's movement
+			inShipCamera.position.y = Spaceship.position.y + 2;					//Player height
+			inShipCamera.position += (Spaceship.direction) * Spaceship.acceleration * dt;	//Adds the ship's velocity to the player's movement
+			tempInShipPosition = inShipCamera.position;
 			inShipCamera.Update(dt);										//Movement - Need to add bounds for movement only within the ship
 			inShipCamera.movement();
+			if ((inShipCamera.position.x > 9) ||
+				(inShipCamera.position.x < -9) ||
+				(inShipCamera.position.z > 9) ||
+				(inShipCamera.position.z < -9)
+				){
+				inShipCamera.position = tempInShipPosition;
+			}
 			break;
 
 		case DRILLING:
+			Drill.camera.colliding = false;
 			Drill.camera.target = Drill.position;
+			Vector3 tempDrillPosition = Drill.position;
+			Vector3 tempDrillCameraPosition = Drill.camera.position;
 			Drill.camera.Update(dt);
+			Drill.camera.movement();
 			updateDrillMovement(dt);
-			//Need input for drill movement
+			if ((Drill.position - Spaceship.position).Length() < 15){
+				Drill.returnToShip = true;
+				if ((Drill.position - Spaceship.position).Length() < 9){
+					Drill.position = tempDrillPosition;
+					Drill.camera.position = tempDrillCameraPosition;
+				}
+			}else if ((Spaceship.position - Drill.position).Length() > 100){
+				Drill.position = tempDrillPosition;
+				Drill.camera.position = tempDrillCameraPosition;
+				Drill.drillTooFarFromShip = true;
+			}
+			else{
+				Drill.drillTooFarFromShip = false;
+				Drill.returnToShip = false;
+			}
+
 			break;
 	}
 
@@ -423,7 +474,7 @@ void OpenGalaxyScene::Update(double dt)
 	//Planet interaction/docking
 	if (SharedData::GetInstance()->SD_enableinteract)
 	{
-		if (((*middleOfShip - (Vector3(250, 250, 0))).Length()) < 100){			//for planet A - sean's planet - ????????
+		if (((Spaceship.position - (Vector3(250, 250, 0))).Length()) < 100){			//for planet A - sean's planet - ????????
 			land = true;
 			nameOfPlanet = "sean's planet";
 
@@ -431,9 +482,12 @@ void OpenGalaxyScene::Update(double dt)
 				//SharedData::GetInstance()->location = 69; //Does not fucking exist 
 				//SharedData::GetInstance()->SD_enableinteract = false;
 			//	return;
+			} else if (collision(planetA_Hitbox, spaceshipHitbox)){
+				Spaceship.acceleration = 0;
+				Spaceship.position = Spaceship.position - Spaceship.direction;
 			}
 		}
-		else if (((*middleOfShip - (Vector3(250, 0, 250))).Length()) < 100){	//for planet B - YueXian's planet - Toga
+		else if (((Spaceship.position - (Vector3(250, 0, 250))).Length()) < 100){	//for planet B - YueXian's planet - Toga
 			land = true;
 			nameOfPlanet = "Toga";
 		
@@ -441,10 +495,12 @@ void OpenGalaxyScene::Update(double dt)
 			{
 				SharedData::GetInstance()->SD_enableinteract = false;
 				SharedData::GetInstance()->SD_location = PLANET_TOGA;
-				
+			} else if (collision(planetB_Hitbox, spaceshipHitbox)){
+				Spaceship.acceleration = 0;
+				Spaceship.position = Spaceship.position - Spaceship.direction;
 			}
 		}
-		else if (((*middleOfShip - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C - ShuYu's planet - Jelly Planet
+		else if (((Spaceship.position - (Vector3(-250, 0, -250))).Length()) < 100){	//for planet C - ShuYu's planet - Jelly Planet
 			land = true;
 			nameOfPlanet = "Jelly Planet";
 
@@ -452,15 +508,32 @@ void OpenGalaxyScene::Update(double dt)
 			{
 				SharedData::GetInstance()->SD_enableinteract = false;
 				SharedData::GetInstance()->SD_location = PLANET_JELLY;
-				return;
+			} else if (collision(planetC_Hitbox, spaceshipHitbox)){
+				Spaceship.acceleration = 0;
+				Spaceship.position = Spaceship.position - Spaceship.direction;
 			}
 		}
 		else{
 			land = false;
-			
 		}
 	}
 	resetKey();
+
+	//Hull < 0 explosion effect	//can probably optimize
+	if (SharedData::GetInstance()->SD_hullIntegrity < 1){
+		for (int i = 0; i < 5; ++i){
+			if (ex_scale[i] > ex_scaleMax[i]){
+				ex_x[i] = Spaceship.position.x + Math::RandFloatMinMax(-8, 8);
+				ex_y[i] = Spaceship.position.y + Math::RandFloatMinMax(-2, 2);
+				ex_z[i] = Spaceship.position.z + Math::RandFloatMinMax(-8, 8);
+				ex_scale[i] = 1;
+				ex_scaleMax[i] = Math::RandFloatMinMax(2, 5);
+			}
+			else{
+				ex_scale[i] += ex_scale[i] * 5 * dt;
+			}
+		}
+	}
 }
 
 void OpenGalaxyScene::RenderText(Mesh* mesh, std::string text, Color color)
@@ -606,9 +679,9 @@ void OpenGalaxyScene::Render()
 	
 	switch (CURRENT_STATE){
 	case PILOTING:
-		viewStack.LookAt(shipCamera.position.x, shipCamera.position.y, shipCamera.position.z,
-			shipCamera.target.x, shipCamera.target.y, shipCamera.target.z,
-			shipCamera.up.x, shipCamera.up.y, shipCamera.up.z);
+		viewStack.LookAt(Spaceship.camera.position.x, Spaceship.camera.position.y, Spaceship.camera.position.z,
+			Spaceship.camera.target.x, Spaceship.camera.target.y, Spaceship.camera.target.z,
+			Spaceship.camera.up.x, Spaceship.camera.up.y, Spaceship.camera.up.z);
 		break;
 
 	case IN_SHIP:
@@ -645,7 +718,7 @@ void OpenGalaxyScene::Render()
 
 	//Skybox
 	modelStack.PushMatrix();
-	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);	//toggle for if skybox moves with skybox
+	modelStack.Translate(Spaceship.position.x, Spaceship.position.y, Spaceship.position.z);	//toggle for if skybox moves with skybox
 	generateSkybox();
 	modelStack.PopMatrix();
 
@@ -654,7 +727,7 @@ void OpenGalaxyScene::Render()
 	//================================================================================================================================================================================//
 
 	//Render Asteroids
-	for (unsigned i = 0; i < allAsteroids.size(); i++){
+	for (unsigned i = 0; i < allAsteroids.size(); ++i){
 			modelStack.PushMatrix();
 			modelStack.Translate(allAsteroids[i]->hitbox.m_origin.x, allAsteroids[i]->hitbox.m_origin.y, allAsteroids[i]->hitbox.m_origin.z);	//Move asteroids to their positions
 			modelStack.Scale(allAsteroids[i]->length, allAsteroids[i]->height, allAsteroids[i]->width);											//Give them their appearance
@@ -686,47 +759,88 @@ void OpenGalaxyScene::Render()
 
 	//Spaceship
 	modelStack.PushMatrix();
-	modelStack.Translate(middleOfShip->x, middleOfShip->y, middleOfShip->z);
-	modelStack.Rotate(rotateShip, 0, 1, 0);
-	modelStack.Rotate(rotateShipZ, 0, 0, 1);
+	modelStack.Translate(Spaceship.position.x, Spaceship.position.y, Spaceship.position.z);
+	modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
+	modelStack.Rotate(Spaceship.rotateZ, 0, 0, 1);
 
 	switch (CURRENT_STATE){
 		case PILOTING:
 			RenderMesh(meshList[SPACESHIP], true);	//To render ship
-			//Drill		//Need to do another check for if in drilling mode or not
+			//Drill		
+			modelStack.PushMatrix();
 			modelStack.Translate(-3.5, 3, 0);
 			RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
 			RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
+			modelStack.PopMatrix();
 
 			//Particle effects
-			for (int i = 0; i < accelerateShip * 3; i++){
+			for (int i = 0; i < Spaceship.acceleration * 5; ++i){
 				modelStack.PushMatrix();
-				modelStack.Translate(Math::RandFloatMinMax(-10, -15), Math::RandFloatMinMax(-2, 2), Math::RandFloatMinMax(-8, 8));
+				modelStack.Translate(Math::RandFloatMinMax(-8, -13), Math::RandFloatMinMax(-2, 2), Math::RandFloatMinMax(-8, 8));
+				modelStack.Scale(0.3, 0.3, 0.5);
 				RenderMesh(meshList[GEO_LIGHTCUBE], false);
 				modelStack.PopMatrix();
 			}
 			break;
 
 		case IN_SHIP:
+			modelStack.PushMatrix();
 			modelStack.Rotate(90, 0, 1, 0);
-			modelStack.Scale(10, 10, 10);
+			modelStack.Scale(5, 3, 5);
 			RenderMesh(meshList[SPACESHIP_INTERIOR], true);	//To render ship interior
+			modelStack.PopMatrix();
 			break;
 
 		case DRILLING:
 			RenderMesh(meshList[SPACESHIP], true);	//To render ship
+			modelStack.Scale(100, 100, 100);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line
+			RenderMesh(meshList[DRILL_MAXDISTANCE], false);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
 			modelStack.PopMatrix();
+
 			modelStack.PushMatrix();
-			modelStack.Translate(Drill.position.x, Drill.position.y, Drill.position.z);
-			modelStack.Rotate(rotateShip, 0, 1, 0);
-			modelStack.Rotate(Drill.rotate, 0, 1, 0);
+			modelStack.Translate(Drill.position.x, Drill.position.y, Drill.position.z);	//wtf is all this shit??
+			//modelStack.Translate(0, -1.8, num);
+			//modelStack.Rotate(12, 0, 1, 0);
+			//modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
+			modelStack.Rotate(Drill.camera.cameraRotationY + 80, 0, 1, 0);
+			modelStack.Rotate(Drill.camera.cameraRotationX , 0, 0, 1);
+			modelStack.Translate(1.8, -1.8, 0);
+			modelStack.Rotate(13, 0, 1, 0);
+			modelStack.Rotate(7, 0, 0, 1);
+			
 			RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
+			//modelStack.Rotate(Drill.rotate, 0, 1, 0);
+			modelStack.Rotate(Drill.rotate, 1, 0, 0);
 			RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
+
 			modelStack.PopMatrix();
+
 			modelStack.PushMatrix();
+			
 	}
 
+	//Drones
+	modelStack.Rotate(DroneRotateX, 1, 0, 0);
+	modelStack.Rotate(DroneRotateY, 0, 1, 0);
+	modelStack.Rotate(DroneRotateZ, 0, 0, 1);
+	modelStack.Translate(DronePosition.x, DronePosition.y, DronePosition.z);
+	RenderMesh(meshList[GEO_LIGHTCUBE], false);
+
 	modelStack.PopMatrix();
+
+	if (SharedData::GetInstance()->SD_hullIntegrity < 1){
+		for (int i = 0; i < 5; ++i){
+			modelStack.PushMatrix();
+			modelStack.Translate(ex_x[i], ex_y[i], ex_z[i]);
+			modelStack.Scale(ex_scale[i], ex_scale[i], ex_scale[i]);
+			modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
+			modelStack.Rotate(Spaceship.rotateZ, 0, 0, 1);
+			RenderMesh(meshList[PLANET_SUN], false);
+			modelStack.PopMatrix();
+		}
+	}
 
 	//================================================================================================================================================================================//
 	//																				Hitbox																							  //
@@ -761,11 +875,12 @@ void OpenGalaxyScene::Render()
 		shipInterior.m_height, 
 		shipInterior.m_width
 		);
-	//modelStack.Rotate(rotateShip, 0, 1, 0);
+	//modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
 	RenderMesh(meshList[GEO_LIGHTCUBE], false);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
 	modelStack.PopMatrix();
+
 	//================================================================================================================================================================================//
 	//																				Planets																							  //
 	//================================================================================================================================================================================//
@@ -849,14 +964,12 @@ void OpenGalaxyScene::Render()
 	//================================================================================================================================================================================//
 
 	//Generate HUD
-	while (CURRENT_STATE != DRILLING){
-		drawHUD();
-		break;
-	}
+	drawHUD();
+
 
 	//Text if ship is within range of landing on planets
 	while (land){
-		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 3, 3, 10);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 4, 3.5, 8.5);
 		break;
 	}
 
@@ -926,64 +1039,64 @@ void OpenGalaxyScene::generateSkybox(){
 
 void OpenGalaxyScene::updateShipMovement(double dt){
 	//For stabilisation
-	if (rotateShipZ && (!Application::IsKeyPressed('U')) && (!Application::IsKeyPressed('O'))){	//to "stabilize" ship
-		if (rotateShipZ > 0){
-			rotateShipZ -= 0.1f;
+	if (Spaceship.rotateZ && (!Application::IsKeyPressed('U')) && (!Application::IsKeyPressed('O'))){	//to "stabilize" ship
+		if (Spaceship.rotateZ > 0){
+			Spaceship.rotateZ -= 0.1f;
 		}
-		else if (rotateShipZ < 0){
-			rotateShipZ += 0.1f;
+		else if (Spaceship.rotateZ < 0){
+			Spaceship.rotateZ += 0.1f;
 		}
 	}
 	//For ship movement
 	if (Application::IsKeyPressed('J')){
-		rotateShip += 1.0f;
+		Spaceship.rotateY += 1.0f;
 		Mtx44 rotate;
 		rotate.SetToRotation(1, 0, 1, 0);
 
-		(*noseOfShip) = rotate * (*noseOfShip);
+		Spaceship.direction = rotate * Spaceship.direction;
 	}
 	if (Application::IsKeyPressed('L')){
-		rotateShip -= 1.0f;
+		Spaceship.rotateY -= 1.0f;
 		Mtx44 rotate;
 		rotate.SetToRotation(-1, 0, 1, 0);
 
-		(*noseOfShip) = rotate * (*noseOfShip);
+		Spaceship.direction = rotate * Spaceship.direction;
 	}
 	if (Application::IsKeyPressed('K')){
-		if (accelerateShip > -10.0f){
-			accelerateShip -= 1.0f;		//deceleration capped at -10.0f
+		if (Spaceship.acceleration > -10.0f){
+			Spaceship.acceleration -= 1.0f;		//deceleration capped at -10.0f
 		}
 		else{
-			accelerateShip = -10;
+			Spaceship.acceleration = -10;
 		}
 	}
 	if (Application::IsKeyPressed('I')){
-		if (accelerateShip < 100.0f){	//acceleration capped at 100.0f
-			accelerateShip += 1.0f;
+		if (Spaceship.acceleration < 100.0f){	//acceleration capped at 100.0f
+			Spaceship.acceleration += 1.0f;
 		}
 		else{
-			accelerateShip = 100;
+			Spaceship.acceleration = 100;
 		}
 	}
 	if (Application::IsKeyPressed('U')){
-		middleOfShip->y += 1.f;
-		if (rotateShipZ < -5.0f){
-			rotateShipZ += 0.5f;
+		Spaceship.position.y += 0.5f;
+		if (Spaceship.rotateZ < 30.0f){
+		Spaceship.rotateZ += 0.5f;
 		}
 	}
 	if (Application::IsKeyPressed('O')){
-		middleOfShip->y -= 1.f;
-		if (rotateShipZ > 5.0f){
-			rotateShipZ -= 0.5f;
+		Spaceship.position.y -= 0.5f;
+		if (Spaceship.rotateZ > -30.0f){
+			Spaceship.rotateZ -= 0.5f;
 		}
 	}
 	if (Application::IsKeyPressed('P')){	//break acceleration to 0
-		if (accelerateShip != 0){
-			if (accelerateShip > 0){
-				accelerateShip -= 0.5f;
+		if (Spaceship.acceleration != 0){
+			if (Spaceship.acceleration > 0){
+				Spaceship.acceleration -= 0.5f;
 			}
 			else{
-				accelerateShip += 0.5f;
+				Spaceship.acceleration += 0.5f;
 			}
 		}
 	}
@@ -993,53 +1106,56 @@ void OpenGalaxyScene::updateShipMovement(double dt){
 void OpenGalaxyScene::updateDrillMovement(double dt){
 
 	//For ship movement
-	if (Application::IsKeyPressed('J')){
-		Drill.rotate += 1.0f;
-		Mtx44 rotate;
-		rotate.SetToRotation(1, 0, 1, 0);
+	Drill.position = Drill.camera.position;
 
-		Drill.facing = rotate * Drill.facing;
-	}
-	if (Application::IsKeyPressed('L')){
-		Drill.rotate -= 1.0f;
-		Mtx44 rotate;
-		rotate.SetToRotation(-1, 0, 1, 0);
-
-		Drill.facing = rotate * Drill.facing;
-	}
-	if (Application::IsKeyPressed('K')){
-		Drill.position -= Drill.facing * Drill.moveSpeed * dt;
-
-	}
-	if (Application::IsKeyPressed('I')){
-		Drill.position += Drill.facing * Drill.moveSpeed * dt;
-	}
-	if (Application::IsKeyPressed('U')){
-		Drill.position.y += 1.f;
-	}
-	if (Application::IsKeyPressed('O')){
-		Drill.position.y -= 1.f;
+	if(Application::IsKeyPressed(VK_SPACE))
+	{
+		Drill.rotate += 2000 * dt;
+		//put colision detection here
+		//collision between asteroid and Drill.Camera.frontTarget
+	
 	}
 
 }
 
 void OpenGalaxyScene::drawHUD()
 {
-	viewStack.LoadIdentity();
-	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, -1);
-	modelStack.Rotate(-92.5, 90, 1, 0);
-	modelStack.Scale(1.1, 0.8, 0.8);
-	RenderMesh(meshList[GEO_HUD], false);
-	modelStack.PopMatrix();
+	switch (CURRENT_STATE){
+	case(PILOTING) :
+		viewStack.LoadIdentity();
+		modelStack.PushMatrix();
+		modelStack.Translate(0, 0, -1);
+		modelStack.Rotate(-92.5, 90, 1, 0);
+		modelStack.Scale(1.1, 0.8, 0.8);
+		RenderMesh(meshList[GEO_HUD], false);
+		modelStack.PopMatrix();
 
-	RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoins:" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 3, 0.5, 18);
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)SharedData::GetInstance()->SD_hullIntegrity), Color(1, 0, 0), 3, 22.5, 3.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Bitcoins:" + std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 3, 0.5, 18);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)SharedData::GetInstance()->SD_hullIntegrity), Color(1, 0, 0), 3, 22.5, 3.5);
 
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->x), Color(1, 0, 0), 3, 4.5, 6.5);
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->y), Color(1, 0, 0), 3, 4.5, 5.5);
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)middleOfShip->z), Color(1, 0, 0), 3, 4.5, 4.5);
-	RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)accelerateShip), Color(1, 0, 0), 4, 18.0, 5.7);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)Spaceship.position.x), Color(1, 0, 0), 3, 4.5, 6.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)Spaceship.position.y), Color(1, 0, 0), 3, 4.5, 5.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)Spaceship.position.z), Color(1, 0, 0), 3, 4.5, 4.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)Spaceship.acceleration), Color(1, 0, 0), 4, 18.0, 5.7);
+		break;
+
+	case(DRILLING) :
+		viewStack.LoadIdentity();
+		modelStack.PushMatrix();
+		modelStack.Translate(0, 0, -1);
+		modelStack.Rotate(-90, 1, 0, 0);
+		modelStack.Scale(1.1, 0.8, 0.8);
+		RenderMesh(meshList[GEO_DRILL_UI], false);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)(Spaceship.position - Drill.position).Length()), Color(1, 0, 0), 3, 23.5, 17.75);
+		if (Drill.drillTooFarFromShip){
+			RenderTextOnScreen(meshList[GEO_TEXT], "YOU ARE GOING TOO FAR", Color(1, 0, 0), 4, 4, 10);
+		}
+		else if (Drill.returnToShip){
+			RenderTextOnScreen(meshList[GEO_TEXT], "Press \'B\' to return", Color(1, 0, 0), 4, 4.75, 10);
+		}
+		modelStack.PopMatrix();
+		break;
+	}
 }
 
 void OpenGalaxyScene::resetKey()

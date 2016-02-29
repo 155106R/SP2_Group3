@@ -10,6 +10,7 @@ using std::ifstream;
 
 #include "Scene.h"
 #include "FPCamera.h"
+#include "Camera_drill.h"
 #include "Camera_Mouse.h"
 #include "OpenGalaxyCamera.h"
 #include "Mesh.h"
@@ -33,7 +34,7 @@ public:
 
 	AABB hitbox;	//Generate a hitbox for the Asteroid for collision checks
 
-	Asteroid(){
+	Asteroid(){		//Default Constructor 
 		material = Math::RandIntMinMax(1, 12);
 		count = Math::RandIntMinMax(1, 50);
 
@@ -52,31 +53,49 @@ public:
 			velocity		//Pass in Velocity
 			);
 	};
+	~Asteroid() {};
 
-	~Asteroid(){
-
-	};
 };
 
 class OpenGalaxyScene : public Scene
 {
 	struct DrillAssets{
 		Vector3 position;
-		Vector3 facing;
+		Vector3 direction;
 		float rotate;
 		float moveSpeed = 5;
 		std::map<unsigned, unsigned> storage;	//Drill's storage of materials in a map <unsigned materialID, unsigned count/stack>
 
 		AABB drillHead;
+		//AABB drillBody;
+
+		bool drillTooFarFromShip;
+		bool returnToShip;
+
+		Camera_drill camera;
+	}Drill;
+
+	struct SpaceshipAssets{
+		Vector3 position;
+		Vector3 direction;
+
+		float acceleration;
+		//max acceleration to be taken from Shared Data;
+
+		float rotateZ;
+		float rotateY;
+
+		AABB hitbox;
 
 		OpenGalaxyCamera camera;
-	}Drill;
+	}Spaceship;
 
 	enum GEOMETRY_TYPE
 	{
 		GEO_AXES,
 		GEO_LIGHTCUBE,
 		GEO_TEXTBOX,
+		GEO_DRILL_UI,
 
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
@@ -100,6 +119,8 @@ class OpenGalaxyScene : public Scene
 		SPACESHIP_INTERIOR,
 		SPACESHIP_DRILL_BODY,
 		SPACESHIP_DRILL_HEAD,
+
+		DRILL_MAXDISTANCE,
 
 		GEO_TEXT,
 		GEO_HUD,
@@ -169,10 +190,6 @@ public:
 	virtual void Render();
 	virtual void Exit();
 
-	//Ship movement stuff
-	Vector3 *noseOfShip;
-	Vector3 *middleOfShip;
-
 private:
 	unsigned m_vertexArrayID;
 	unsigned m_vertexBuffer[NUM_GEOMETRY];
@@ -205,17 +222,18 @@ private:
 
 	unsigned CURRENT_STATE;	//Play state
 
-	float shipAxisX, shipAxisY, shipAxisZ; 
-	float rotateShipZ;
-	bool isTransltingY;
-	float rotateShip;
-	float translateShip;
-	float accelerateShip;
-
 	void updateDrillMovement(double dt);
 	void updateShipMovement(double dt);
 
 	Vector3 tempPosition;
+
+	//Drones
+	Vector3 DronePosition;
+	float DroneRotateX;
+	float DroneRotateY;
+	float DroneRotateZ;
+	float DroneTrans;
+	bool repair;
 
 	//For Light
 	bool enableLight;
@@ -229,6 +247,8 @@ private:
 	Light light[2];
 
 	Mesh *meshList[NUM_GEOMETRY];
+
+	float ex_x[5], ex_y[5], ex_z[5], ex_scale[5], ex_scaleMax[5];
 };
 
 #endif
