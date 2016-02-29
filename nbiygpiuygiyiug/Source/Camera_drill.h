@@ -1,12 +1,13 @@
 
-#ifndef CAMERA_MOUSE_H
-#define CAMERA_MOUSE_H
+#ifndef CAMERA_DRILL_H
+#define CAMERA_DRILL_H
+
 #include "Camera.h"
 #include "MyMath.h"
 
 using Math::DegreeToRadian;
 
-class Camera_Mouse : public Camera
+class Camera_drill : public Camera
 {
 public:
 	//Vector3 position;
@@ -18,9 +19,9 @@ public:
 	Vector3 defaultUp;
 	Vector3 frontTarget;
 	Vector3 tempPosition;
-	Vector3 nextPosition;
+	Vector3 nextPosition; 
 
-	float cameraRotationX, cameraRotationY;
+		float cameraRotationX, cameraRotationY;
 	int Counter;
 	int screenMidX;
 	int screenMidY;
@@ -35,15 +36,14 @@ public:
 	void movement();
 
 
-	Camera_Mouse();
-	~Camera_Mouse();
+	Camera_drill();
+	~Camera_drill();
 	virtual void Init(const Vector3& pos, const Vector3& target, const Vector3& up);
 	virtual void Update(double dt);
 	virtual void Reset();
-	bool Camera_Mouse::checkCamera(int minX, int minZ, int maxX, int maxZ);
+	bool Camera_drill::checkCamera(int minX, int minZ, int maxX, int maxZ);
 	virtual void boundCheck(float minX, float minZ, float maxX, float maxZ);
 	virtual void boundCheck2(float minX, float minZ, float maxX, float maxZ);
-	void jump(float dt);
 
 
 	enum movement
@@ -54,7 +54,7 @@ public:
 		RIGHT,
 
 		NUM_MOVEMENT
-		
+
 
 
 	};

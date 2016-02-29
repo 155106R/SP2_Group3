@@ -23,6 +23,7 @@ void PlanetJellyScene::Init()
 	//interactions
 
 	e_state = 0;
+	i_state = 0;
 
 	currentstate = FREEMOVE;
 
@@ -37,6 +38,8 @@ void PlanetJellyScene::Init()
 	hitbox.push_back(AABB::generateAABB(Vector3(180, 0, 0), 90, 80, 75, 0));// cave [3]
 
 	hitbox.push_back(AABB::generateAABB(Vector3(-55, 0, -270), 90, 30, 75, 0));// ship [4]
+
+	hitbox.push_back(AABB::generateAABB(Vector3(140, 8, 22), 5, 15, 5, 0));// mdrone [5]
 
 
 	//Definations
@@ -192,6 +195,13 @@ void PlanetJellyScene::Init()
 	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
 	meshList[GEO_UI]->textureID = LoadTGA("Image//planet_UI.tga");
 
+
+	meshList[DRONE_BODY] = MeshBuilder::GenerateOBJ("player ship", "OBJ//mining_drone_body.obj");
+	meshList[DRONE_BODY]->textureID = LoadTGA("Image//miningdrone_texture.tga");
+
+	meshList[DRONE_PROPELLER] = MeshBuilder::GenerateOBJ("player ship", "OBJ//mining_drone_propeller.obj");
+	meshList[DRONE_PROPELLER]->textureID = LoadTGA("Image//miningdrone_texture.tga");
+
 	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
 	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
 
@@ -201,8 +211,14 @@ void PlanetJellyScene::Init()
 	meshList[GEO_SHOP] = MeshBuilder::GenerateQuad("shop screen", Color(0, 0, 0));
 	meshList[GEO_SHOP]->textureID = LoadTGA("Image//shop_screen.tga");
 
+	meshList[GEO_AMOUNTBOX] = MeshBuilder::GenerateQuad("amt box", Color(0, 0, 0));
+	meshList[GEO_AMOUNTBOX]->textureID = LoadTGA("Image//amount_screen.tga");
+
 	meshList[SHIP] = MeshBuilder::GenerateOBJ("player ship", "OBJ//ship.obj");
 	meshList[SHIP]->textureID = LoadTGA("Image//ship_texture1.tga");
+
+	meshList[GEO_INVENTORY] = MeshBuilder::GenerateQuad("inventory", Color(0, 0, 0));
+	meshList[GEO_INVENTORY]->textureID = LoadTGA("Image//Inventory_screen.tga");
 	
 	//Render NCP
 	Init_animation_NPC();
@@ -461,7 +477,7 @@ void PlanetJellyScene::Update_animation_NPC(double dt)
 
 void PlanetJellyScene::Update(double dt)
 {
-	cout << SharedData::GetInstance()->SD_enableinteract << endl;
+	//cout << SharedData::GetInstance()->SD_enableinteract << endl;
 	//cout << camera.position << endl;
 	button_prompt = 0;
 
@@ -506,10 +522,10 @@ void PlanetJellyScene::Update(double dt)
 	{
 		enableLight = true;
 	}
-	if (Application::IsKeyPressed('I'))
-	{
-		light[0].position.z -= (float)(LSPEED*dt);
-	}
+	//if (Application::IsKeyPressed('I'))
+	//{
+	//	light[0].position.z -= (float)(LSPEED*dt);
+	//}
 	if (Application::IsKeyPressed('K'))
 	{
 		light[0].position.z += (float)(LSPEED*dt);
@@ -537,6 +553,24 @@ void PlanetJellyScene::Update(double dt)
 		checkCollision();
 		camera.movement();
 	}
+	// miningdrone code
+	if (SharedData::GetInstance()->SD_MiningDrone_J)
+	{
+		mdrone_animation(dt);
+		if (mdrone_mineralcount < 99)
+		{
+			if (mdrone_added == false)
+			{
+				mdrone_mineralcount += ((SharedData::GetInstance()->SD_timecounter - mdrone_starttime) / 60);//increase mineral count using time away from planet
+				//every 30 secs, get 10 to 30 minerals
+				mdrone_added = true;
+			}
+			mdrone_starttime = SharedData::GetInstance()->SD_timecounter;
+		}
+
+	}
+
+
 
 
 	//Light
@@ -554,11 +588,13 @@ void PlanetJellyScene::Update(double dt)
 	}
 
 	timer += dt;
+
+
 	resetKey();
 	inventory();
 	interactionUpdate(dt);
 	Updata_Checker(dt);
-	
+	SharedData::GetInstance()->SD_timecounter += dt;//add time to the timer
 }
 
 void PlanetJellyScene::RenderText(Mesh* mesh, std::string text, Color color)
@@ -727,7 +763,7 @@ void PlanetJellyScene::Render()
 	modelStack.PushMatrix();
 	modelStack.Translate(100, -463, 1000);
 	modelStack.Scale(500, 400, 500);
-	RenderMesh(meshList[GROUND_MESH], enableLight);
+	RenderMesh(meshList[GROUND_MESH], true);
 	modelStack.PopMatrix();
 	
 	//render cave
@@ -735,7 +771,7 @@ void PlanetJellyScene::Render()
 	modelStack.Translate(200, 43, 0);
 	modelStack.Rotate(-90, 0, 1, 0);
 	modelStack.Scale(40, 40, 40);
-	RenderMesh(meshList[CAVE], enableLight);
+	RenderMesh(meshList[CAVE], true);
 	modelStack.PopMatrix();
 
 
@@ -744,7 +780,7 @@ void PlanetJellyScene::Render()
 	modelStack.Translate(0, 0, -460);
 	modelStack.Rotate(-105, 0, 1, 0);
 	modelStack.Scale(20, 20, 20);
-	RenderMesh(meshList[SHIP], enableLight);
+	RenderMesh(meshList[SHIP], true);
 	modelStack.PopMatrix();
 
 	// render shop
@@ -752,14 +788,14 @@ void PlanetJellyScene::Render()
 	modelStack.Translate(100, -12, -100);
 	modelStack.Rotate(180, 0, 1, 0);
 	modelStack.Scale(20, 20, 20);
-	RenderMesh(meshList[SHOP_MINERAL], enableLight);
+	RenderMesh(meshList[SHOP_MINERAL], true);
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
 	modelStack.Translate(-100, -20, 0);
 	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Scale(10, 10, 10);
-	RenderMesh(meshList[SHOP_DRONE], enableLight);
+	RenderMesh(meshList[SHOP_DRONE], true);
 	modelStack.PopMatrix();
 
 
@@ -767,7 +803,7 @@ void PlanetJellyScene::Render()
 	modelStack.Translate(100, -21, 100);
 	modelStack.Rotate(180, 0, 1, 0);
 	modelStack.Scale(10, 10, 10);
-	RenderMesh(meshList[SHOP_UPGRADE], enableLight);
+	RenderMesh(meshList[SHOP_UPGRADE], true);
 	modelStack.PopMatrix();
 
 	for (int i = 0; i <= 1; i++)
@@ -783,13 +819,17 @@ void PlanetJellyScene::Render()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		modelStack.PopMatrix();
 	}
+		
 	
+	//if statement here
+	generate_mdrone();//renders mining drone
+
 	// NPC-DRONE
 	modelStack.PushMatrix();
 	modelStack.Translate(-115, -10 + jelly.position.y + jelly_jumping.position.y, -15);
 	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Scale(5, 5 + jelly.S_Y, 5);
-	RenderMesh(meshList[NPC_1], enableLight);
+	RenderMesh(meshList[NPC_1], true);
 	modelStack.PopMatrix();
 	
 
@@ -799,7 +839,7 @@ void PlanetJellyScene::Render()
 	modelStack.Translate(100, -10 + jelly.position.y + jelly_jumping.position.y, 100);
 	modelStack.Rotate(180, 0, 1, 0);
 	modelStack.Scale(5, 5 + jelly.S_Y , 5);
-	RenderMesh(meshList[NPC_1], enableLight);
+	RenderMesh(meshList[NPC_1], true);
 	modelStack.PopMatrix();
 	
 
@@ -808,9 +848,12 @@ void PlanetJellyScene::Render()
 	modelStack.PushMatrix();
 	modelStack.Translate(110, -5 + jelly.position.y + jelly_jumping.position.y, -90);
 	modelStack.Scale(5, 5 + jelly.S_Y, 5);
-	RenderMesh(meshList[NPC_1], enableLight);
+	RenderMesh(meshList[NPC_1], true);
 	modelStack.PopMatrix();
-	
+
+
+
+
 	//render names
 	for (int i = 0; i < nameS.size() - 1; i++)
 	{
@@ -834,16 +877,18 @@ void PlanetJellyScene::Render()
 	modelStack.PopMatrix();
 
 
+
+
 	modelStack.PushMatrix();
 	modelStack.Translate(
-		(hitbox[4].m_origin.x),
-		(hitbox[4].m_origin.y),
-		(hitbox[4].m_origin.z)
+		(hitbox[5].m_origin.x),
+		(hitbox[5].m_origin.y),
+		(hitbox[5].m_origin.z)
 		);
 	modelStack.Scale(
-		(hitbox[4].m_length),
-		(hitbox[4].m_height),
-		(hitbox[4].m_width)
+		(hitbox[5].m_length),
+		(hitbox[5].m_height),
+		(hitbox[5].m_width)
 		);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
 	RenderMesh(meshList[GEO_CUBE], false);
@@ -854,32 +899,58 @@ void PlanetJellyScene::Render()
 	viewStack.LoadIdentity();
 	modelStack.PushMatrix();
 	switch (currentstate){
-	case 0:
+	case FREEMOVE:
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-92.5, 90, 1, 0);
 		modelStack.Scale(1.1, 0.8, 0.8);
 		RenderMesh(meshList[GEO_UI], false);
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 1.6, 1.7);
-		RenderTextOnScreen(meshList[GEO_TEXT], "JELLO", Color(1, 0, 0), 3.5, 20.4, 16.2);
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 4, 2.1, 1.7);
+		RenderTextOnScreen(meshList[GEO_TEXT], "JELLO", Color(1, 0, 0), 3.5, 19.4, 16.2);
 		break;
-	case 1:
+	case CONVERSE:
 		modelStack.Translate(0, -0.3, -1);
 		modelStack.Rotate(90, 1, 0, 0);
 		modelStack.Scale(1, 1, 0.3);
 		RenderMesh(meshList[GEO_TEXT_BOX], false);
 		break;
-	case 2:
+	case TRADE:
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-90, 1, 0, 0);
 		modelStack.Scale(1.1, 0.8, 0.8);
-		RenderMesh(meshList[GEO_SHOP], false);
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		if (SellState == BROWSING)
+		{
+			RenderMesh(meshList[GEO_SHOP], false);
+			//RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		}
+		else
+		{
+			RenderMesh(meshList[GEO_AMOUNTBOX], false);
+		}
+		break;
+	case INVENTORY:
+		modelStack.Translate(-0.035, 0, -0.85);
+		modelStack.Rotate(-90, 1, 0, 0);
+		modelStack.Scale(1, 1, 0.7);
+		if (SellState == DROPPING)
+		{
+			RenderMesh(meshList[GEO_AMOUNTBOX], false);
+		}
+		else
+		{
+			RenderMesh(meshList[GEO_INVENTORY], false);
+		}
+
+		//RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
 		break;
 
 	};
 	Render_Checker();
 	modelStack.PopMatrix();
+
+
 	renderinteract();
+
+
 	text();
 
 }
@@ -951,6 +1022,46 @@ void PlanetJellyScene::generateSkybox(){
 	modelStack.Scale(1000, 1000, 1000);
 	RenderMesh(meshList[SKYBOX_Ynega], false);
 	modelStack.PopMatrix();
+}
+
+void PlanetJellyScene::generate_mdrone()
+{
+	modelStack.PushMatrix();
+	//modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
+	//modelStack.Rotate(-90, 1, 0, 0);
+	modelStack.Translate(140, mdrone_y, 22);
+	modelStack.Scale(2, 2, 2);
+	modelStack.Rotate(-90, 0, 1, 0);
+	RenderMesh(meshList[DRONE_BODY], true);	
+	modelStack.Rotate(mdrone_spin, 0, 1, 0);
+	RenderMesh(meshList[DRONE_PROPELLER], true);
+	modelStack.PopMatrix();
+
+
+}
+
+void PlanetJellyScene::mdrone_animation(double dt)
+{
+	mdrone_spin += 800*dt;
+
+	if (mdrone_ymax == false)
+	{
+		mdrone_y += 4 * dt;
+		if (mdrone_y > 5)
+		{
+			mdrone_ymax = true;
+		}
+
+	}
+	else if (mdrone_ymax == true)
+	{
+		mdrone_y -= 4 * dt;
+		if (mdrone_y < -3)
+		{
+			mdrone_ymax = false;
+		}
+
+	}
 }
 
 void PlanetJellyScene::Init_Checker()
@@ -1574,8 +1685,8 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 		if (((collision(hitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
 		{
-			e_state = 1;
-
+			//e_state = 1;
+			//mingame shit
 		}
 
 		if (((collision(hitbox[4], camera.frontTarget) == true)) && e_state == 0)//ship
@@ -1585,10 +1696,64 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 			if (Application::IsKeyPressed('E'))
 			{
-				cout << "no" << endl;
+				mdrone_added = false;
 				SharedData::GetInstance()->SD_enableinteract = false;
 				e_state = 1;
 				SharedData::GetInstance()->SD_location = OPEN_GALAXY;
+
+
+			}
+
+		}
+
+		if ((collision(hitbox[5], camera.frontTarget) == true))//Mining drone
+		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+		}
+
+		if ((collision(hitbox[5], camera.frontTarget) == true))//Mining drone
+		{
+
+			//cout << "no" << endl;
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+
+				//cout << "no" << endl;
+				e_state = 1;
+				button_prompt = 0;
+				if (currentstate == CONVERSE)
+				{
+				currentstate = FREEMOVE;
+				rendertext = 0;
+				button_prompt = 1;
+				return;
+				}
+
+
+				cout << "no" << endl;
+				currentstate = CONVERSE;
+				if (rendertext == 0 && mdrone_mineralcount <= 0)//empty mining drone
+				{
+					rendertext = 4;
+				}
+				else if (mdrone_mineralcount > 0)
+				{
+					rendertext = 5;
+					//add minerals to inventory slots
+					//what if no empty slots??
+				}
+
+			
+				delay = timer + 0.5;//set delay offset
+
+
 			}
 		}
 	}
@@ -1648,6 +1813,13 @@ void PlanetJellyScene::text()
 	case(3) :
 		RenderTextOnScreen(meshList[GEO_TEXT], "Please do not feed purchased drones to the natives.", Color(1, 0, 0), 2, 4.2, 5.8);//drone shop
 		break;
+	case(4) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "BEGINNING MINING OPERATIONS.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (empty)
+		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
+		break;
+	case(5) :
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
+		break;
 	};
 
 }
@@ -1678,7 +1850,6 @@ void PlanetJellyScene::checkCollision()
 		if ((collision(hitbox[i], camera.nextPosition)))
 		{
 			camera.colliding = true;
-			cout << "fuck" << endl;
 		}
 	}
 
@@ -1688,7 +1859,7 @@ void PlanetJellyScene::checkCollision()
 void PlanetJellyScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I'))// && timer > delay) && e_state == 0)
+	if (Application::IsKeyPressed('I'))
 	{
 		i_state = 1;
 		if (timer > delay)

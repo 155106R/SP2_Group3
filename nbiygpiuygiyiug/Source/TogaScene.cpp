@@ -44,6 +44,8 @@ void TogaScene::Init()
 	Shophitbox.push_back(AABB::generateAABB(Vector3(0, 0, -500), 200, 200, 200, 0));// Cave [3]
 	
 	Shophitbox.push_back(AABB::generateAABB(Vector3(-56, 0, 664), 450 ,30, 340, 0));// ship [4]
+
+	Shophitbox.push_back(AABB::generateAABB(Vector3(10, 8, -400), 5, 15, 5, 0));// mdrone [5]
 	
 	player = AABB::generateAABB(camera.nextPosition, 10, 30, 10, 0);//player
 
@@ -237,9 +239,12 @@ void TogaScene::Init()
 	meshList[UPGRADE_SHOP]->textureID = LoadTGA("Image//upgradeshop_textureA.tga");
 
 	//cave
-	meshList[CAVE] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//Cave_A.obj");
+	meshList[CAVE] = MeshBuilder::GenerateOBJ("muh cave", "OBJ//Cave_A.obj");
 	meshList[CAVE]->textureID = LoadTGA("Image//cave_textureA.tga");
-
+	
+	//rock
+	meshList[GEO_ROCK] = MeshBuilder::GenerateOBJ("muh rock", "OBJ//rock.obj");
+	meshList[GEO_ROCK]->textureID = LoadTGA("Image//rock_texture.tga");
 
 	//togan wandering npc
 	meshList[NPC_TOGAN_BODY] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_body.obj");
@@ -255,6 +260,14 @@ void TogaScene::Init()
 	meshList[NPC_TOGAN_LEG] = MeshBuilder::GenerateOBJ("drone merchant body", "OBJ//togaman_leg.obj");
 	meshList[NPC_TOGAN_LEG]->textureID = LoadTGA("Image//toga_texture.tga");
 
+	//repair drone
+	meshList[DRONE_BODY] = MeshBuilder::GenerateOBJ("player ship", "OBJ//mining_drone_body.obj");
+	meshList[DRONE_BODY]->textureID = LoadTGA("Image//miningdrone_texture.tga");
+
+	meshList[DRONE_PROPELLER] = MeshBuilder::GenerateOBJ("player ship", "OBJ//mining_drone_propeller.obj");
+	meshList[DRONE_PROPELLER]->textureID = LoadTGA("Image//miningdrone_texture.tga");
+
+	//ui stuff
 	meshList[GEO_UI] = MeshBuilder::GenerateQuad("UI", Color(0, 0, 0));
 	meshList[GEO_UI]->textureID = LoadTGA("Image//planet_UI.tga");
 
@@ -287,7 +300,7 @@ float inc = 0;
 
 void TogaScene::Update(double dt)
 {
-	//cout << SharedData::GetInstance()->SD_enableinteract << endl;
+	cout << mdrone_mineralcount << endl;
 
 	button_prompt = 0;
 
@@ -335,8 +348,22 @@ void TogaScene::Update(double dt)
 	}
 	
 
+	//if miningdrone bool == mining
+	if (SharedData::GetInstance()->SD_MiningDrone_T)
+	{
+		mdrone_animation(dt);
+		if (mdrone_mineralcount < 99)
+		{
+			if (mdrone_added == false)
+			{
+				mdrone_mineralcount +=  ((SharedData::GetInstance()->SD_timecounter - mdrone_starttime)/60);//increase mineral count using time away from planet
+				//every 30 secs, get 10 to 30 minerals
+				mdrone_added = true;
+			}
+			mdrone_starttime = SharedData::GetInstance()->SD_timecounter;
+		}
 
-
+	}
 
 	//Light
 	if (Application::IsKeyPressed('8')){
@@ -359,6 +386,7 @@ void TogaScene::Update(double dt)
 	droneAnimation(dt);
 	mineralAnimation(dt);
 	upgradeAnimation(dt);
+	camera.boundCheck(-400, -554, 400, 554);
 	toganwalk(dt);
 	inventory();
 	interactionUpdate(dt);
@@ -366,6 +394,9 @@ void TogaScene::Update(double dt)
 
 	Update_Name_NPC(dt);
 	Update_animation_NPC(dt);
+
+
+	SharedData::GetInstance()->SD_timecounter += dt;//add time to the timer
 }
 
 
@@ -569,6 +600,55 @@ void TogaScene::Render()
 	RenderMesh(meshList[CAVE], true);
 	modelStack.PopMatrix();
 
+
+	//rock wall/z->
+	for (int i = 0; i <= 10; ++i)
+	{
+
+		float x = -480;
+		float z = 554;
+
+		modelStack.PushMatrix();
+		modelStack.Translate(x, 0, z - (110.8*i));
+		modelStack.Rotate(20 * i, 0, 1, 0);
+		modelStack.Scale(60, 60, 60);
+		RenderMesh(meshList[GEO_ROCK], true);
+		modelStack.PopMatrix();
+
+	
+		modelStack.PushMatrix();
+		modelStack.Translate(-x, 0, z - (110.8*i));
+		modelStack.Rotate(20 * i, 0, 1, 0);
+		modelStack.Scale(60, 60, 60);
+		RenderMesh(meshList[GEO_ROCK], true);
+		modelStack.PopMatrix();
+	}
+
+	for (int i = 0; i <= 12; ++i)
+	{
+
+		float x = -480;
+		float z = 574;
+
+		modelStack.PushMatrix();
+		modelStack.Translate(x+(80*i), -8, z);
+		modelStack.Rotate(20 * i, 0, 1, 0);
+		modelStack.Scale(40, 20, 40);
+		RenderMesh(meshList[GEO_ROCK], true);
+		modelStack.PopMatrix();
+
+
+		modelStack.PushMatrix();
+		modelStack.Translate(x + (80 * i), -3, -z-20);
+		modelStack.Rotate(20 * i, 0, 1, 0);
+		modelStack.Scale(60, 65, 40);
+		RenderMesh(meshList[GEO_ROCK], true);
+		modelStack.PopMatrix();
+	}
+
+
+
+
 	//render ship
 	modelStack.PushMatrix();
 	modelStack.Translate(-56, 0, 664);
@@ -598,6 +678,8 @@ void TogaScene::Render()
 	generateUpgrademerchant();
 	modelStack.PopMatrix();
 
+	//if statement here
+	generate_mdrone();//renders mining drone
 
 	modelStack.PushMatrix();
 	modelStack.Translate(
@@ -620,7 +702,7 @@ void TogaScene::Render()
 
 	// render NPC
 	//NPC-NPC
-	for (int i = 0; i <= 1; i++)
+	for (int i = 0; i <= 3; i++)
 	{
 		modelStack.PushMatrix();
 		modelStack.Translate(togan_NPC_Loop[i].position.x, togan_NPC_Loop[i].position.y, togan_NPC_Loop[i].position.z);
@@ -677,8 +759,16 @@ void TogaScene::Render()
 		modelStack.Translate(-0.035, 0, -0.85);
 		modelStack.Rotate(-90, 1, 0, 0);
 		modelStack.Scale(1, 1, 0.7);
-		RenderMesh(meshList[GEO_INVENTORY], false);
-		//RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(SharedData::GetInstance()->SD_bitcoins), Color(1, 0, 0), 2.5, 2.6, 2.);
+		if (SellState == DROPPING)
+		{
+			RenderMesh(meshList[GEO_AMOUNTBOX], false);
+		}
+		else
+		{
+			RenderMesh(meshList[GEO_INVENTORY], false);
+		}
+		
+		
 		break;
 
 		};
@@ -859,6 +949,7 @@ void TogaScene::generateTogan()
 
 	//body
 	modelStack.PushMatrix();
+	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_BODY], true);
@@ -866,7 +957,7 @@ void TogaScene::generateTogan()
 
 	//head
 	modelStack.PushMatrix();
-	modelStack.Rotate(0, 1, 1, 1);
+	modelStack.Rotate(90, 0, 1, 0);
 	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_HEAD], true);
@@ -875,14 +966,14 @@ void TogaScene::generateTogan()
 	//legs
 	//left leg
 	modelStack.PushMatrix();
-	modelStack.Translate(0, 10, 3.5);
+	modelStack.Translate(0, 10, 2);
 	modelStack.Rotate(rotate_legL, 0, 0, 1);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_LEG], true);
 	modelStack.PopMatrix();
 	//right leg
 	modelStack.PushMatrix();	
-	modelStack.Translate(0, 10, -3.5);
+	modelStack.Translate(0, 10, -2);
 	modelStack.Rotate(rotate_legR, 0, 0, 1);
 	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[NPC_TOGAN_LEG], true);
@@ -907,6 +998,47 @@ void TogaScene::generateTogan()
 	modelStack.PopMatrix();
 
 }
+
+void TogaScene::generate_mdrone()
+{
+	modelStack.PushMatrix();
+	//modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
+	//modelStack.Rotate(-90, 1, 0, 0);
+	modelStack.Translate(10, mdrone_y, -400);
+	modelStack.Scale(2, 2, 2);
+	//modelStack.Rotate(-90, 0, 1, 0);
+	RenderMesh(meshList[DRONE_BODY], true);
+	modelStack.Rotate(mdrone_spin, 0, 1, 0);
+	RenderMesh(meshList[DRONE_PROPELLER], true);
+	modelStack.PopMatrix();
+
+
+}
+
+void TogaScene::mdrone_animation(double dt)
+{
+	mdrone_spin += 800 * dt;
+
+	if (mdrone_ymax == false)
+	{
+		mdrone_y += 4 * dt;
+		if (mdrone_y > 5)
+		{
+			mdrone_ymax = true;
+		}
+
+	}
+	else if (mdrone_ymax == true)
+	{
+		mdrone_y -= 4 * dt;
+		if (mdrone_y < -3)
+		{
+			mdrone_ymax = false;
+		}
+
+	}
+}
+
 
 void TogaScene::droneAnimation(double dt)
 {
@@ -1013,7 +1145,7 @@ void TogaScene::toganwalk(double dt)
 {
 	if (armR_max ==0 )
 	{
-		rotate_armR += 7 * dt;
+		rotate_armR += 20 * dt;
 			if(rotate_armR > 35)
 			{
 				armR_max = 1;
@@ -1021,7 +1153,7 @@ void TogaScene::toganwalk(double dt)
 	}
 	else if(armR_max == 1)
 	{
-		rotate_armR -= 7 * dt ;
+		rotate_armR -= 20 * dt ;
 		if (rotate_armR < -3)
 		{
 			armR_max = 0;
@@ -1030,7 +1162,7 @@ void TogaScene::toganwalk(double dt)
 
 	if (armL_max == 0)
 	{
-		rotate_armL += 7 * dt;
+		rotate_armL += 20 * dt;
 		if (rotate_armL > 35)
 		{
 			armL_max = 1;
@@ -1038,7 +1170,7 @@ void TogaScene::toganwalk(double dt)
 	}
 	else if (armL_max == 1)
 	{
-		rotate_armL -= 7 * dt;
+		rotate_armL -= 20 * dt;
 		if (rotate_armL < -3)
 		{
 			armL_max = 0;
@@ -1048,7 +1180,7 @@ void TogaScene::toganwalk(double dt)
 
 	if (legR_max == 0)
 	{
-		rotate_legR += 7 * dt;
+		rotate_legR += 20 * dt;
 		if (rotate_legR > 40)
 		{
 			legR_max = 1;
@@ -1056,7 +1188,7 @@ void TogaScene::toganwalk(double dt)
 	}
 	else if (legR_max == 1)
 	{
-		rotate_legR -= 7 * dt;
+		rotate_legR -= 20 * dt;
 		if (rotate_legR < -5)
 		{
 			legR_max = 0;
@@ -1065,7 +1197,7 @@ void TogaScene::toganwalk(double dt)
 
 	if (legL_max == 0)
 	{
-		rotate_legL += 7 * dt;
+		rotate_legL += 20 * dt;
 		if (rotate_legL > 40)
 		{
 			legL_max = 1;
@@ -1073,7 +1205,7 @@ void TogaScene::toganwalk(double dt)
 	}
 	else if (legL_max == 1)
 	{
-		rotate_legL -= 7 * dt;
+		rotate_legL -= 20 * dt;
 		if (rotate_legL < -5)
 		{
 			legL_max = 0;
@@ -1194,12 +1326,50 @@ void TogaScene::interactionUpdate(double dt)
 			
 			if (Application::IsKeyPressed('E'))
 			{
+				mdrone_added = false;
 				SharedData::GetInstance()->SD_enableinteract = false;
 				e_state = 1;
 				
 				SharedData::GetInstance()->SD_location = OPEN_GALAXY;
 			}
 		}
+
+		if ((collision(Shophitbox[5], camera.frontTarget) == true))//Mining drone
+		{
+			if (currentstate == 0)
+			{
+				button_prompt = 1;
+			}
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			{
+				e_state = 1;
+				button_prompt = 0;
+				if (currentstate == CONVERSE)
+				{
+					currentstate = FREEMOVE;
+					rendertext = 0;
+					button_prompt = 1;
+					return;
+					
+				}
+				currentstate = CONVERSE;
+				if (rendertext == 0 && mdrone_mineralcount <= 0)//empty mining drone
+				{
+					rendertext = 4;
+				}
+				else if (mdrone_mineralcount >  0 )
+				{
+					rendertext = 5;
+					//add minerals to inventory slots
+					//what if no empty slots??
+				}
+
+				delay = timer + 0.5;//set delay offset
+
+
+			}
+		}
+			
 	}
 	
 }
@@ -1253,6 +1423,14 @@ void TogaScene::text()
 
 	case(3) :
 		RenderTextOnScreen(meshList[GEO_TEXT], "Drone prices are non-negotiable.", Color(1, 0, 0), 2, 4.2, 5.8);//drone shop
+		break;
+
+	case(4) :
+		RenderTextOnScreen(meshList[GEO_TEXT], "BEGINNING MINING OPERATIONS.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (empty)
+		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
+		break;
+	case(5):
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount)+ " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
 		break;
 	};
 
@@ -1321,7 +1499,7 @@ void TogaScene::inventory()
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
 		{
 			SellState = DROPPING;
-			cout << "FUCCKCKCKCKCKCCK" << endl;
+			
 		}
 	}
 	if (SellState == DROPPING)
@@ -1386,7 +1564,7 @@ void TogaScene::Init_Checker()
 }
 void TogaScene::Updata_Checker(double dt)
 {
-	cout << SellState << endl;
+	
 	if (Application::IsKeyPressed('B'))
 	{
 		cout << "check  " << SharedData::GetInstance()->PlayerInventory->Slot[0].name << endl;
@@ -1637,18 +1815,18 @@ void TogaScene::Render_Checker()
 	}
 	if (SellState == DROPPING && currentstate == INVENTORY)
 	{
-		RenderTextOnScreen(meshList[GEO_TEXT], "Drop:  " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + ")", Color(1, 0, 0), 2, 16, 18);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Drop:  " + std::to_string(SBamount) + "   (" + SharedData::GetInstance()->PlayerInventory->Slot[num].name + ")", Color(1, 0, 0), 2, 14, 18);
 	}
 
 	if (SellState != BROWSING && (currentstate == TRADE || currentstate == INVENTORY))//not browsing
 	{
 		if (confirm == true)
 		{
-			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 13, 13);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 11, 13);
 		}
-		else RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 23, 13);
-		RenderTextOnScreen(meshList[GEO_TEXT], "Confirm", Color(1, 0, 0), 2, 15, 13);
-		RenderTextOnScreen(meshList[GEO_TEXT], "Cancel", Color(1, 0, 0), 2, 25, 13);
+		else RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 21, 13);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Confirm", Color(1, 0, 0), 2, 13, 13);
+		RenderTextOnScreen(meshList[GEO_TEXT], "Cancel", Color(1, 0, 0), 2, 23, 13);
 	}
 
 }
@@ -1734,7 +1912,7 @@ void TogaScene::Init_animation_NPC()
 
 
 	//jelly npc animation
-	for (int i = 0; i <= 1; i++)
+	for (int i = 0; i <= 3; i++)
 	{
 		Togan newtoga;
 		newtoga.position = Vector3(0, -15, 0);
@@ -1749,7 +1927,7 @@ void TogaScene::Update_animation_NPC(double dt)
 {
 
 	// jelly npc animation
-	for (int i = 0; i <= 1; i++)
+	for (int i = 0; i <= 3; i++)
 	{
 		
 		if (togan_NPC_Loop[i].state == 0 )

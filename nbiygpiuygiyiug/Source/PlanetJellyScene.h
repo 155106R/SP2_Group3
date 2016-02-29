@@ -47,6 +47,8 @@ class PlanetJellyScene : public Scene
 		SHOP_DRONE,
 		SHOP_UPGRADE,
 		SHIP,
+		DRONE_PROPELLER,
+		DRONE_BODY,
 
 		GEO_AMOUNTBOX,
 		GEO_INVENTORY,
@@ -129,6 +131,18 @@ private:
 	void Init_minigame();
 	void Updata_minigame(double dt);
 	void Render_minigame();
+
+
+	//mining drone
+	void generate_mdrone();
+	void mdrone_animation(double dt);
+	float mdrone_spin=0;
+	float mdrone_y = 0;
+	bool mdrone_ymax = false;
+
+		int mdrone_mineralcount=0;
+	float mdrone_starttime;
+	bool mdrone_added=true;
 
 	struct falling_rocks
 	{

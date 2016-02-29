@@ -1,5 +1,6 @@
 #include "TradeCalculation.h"
 
+
 TradeCalculation::TradeCalculation() 
 {
 	// item from planet toga
@@ -127,6 +128,8 @@ TradeCalculation::TradeCalculation()
 
 }
 
-TradeCalculation::~TradeCalculation() {}
+TradeCalculation::~TradeCalculation() 
+{}
+
 
 

@@ -26,6 +26,7 @@ class TogaScene : public Scene
 		GEO_LIGHTBALL,
 		GEO_TEXTBOX,
 		GEO_CUBE,
+		GEO_ROCK,
 
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
@@ -58,7 +59,8 @@ class TogaScene : public Scene
 		NPC_TOGAN_ARM,
 		NPC_TOGAN_LEG,
 
-
+		DRONE_PROPELLER,
+		DRONE_BODY,
 
 
 		CAVE,
@@ -312,6 +314,19 @@ private:
 	float targetxz;
 
 	float boxRange;
+
+	//mining drone
+	void generate_mdrone();
+	void mdrone_animation(double dt);
+	float mdrone_spin = 0;
+	float mdrone_y = 0;
+	bool mdrone_ymax = false;
+
+	int mdrone_mineralcount=0;
+	float mdrone_starttime;
+	bool mdrone_added=true;
+
+
 
 	//collision checking
 	void checkCollision();
