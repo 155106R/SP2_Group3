@@ -1276,13 +1276,13 @@ void TogaScene::interactionUpdate(double dt)
 		}
 
 
-		if ((collision(Shophitbox[1], camera.frontTarget) == true) && currentstate != TRADE)//Upgrade merchant
+		if ((collision(Shophitbox[1], camera.frontTarget) == true) )//Upgrade merchant
 		{
 			if (currentstate == 0)
 			{
 				button_prompt = 1;
 			}
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE)
 			{
 				SID = 2;
 				e_state = 1;
@@ -1306,13 +1306,13 @@ void TogaScene::interactionUpdate(double dt)
 		}
 
 
-		if ((collision(Shophitbox[2], camera.frontTarget) == true) && currentstate != TRADE)//Drone merchant
+		if ((collision(Shophitbox[2], camera.frontTarget) == true) )//Drone merchant
 		{
 			if (currentstate == 0)
 			{
 				button_prompt = 1;
 			}
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE)
 			{
 				e_state = 1;
 				SID = 4;
@@ -1349,7 +1349,7 @@ void TogaScene::interactionUpdate(double dt)
 				button_prompt = 1;
 			}
 
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != CAVEGAME)
 			{
 				if (currentstate == FREEMOVE)
 				{
@@ -1530,7 +1530,7 @@ void TogaScene::checkCollision()
 void TogaScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I') )// && timer > delay) && e_state == 0)
+	if (Application::IsKeyPressed('I') && (currentstate == INVENTORY || currentstate == FREEMOVE))// && timer > delay) && e_state == 0)
 	{
 		i_state = 1;
 		if (timer > delay)
@@ -1538,11 +1538,15 @@ void TogaScene::inventory()
 			delay = timer + 0.5;
 				if (currentstate == 0)
 				{
+					num = 0;
+					tempnum = 0;
 					currentstate = INVENTORY;
 					return;
 				}
 				else if(currentstate ==INVENTORY)
 				{
+					num = 0;
+					tempnum = 0;
 					currentstate = FREEMOVE;
 					return;
 				}
@@ -1926,7 +1930,7 @@ void TogaScene::Updata_Checker(double dt)
 		{
 			if (num < SharedData::GetInstance()->PlayerInventory->Slots - 1)
 			{
-				delay = timer + 0.1;
+				delay = timer + 0.2;
 				num++;
 				if (num > 4)
 				{
@@ -1936,7 +1940,7 @@ void TogaScene::Updata_Checker(double dt)
 		}
 		if ((Application::IsKeyPressed('W') && SellState == 0) && timer > delay) // scroll up your list
 		{
-			delay = timer + 0.1;
+			delay = timer + 0.2;
 			if (num > 0)
 			{
 				num--;
