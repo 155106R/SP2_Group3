@@ -36,7 +36,7 @@ public:
 
 	AABB hitbox;	//Generate a hitbox for the Asteroid for collision checks
 
-	Asteroid(){
+	Asteroid(){		//Default Constructor 
 		material = Math::RandIntMinMax(1, 12);
 		count = Math::RandIntMinMax(1, 50);
 
@@ -55,25 +55,43 @@ public:
 			velocity		//Pass in Velocity
 			);
 	};
+	~Asteroid() {};
 
-	~Asteroid(){
-
-	};
 };
 
 class OpenGalaxyScene : public Scene
 {
 	struct DrillAssets{
 		Vector3 position;
-		Vector3 facing;
+		Vector3 direction;
 		float rotate;
 		float moveSpeed = 5;
+		float drillspeed = 0;
 		std::map<unsigned, unsigned> storage;	//Drill's storage of materials in a map <unsigned materialID, unsigned count/stack>
 
 		AABB drillHead;
+		//AABB drillBody;
+
+		bool drillTooFarFromShip;
+		bool returnToShip;
 
 		Camera_drill camera;
 	}Drill;
+
+	struct SpaceshipAssets{
+		Vector3 position;
+		Vector3 direction;
+
+		float acceleration;
+		//max acceleration to be taken from Shared Data;
+
+		float rotateZ;
+		float rotateY;
+
+		AABB hitbox;
+
+		OpenGalaxyCamera camera;
+	}Spaceship;
 
 	enum GEOMETRY_TYPE
 	{
@@ -106,6 +124,8 @@ class OpenGalaxyScene : public Scene
 		SPACESHIP_DRILL_BODY,
 		SPACESHIP_DRILL_HEAD,
 		SPACESHIP_DRONE,
+
+		DRILL_MAXDISTANCE,
 
 		GEO_TEXT,
 		GEO_HUD,
@@ -175,11 +195,6 @@ public:
 	virtual void Render();
 	virtual void Exit();
 
-
-	//Ship movement stuff
-	Vector3 *noseOfShip;
-	Vector3 *middleOfShip;
-
 private:
 	unsigned m_vertexArrayID;
 	unsigned m_vertexBuffer[NUM_GEOMETRY];
@@ -204,7 +219,13 @@ private:
 	bool rdrone_active = 0;
 
 	//For Planet Interactions
+	//keystates
 	bool e_state;
+	bool space_state;
+
+
+
+	//////////
 	float timer = 0;
 	float delay;
 	void resetKey();
@@ -220,13 +241,6 @@ private:
 	AABB shipInterior;
 
 	unsigned CURRENT_STATE;	//Play state
-
-	float shipAxisX, shipAxisY, shipAxisZ; 
-	float rotateShipZ;
-	bool isTransltingY;
-	float rotateShip;
-	float translateShip;
-	float accelerateShip;
 
 	void updateDrillMovement(double dt);
 	void updateShipMovement(double dt);
@@ -245,6 +259,8 @@ private:
 	Light light[2];
 
 	Mesh *meshList[NUM_GEOMETRY];
+
+	float ex_x[5], ex_y[5], ex_z[5], ex_scale[5], ex_scaleMax[5];
 };
 
 #endif

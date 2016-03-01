@@ -184,6 +184,7 @@ private:
 		CONVERSE,
 		TRADE,
 		INVENTORY,
+		CAVEGAME,
 		NUM_state
 	};
 
@@ -322,6 +323,7 @@ private:
 	float mdrone_y = 0;
 	bool mdrone_ymax = false;
 
+	float mdrone_mineraltype=1;
 	int mdrone_mineralcount=0;
 	float mdrone_starttime;
 	bool mdrone_added=true;

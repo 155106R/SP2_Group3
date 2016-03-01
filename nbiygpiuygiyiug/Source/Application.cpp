@@ -72,7 +72,7 @@ void Application::Init()
 
 
 	//Create a window and create its OpenGL context
-	m_window = glfwCreateWindow(1920, 1080, "Computer Graphics", NULL, NULL);	//For fixed screen size
+	m_window = glfwCreateWindow(960, 640, "Computer Graphics", NULL, NULL);	//For fixed screen size
 	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 	glfwSetWindowSizeCallback(m_window, resize_callback);

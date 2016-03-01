@@ -87,7 +87,12 @@ void Camera_drill::Update(double dt)
 	}
 
 	cameraRotationY -= (mousePosition.x - screenMidX) / rotationSpeed;
-	cameraRotationX -= (mousePosition.y - screenMidY) / rotationSpeed;
+	float newpitch = cameraRotationX - (mousePosition.y - screenMidY) / rotationSpeed;
+
+	if (newpitch < 50 && newpitch > -50)
+	{
+		cameraRotationX -= (mousePosition.y - screenMidY) / rotationSpeed;
+	}
 
 	if (cameraRotationX > maxCameraRotationX) {
 
@@ -194,7 +199,7 @@ void Camera_drill::Update(double dt)
 	right = view.Cross(defaultUp);
 	up = right.Cross(view);
 
-	frontTarget = position + view*(float)(10);
+	frontTarget = position + view*(float)(2.5);
 
 	
 }
@@ -300,5 +305,4 @@ void Camera_drill::movement()
 	right.Normalize();
 	up = right.Cross(view).Normalized();
 
-	frontTarget = position + view*(float)(20);
 }

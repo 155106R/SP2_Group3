@@ -54,8 +54,8 @@ public:
 
 	int SD_bitcoins = 0;
 
-	bool SD_MiningDrone_T = true;
-	bool SD_MiningDrone_J = true;
+	bool SD_MiningDrone_T = false;
+	bool SD_MiningDrone_J = false;
 	int  SD_MiningDrone_stash=0;
 
 
