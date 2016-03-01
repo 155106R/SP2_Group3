@@ -197,7 +197,7 @@ void TogaScene::Init()
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_bk.tga");
 	meshList[GROUNDMESH] = MeshBuilder::GenerateQuad("floor", Color(1, 1, 1));
 	meshList[GROUNDMESH]->textureID = LoadTGA("Image//Skybox//SkyboxToga//groundmeshtoga.tga");
-	
+	meshList[GEO_PLANE] = MeshBuilder::GenerateQuad("back", Color(0, 0, 0));
 	//mineral stuff
 	meshList[NPC_MINERAL_BODY] = MeshBuilder::GenerateOBJ("mineral merchant head","OBJ//merchantminerals_bodyA.obj");
 	meshList[NPC_MINERAL_BODY]->textureID = LoadTGA("Image//merchantmineral_textureA.tga");
@@ -790,7 +790,28 @@ void TogaScene::Render()
 		};
 		modelStack.PopMatrix();
 
+		if (currentstate == CAVEGAME)
+		{
+			glDisable(GL_DEPTH_TEST);
+			Mtx44 ortho;
+			ortho.SetToOrtho(0, 80, 0, 60, -100, 100); //size of screen UI
+			projectionStack.PushMatrix();
+			projectionStack.LoadMatrix(ortho);
+			viewStack.PushMatrix();
+			viewStack.LoadIdentity(); //No need camera for ortho mode
+			modelStack.PushMatrix();
+			modelStack.LoadIdentity(); //Reset modelStack
 
+			modelStack.Translate(40, 30, 0);
+			modelStack.Rotate(90, 1, 0, 0);
+			modelStack.Scale(80, 1, 85);
+			//Render here
+			RenderMesh(meshList[GEO_PLANE], false);
+			projectionStack.PopMatrix();
+			viewStack.PopMatrix();
+			modelStack.PopMatrix();
+			glEnable(GL_DEPTH_TEST);
+		}
 	
 	
 	renderinteract();
@@ -2250,8 +2271,8 @@ void TogaScene::Update_animation_NPC(double dt)
 		{
 			if (togan_NPC_Loop[i].tempposition.x == 0 && togan_NPC_Loop[i].tempposition.z == 0)
 			{
-				togan_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-50, 50);
-				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-50, 50);
+				togan_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-100, 100);
+				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-100, 100);
 			}
 			else if (togan_NPC_Loop[i].tempR == 0)
 			{

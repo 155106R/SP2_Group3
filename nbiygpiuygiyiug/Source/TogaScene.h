@@ -27,6 +27,7 @@ class TogaScene : public Scene
 		GEO_TEXTBOX,
 		GEO_CUBE,
 		GEO_ROCK,
+		GEO_PLANE,
 
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
