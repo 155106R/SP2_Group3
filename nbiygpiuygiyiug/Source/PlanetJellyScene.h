@@ -226,7 +226,7 @@ private:
 
 	};
 	//interactions
-	unsigned currentstate;
+	unsigned currentstate=0;
 	void inventory();
 	void interact_state();
 	void renderinteract();

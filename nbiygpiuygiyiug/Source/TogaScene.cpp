@@ -1253,7 +1253,7 @@ void TogaScene::interactionUpdate(double dt)
 				button_prompt = 1;
 			}
 
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE )
 			{
 				SID = 0;
 				e_state = 1;
@@ -1271,16 +1271,10 @@ void TogaScene::interactionUpdate(double dt)
 				delay = timer + 0.5;//set delay offset
 
 			}
-			if (Application::IsKeyPressed(VK_ESCAPE))
-			{
-				shop = false;
-				currentstate = FREEMOVE;
-				return;
-			}
 		}
 
 
-		if ((collision(Shophitbox[1], camera.frontTarget) == true))//Upgrade merchant
+		if ((collision(Shophitbox[1], camera.frontTarget) == true) && currentstate != TRADE)//Upgrade merchant
 		{
 			if (currentstate == 0)
 			{
@@ -1292,7 +1286,7 @@ void TogaScene::interactionUpdate(double dt)
 				e_state = 1;
 				button_prompt = 0;
 				interact_state();
-				cout << "shite" << endl;
+
 
 				if (rendertext == 0 && currentstate == 1)
 				{
@@ -1307,16 +1301,10 @@ void TogaScene::interactionUpdate(double dt)
 
 
 			}
-			if (Application::IsKeyPressed(VK_ESCAPE))
-			{
-				shop = false;
-				currentstate = FREEMOVE;
-				return;
-			}
 		}
 
 
-		if ((collision(Shophitbox[2], camera.frontTarget) == true))//Drone merchant
+		if ((collision(Shophitbox[2], camera.frontTarget) == true) && currentstate != TRADE)//Drone merchant
 		{
 			if (currentstate == 0)
 			{
@@ -1341,12 +1329,15 @@ void TogaScene::interactionUpdate(double dt)
 
 
 			}
-			if (Application::IsKeyPressed(VK_ESCAPE))
-			{
-				shop = false;
-				currentstate = FREEMOVE;
-				return;
-			}
+		}
+
+		if (Application::IsKeyPressed(VK_ESCAPE) && currentstate == TRADE)
+		{
+			shop = false;
+			num = 0;
+			tempnum = 0;
+			currentstate = FREEMOVE;
+			return;
 		}
 
 		if (((collision(Shophitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
@@ -1358,17 +1349,19 @@ void TogaScene::interactionUpdate(double dt)
 
 			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
 			{
-				delay = timer + 0.5;//set delay offset
+				if (currentstate == FREEMOVE)
+				{
+					delay = timer + 0.5;//set delay offset
 
-				e_state = 1;
-				button_prompt = 0;
-				InGame = 1;
-				currentstate = CAVEGAME;
-				//run your game code
+					e_state = 1;
+					button_prompt = 0;
+					InGame = 1;
+					currentstate = CAVEGAME;
+					//run your game code
 
-				//to quit
-				//change currenstate =0;
-
+					//to quit
+					//change currenstate =0;
+				}
 			}
 		
 		}
@@ -1489,7 +1482,7 @@ void TogaScene::text()
 		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
 		break;
 	case(5):
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + "x" + std::to_string(mdrone_mineraltype)+ " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + "x" + SharedData::GetInstance()->PlayerInventory->ItemS[(mdrone_mineraltype)-1].name + " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
 		break;
 	};
 
