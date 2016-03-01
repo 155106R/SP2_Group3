@@ -464,7 +464,7 @@ void OpenGalaxyScene::Update(double dt)
 			Drill.direction = Spaceship.direction;
 			Drill.rotate = 0;
 			Drill.position = Vector3(Spaceship.position.x, Spaceship.position.y + 5, Spaceship.position.z);
-			Drill.camera.Init(Vector3(10, 10, 10), Drill.position, Vector3(0, 10, 0));
+			Drill.camera.Init(Vector3(30, 0, 1), Vector3(30, 0, 0), Vector3(0, 1, 0));
 			Drill.camera.position = Vector3(Spaceship.position.x, Spaceship.position.y + 10, Spaceship.position.z);
 			CURRENT_STATE = DRILLING;
 			break;
@@ -508,7 +508,6 @@ void OpenGalaxyScene::Update(double dt)
 		Vector3 tempDrillPosition = Drill.position;
 		Vector3 tempDrillCameraPosition = Drill.camera.position;
 		Drill.camera.Update(dt);
-		Drill.camera.movement();
 		updateDrillMovement(dt);
 		if ((Drill.position - Spaceship.position).Length() < 15)
 		{
@@ -865,6 +864,23 @@ void OpenGalaxyScene::Render()
 	modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
 	modelStack.Rotate(Spaceship.rotateZ, 0, 0, 1);
 
+
+
+	if (SharedData::GetInstance()->SD_hullIntegrity < 10)
+	{
+		for (int i = 0; i < 5; ++i){
+			modelStack.PushMatrix();
+			modelStack.Translate(ex_x[i], ex_y[i], ex_z[i]);
+			modelStack.Scale(ex_scale[i], ex_scale[i], ex_scale[i]);
+			modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
+			modelStack.Rotate(Spaceship.rotateZ, 0, 0, 1);
+			RenderMesh(meshList[PLANET_SUN], false);
+			modelStack.PopMatrix();
+		}
+	}
+
+
+
 	switch (CURRENT_STATE){
 	case PILOTING:
 		RenderMesh(meshList[SPACESHIP], true);	//To render ship
@@ -903,38 +919,29 @@ void OpenGalaxyScene::Render()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
 		modelStack.PopMatrix();
 
-		modelStack.PushMatrix();
-		modelStack.Translate(Drill.position.x, Drill.position.y, Drill.position.z);	//wtf is all this shit??
-		modelStack.Rotate(Drill.camera.cameraRotationY + 80, 0, 1, 0);
-		modelStack.Rotate(Drill.camera.cameraRotationX, 0, 0, 1);
-		modelStack.Translate(1.8, -1.8, 0);
-		modelStack.Rotate(13, 0, 1, 0);
-		modelStack.Rotate(7, 0, 0, 1);
-		RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
-		//modelStack.Rotate(Drill.rotate, 0, 1, 0);
-		modelStack.Rotate(Drill.rotate, 1, 0, 0);
-		RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
+		//modelStack.PushMatrix();
+		//modelStack.Translate(Drill.position.x, Drill.position.y, Drill.position.z);	//wtf is all this shit??
+		//modelStack.Rotate(Drill.camera.cameraRotationY + 80, 0, 1, 0);
+		//modelStack.Rotate(Drill.camera.cameraRotationX, 0, 0, 1);
+		//modelStack.Translate(1.8, -1.8, 0);
+		//modelStack.Rotate(13, 0, 1, 0);
+		//modelStack.Rotate(7, 0, 0, 1);
+		//RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
+		////modelStack.Rotate(Drill.rotate, 0, 1, 0);
+		//modelStack.Rotate(Drill.rotate, 1, 0, 0);
+		//RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
 
-		modelStack.PopMatrix();
+		//modelStack.PopMatrix();
 		modelStack.PushMatrix();
 
 	}
 	modelStack.PopMatrix();
 
 
-	if (SharedData::GetInstance()->SD_hullIntegrity < 1){
-		for (int i = 0; i < 5; ++i){
-			modelStack.PushMatrix();
-			modelStack.Translate(ex_x[i], ex_y[i], ex_z[i]);
-			modelStack.Scale(ex_scale[i], ex_scale[i], ex_scale[i]);
-			modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
-			modelStack.Rotate(Spaceship.rotateZ, 0, 0, 1);
-			RenderMesh(meshList[PLANET_SUN], false);
-			modelStack.PopMatrix();
-		}
-	}
+	
 
-	for (int i = 0; i < 3; ++i){
+	for (int i = 0; i < 3; ++i)
+	{
 		modelStack.PushMatrix();
 		modelStack.Translate(smallAstPosition[i].x, smallAstPosition[i].y, smallAstPosition[i].z);
 		modelStack.Scale(smallAstScaleX[i], smallAstScaleY[i], smallAstScaleZ[i]);
@@ -1208,6 +1215,15 @@ void OpenGalaxyScene::drawHUD()
 	} else if (CURRENT_STATE == DRILLING){
 
 		viewStack.LoadIdentity();
+		modelStack.PushMatrix();	
+		modelStack.Translate(0, -1.6, -2.7);	
+		modelStack.Rotate(90, 0, 1, 0);
+		modelStack.Rotate(12.58, 0, 0, 1);
+		RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
+		modelStack.Rotate(Drill.rotate, 1, 0, 0);
+		RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
+
+		modelStack.PopMatrix();
 		modelStack.PushMatrix();
 		modelStack.Translate(0, 0, -1);
 		modelStack.Rotate(-90, 1, 0, 0);
