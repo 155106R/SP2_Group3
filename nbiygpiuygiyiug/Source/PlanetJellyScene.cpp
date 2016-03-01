@@ -891,21 +891,21 @@ void PlanetJellyScene::Render()
 
 
 
-	modelStack.PushMatrix();
-	modelStack.Translate(
-		(hitbox[3].m_origin.x),
-		(hitbox[3].m_origin.y),
-		(hitbox[3].m_origin.z)
-		);
-	modelStack.Scale(
-		(hitbox[3].m_length),
-		(hitbox[3].m_height),
-		(hitbox[3].m_width)
-		);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	RenderMesh(meshList[GEO_CUBE], false);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-	modelStack.PopMatrix();
+	//modelStack.PushMatrix();
+	//modelStack.Translate(
+	//	(hitbox[3].m_origin.x),
+	//	(hitbox[3].m_origin.y),
+	//	(hitbox[3].m_origin.z)
+	//	);
+	//modelStack.Scale(
+	//	(hitbox[3].m_length),
+	//	(hitbox[3].m_height),
+	//	(hitbox[3].m_width)
+	//	);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
+	//RenderMesh(meshList[GEO_CUBE], false);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
+	//modelStack.PopMatrix();
 
 
 	viewStack.LoadIdentity();
@@ -1643,6 +1643,12 @@ void PlanetJellyScene::interactionUpdate(double dt)
 				}
 				delay = timer + 0.5;//set delay offset
 			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
+			}
 		}
 
 
@@ -1669,6 +1675,12 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 				delay = timer + 0.5;//set delay offset
 			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
+			}
 		}
 
 		if ((collision(hitbox[2], camera.frontTarget) == true))//Drone merchant
@@ -1693,6 +1705,12 @@ void PlanetJellyScene::interactionUpdate(double dt)
 				}
 				delay = timer + 0.5;//set delay offset
 			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
+			}
 		}
 
 		if (((collision(hitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
@@ -1704,13 +1722,16 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
 			{
-				delay = timer + 0.5;//set delay offset
+				if (currentstate == FREEMOVE)
+				{
+					delay = timer + 0.5;//set delay offset
 
-				e_state = 1;
-				button_prompt = 0;
-				InGame = 1;
-				currentstate = CAVEGAME;
-				//run your game code
+					e_state = 1;
+					button_prompt = 0;
+					InGame = 1;
+					currentstate = CAVEGAME;
+					//run your game code
+				}
 			}
 
 				//to quit
@@ -1804,14 +1825,7 @@ void PlanetJellyScene::interact_state()
 		currentstate = TRADE;
 		return;
 	}
-	else if (currentstate == TRADE)
-	{
-		num = 0;
-		tempnum = 0;
-		shop = false;
-		currentstate = FREEMOVE;
-		return;
-	}
+
 
 }
 
@@ -1850,7 +1864,7 @@ void PlanetJellyScene::text()
 		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
 		break;
 	case(5) :
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + "x" + std::to_string(mdrone_mineraltype) + " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + "x" + SharedData::GetInstance()->PlayerInventory->ItemS[(mdrone_mineraltype)-1].name + " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
 		break;
 	};
 
@@ -1861,6 +1875,10 @@ void PlanetJellyScene::resetKey()
 	if (!Application::IsKeyPressed('E'))
 	{
 		e_state = 0;
+	}
+	if (!Application::IsKeyPressed('E'))
+	{
+		i_state = 0;
 	}
 	if (SharedData::GetInstance()->SD_enableinteract == false)
 	{
@@ -1891,25 +1909,28 @@ void PlanetJellyScene::checkCollision()
 void PlanetJellyScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I') && (currentstate == INVENTORY || currentstate == FREEMOVE))
+	if (Application::IsKeyPressed('I'))
 	{
-		i_state = 1;
-		if (timer > delay)
-		{
-			delay = timer + 0.5;
-			if (currentstate == 0)
+	
+			i_state = 1;
+			if (timer > delay)
 			{
-				num = 0;
-				tempnum = 0;
-				currentstate = INVENTORY;
+				delay = timer + 0.5;
+				if (currentstate == 0 && SharedData::GetInstance()->SD_enableinteract)
+				{
+					num = 0;
+					tempnum = 0;
+					
+					return;
+				}
+				else if(currentstate = INVENTORY)
+				{
+					num = 0;
+					tempnum = 0;
+					currentstate = FREEMOVE;
+				}
 			}
-			else
-			{
-				num = 0;
-				tempnum = 0;
-				currentstate = FREEMOVE;
-			}
-		}
+		
 	}
 }
 
