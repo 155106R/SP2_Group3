@@ -39,9 +39,16 @@ void CaveGame::randSetRocks(char PID)
 	for (int i = 0; i <36; i++)
 	{
 		Rocks[i].Speed = Math::RandFloatMinMax(1, 10);
-		if (PID == 'A') Rocks[i].score_ID = Math::RandIntMinMax(0, 3);
-		if (PID == 'B') Rocks[i].score_ID = Math::RandIntMinMax(4, 7);
+		if (PID == 'A')
+		{
+			Rocks[i].score_ID = Math::RandIntMinMax(1, 4);
+		}
+		else if (PID == 'B')
+		{
+			Rocks[i].score_ID = Math::RandIntMinMax(5, 8);
+		}
 		Rocks[i].score_amount = Math::RandIntMinMax(1, 3);
+		cout << Rocks[i].score_ID << endl;
 	}
 }
 void CaveGame::startFalling(double dt, char PID)
@@ -64,8 +71,14 @@ void CaveGame::reRandRocks(int i, char PID)
 	Rocks[i].P_Y = 28;
 	Rocks[i].state = 0;
 	Rocks[i].Speed = Math::RandFloatMinMax(1, 10);
-	if (PID == 'A') Rocks[i].score_ID = Math::RandIntMinMax(0, 3);
-	if (PID == 'B') Rocks[i].score_ID = Math::RandIntMinMax(4, 7);
+	if (PID == 'A')
+	{
+		Rocks[i].score_ID = Math::RandIntMinMax(1, 4);  
+	}
+	if (PID == 'B')
+	{
+		Rocks[i].score_ID = Math::RandIntMinMax(5, 8);
+	}
 	Rocks[i].score_amount = Math::RandIntMinMax(1, 3);
 }
 void CaveGame::addScore(int ID, int amount)

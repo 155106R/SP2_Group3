@@ -21,7 +21,6 @@ PlanetJellyScene::~PlanetJellyScene()
 void PlanetJellyScene::Init()
 {
 	//interactions
-
 	e_state = 0;
 	i_state = 0;
 
@@ -1107,7 +1106,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 	}
 
 	// Buying Upgrades
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == TRADE && (SID==2 || SID==3) && SellState != UPGRADING && shop==true) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == TRADE && (SID==2 || SID==3) && SellState != UPGRADING && shop==true) && timer > delay)
 	{
 		delay = timer + 0.2;
 		SellState = UPGRADING;
@@ -1115,7 +1114,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 
 	if (SellState == UPGRADING)
 	{
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm Upgrade
+		if ((Application::IsKeyPressed('E') && confirm == true) && timer > delay) // confirm Upgrade
 		{
 			delay = timer + 0.2;
 			SharedData::GetInstance()->PlayerInventory->BuyUpgrade(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[num].ID, SharedData::GetInstance()->PlayerInventory->store[SID].SID);
@@ -1124,7 +1123,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1132,18 +1131,18 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
 	}
 	// Buying Drones
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == TRADE && (SID == 4 || SID == 5) && SellState != DRONES && shop == true && SharedData::GetInstance()->PlayerInventory->store[SID].RebotS[num].Sold == false) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == TRADE && (SID == 4 || SID == 5) && SellState != DRONES && shop == true && SharedData::GetInstance()->PlayerInventory->store[SID].RebotS[num].Sold == false) && timer > delay)
 	{
 		delay = timer + 0.2;
 		SellState = DRONES;
@@ -1151,7 +1150,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 
 	if (SellState == DRONES)
 	{
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm buy drone
+		if ((Application::IsKeyPressed('E') && confirm == true) && timer > delay) // confirm buy drone
 		{
 			delay = timer + 0.2;
 			SharedData::GetInstance()->PlayerInventory->BuyDrone(num, SID);
@@ -1160,7 +1159,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1168,19 +1167,19 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
 	}
 
 	// droppong items in inventory
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == INVENTORY && SellState != DROPPING) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == INVENTORY && SellState != DROPPING) && timer > delay)
 	{
 		delay = timer + 0.2;
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
@@ -1191,7 +1190,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 
 	if (SellState == DROPPING) // seleting amount to drop
 	{
-		if (Application::IsKeyPressed(VK_UP) && timer > delay) // increase amount to drop
+		if (Application::IsKeyPressed('W') && timer > delay) // increase amount to drop
 		{
 			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
@@ -1200,7 +1199,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			}
 		}
 
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to drop
+		if ((Application::IsKeyPressed('S')) && timer > delay) // decrease amount to drop
 		{
 			delay = timer + 0.1;
 			if (SBamount > 1)
@@ -1209,7 +1208,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			}
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm dropping
+		if ((Application::IsKeyPressed('E') && confirm == true) && timer > delay) // confirm dropping
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1218,7 +1217,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1226,19 +1225,19 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
 	}
 
 	// Selling 
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == TRADE && shop==false && SellState != SELLING) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == TRADE && shop==false && SellState != SELLING) && timer > delay)
 	{
 		delay = timer + 0.2;
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
@@ -1248,7 +1247,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 	}
 	if (SellState == SELLING)
 	{
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm selling
+		if ((Application::IsKeyPressed('E') && confirm == true) && timer > delay) // confirm selling
 		{
 			delay = timer + 0.2;
 			SharedData::GetInstance()->PlayerInventory->sellItem(SharedData::GetInstance()->PlayerInventory->Slot[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[SID].SID);
@@ -1257,7 +1256,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_UP)  && timer > delay) // increase amount to sell
+		if (Application::IsKeyPressed('W')  && timer > delay) // increase amount to sell
 		{
 			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
@@ -1265,7 +1264,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 				SBamount++;
 			}
 		}
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to sell
+		if ((Application::IsKeyPressed('S')) && timer > delay) // decrease amount to sell
 		{
 			delay = timer + 0.1;
 			if (SBamount > 1)
@@ -1273,7 +1272,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 				SBamount--;
 			}
 		}
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1281,19 +1280,19 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
 	}
 
 	// Buying
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == TRADE && shop == true && (SID == 0 || SID == 1) && SellState != BUYING) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == TRADE && shop == true && (SID == 0 || SID == 1) && SellState != BUYING) && timer > delay)
 	{
 		delay = timer + 0.2;
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
@@ -1304,7 +1303,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 	if (SellState == BUYING)
 	{
 
-		if (Application::IsKeyPressed(VK_RETURN)  && confirm == true) // confirm buying
+		if (Application::IsKeyPressed('E')  && confirm == true) // confirm buying
 		{
 			delay = timer + 0.2;
 			SharedData::GetInstance()->PlayerInventory->buyItem(SharedData::GetInstance()->PlayerInventory->store[SID].GoodS[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[SID].SID, num);
@@ -1313,7 +1312,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_UP) ) && timer > delay) // increase amount to buy
+		if ((Application::IsKeyPressed('W') ) && timer > delay) // increase amount to buy
 		{
 			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->store[SID].GoodS[num].stack)
@@ -1321,7 +1320,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 				SBamount++;
 			}
 		}
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to buy
+		if ((Application::IsKeyPressed('S')) && timer > delay) // decrease amount to buy
 		{
 			delay = timer + 0.1;
 			if (SBamount > 1)
@@ -1329,7 +1328,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 				SBamount--;
 			}
 		}
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1337,12 +1336,12 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
@@ -1351,7 +1350,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 	// bag - inventory scrolling part
 	if ((currentstate == TRADE || currentstate == INVENTORY) && SellState == 0)
 	{
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay && shop == true) // scroll down your list
+		if ((Application::IsKeyPressed('S')) && timer > delay && shop == true) // scroll down your list
 		{
 			delay = timer + 0.2;
 			if ((SID == 0 || SID == 1)) // mineral shop
@@ -1389,7 +1388,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			}
 		}
 
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay && shop == false) // scroll down your list
+		if ((Application::IsKeyPressed('S')) && timer > delay && shop == false) // scroll down your list
 		{
 			if (num < SharedData::GetInstance()->PlayerInventory->Slots-1)
 			{
@@ -1401,7 +1400,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 				}
 			}
 		}
-		if ((Application::IsKeyPressed(VK_UP) && SellState == 0) && timer > delay) // scroll up your list
+		if ((Application::IsKeyPressed('W') && SellState == 0) && timer > delay) // scroll up your list
 		{
 			delay = timer + 0.2;
 			if (num > 0)
@@ -1418,7 +1417,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 	// store - mineral
 	if (currentstate == TRADE && SellState == 0)
 	{
-		if ((Application::IsKeyPressed(VK_LEFT) && shop != true) && timer > delay) // switch to shop
+		if ((Application::IsKeyPressed('A') && shop != true) && timer > delay) // switch to shop
 		{
 			delay = timer + 0.2;
 			shop = true;
@@ -1426,7 +1425,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 			tempnum = 0;
 		}
 
-		if ((Application::IsKeyPressed(VK_RIGHT) && shop != false) && timer > delay) // switch to bag
+		if ((Application::IsKeyPressed('D') && shop != false) && timer > delay) // switch to bag
 		{
 			delay = timer + 0.2;
 			shop = false;
@@ -1707,6 +1706,7 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 				e_state = 1;
 				button_prompt = 0;
+				InGame = 1;
 				currentstate = CAVEGAME;
 				//run your game code
 			}
@@ -1889,7 +1889,7 @@ void PlanetJellyScene::checkCollision()
 void PlanetJellyScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I'))
+	if (Application::IsKeyPressed('I') && (currentstate == INVENTORY || currentstate == FREEMOVE))
 	{
 		i_state = 1;
 		if (timer > delay)
@@ -1913,47 +1913,52 @@ void PlanetJellyScene::inventory()
 
 void PlanetJellyScene::Init_minigame()
 {
-	InGame = 1; // menu
+	InGame = 0; // menu
 	Pnum = 0;
-	SharedData::GetInstance()->Game->randSetRocks('B');
 }
 void PlanetJellyScene::Updata_minigame(double dt)
 {
+	
 	if (InGame == 1) // menu
 	{
-		if (Application::IsKeyPressed(VK_UP) && Pnum > 0 && timer > delay)
+		SharedData::GetInstance()->Game->randSetRocks('B');
+		if (Application::IsKeyPressed('W') && Pnum > 0 && timer > delay)
 		{
 			delay = timer + 0.2;
 			Pnum--;
 		}
-		if (Application::IsKeyPressed(VK_DOWN) && Pnum < 3 && timer > delay)
+		if (Application::IsKeyPressed('S') && Pnum < 3 && timer > delay)
 		{
 			delay = timer + 0.2;
 			Pnum++;
 		}
-		if (Application::IsKeyPressed(VK_RETURN) && timer > delay) // change mode
+		if (Application::IsKeyPressed('E') && timer > delay) // change mode
 		{
 			delay = timer + 0.2;
 			if (Pnum == 0) InGame = 2; //Instruction && Controls
 			if (Pnum == 1) InGame = 3; // start mining game
 			if (Pnum == 2) InGame = 4; // check mineral list
-			if (Pnum == 3) InGame = 0; // exit game
+			if (Pnum == 3)
+			{
+				currentstate = 0;
+				InGame = 0; // exit game
+			}
 			Pnum = 0;
 		}
 	}
 	if (InGame == 2) //Instruction && Controls
 	{
-		if (Application::IsKeyPressed(VK_UP) && Pnum > 0 && timer > delay)
+		if (Application::IsKeyPressed('W') && Pnum > 0 && timer > delay)
 		{
 			delay = timer + 0.2;
 			Pnum--;
 		}
-		if (Application::IsKeyPressed(VK_DOWN) && Pnum < 3 && timer > delay)
+		if (Application::IsKeyPressed('S') && Pnum < 3 && timer > delay)
 		{
 			delay = timer + 0.2;
 			Pnum++;
 		}
-		if (Application::IsKeyPressed(VK_RETURN) && timer > delay && Pnum == 3)  // back to menu
+		if (Application::IsKeyPressed('E') && timer > delay && Pnum == 3)  // back to menu
 		{
 			delay = timer + 0.2;
 			InGame = 1;
@@ -1963,13 +1968,13 @@ void PlanetJellyScene::Updata_minigame(double dt)
 	if (InGame == 3) // really In game
 	{
 		SharedData::GetInstance()->Game->startFalling(dt, 'B');
-		if (Application::IsKeyPressed(VK_LEFT) && SharedData::GetInstance()->Game->Board_P > 3 && timer > delay)
+		if (Application::IsKeyPressed('A') && SharedData::GetInstance()->Game->Board_P > 3 && timer > delay)
 		{
 			delay = timer + 0.1;
 			SharedData::GetInstance()->Game->Board_P--;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT) && SharedData::GetInstance()->Game->Board_P < 37 && timer > delay)
+		if (Application::IsKeyPressed('D') && SharedData::GetInstance()->Game->Board_P < 37 && timer > delay)
 		{
 			delay = timer + 0.1;
 			SharedData::GetInstance()->Game->Board_P++;
@@ -1985,17 +1990,17 @@ void PlanetJellyScene::Updata_minigame(double dt)
 	}
 	if (InGame == 4) //Instruction && Controls
 	{
-		if (Application::IsKeyPressed(VK_UP) && Pnum > 0 && timer > delay)
+		if (Application::IsKeyPressed('W') && Pnum > 0 && timer > delay)
 		{
 			delay = timer + 0.2;
 			Pnum--;
 		}
-		if (Application::IsKeyPressed(VK_DOWN) && Pnum < 4 && timer > delay)
+		if (Application::IsKeyPressed('S') && Pnum < 4 && timer > delay)
 		{
 			delay = timer + 0.2;
 			Pnum++;
 		}
-		if (Application::IsKeyPressed(VK_RETURN) && timer > delay && Pnum == 4) // back to menu
+		if (Application::IsKeyPressed('E') && timer > delay && Pnum == 4) // back to menu
 		{
 			delay = timer + 0.2;
 			InGame = 1;
@@ -2004,23 +2009,24 @@ void PlanetJellyScene::Updata_minigame(double dt)
 	}
 	if (InGame == 5) //Check Score
 	{
-		if (Application::IsKeyPressed(VK_UP) && Pnum > 0 && timer > delay)
+		if (Application::IsKeyPressed('W') && Pnum > 0 && timer > delay)
 		{
 			delay = timer + 0.2;
 			Pnum--;
 		}
-		if (Application::IsKeyPressed(VK_DOWN) && Pnum < 4 && timer > delay)
+		if (Application::IsKeyPressed('S') && Pnum < 4 && timer > delay)
 		{
 			delay = timer + 0.2;
 			Pnum++;
 		}
-		if (Application::IsKeyPressed(VK_RETURN) && timer > delay && Pnum == 4) // exit game && Add mineral got in cave to bag
+		if (Application::IsKeyPressed('E') && timer > delay && Pnum == 4) // exit game && Add mineral got in cave to bag
 		{
 			for (int i = 0; i < 4; i++) SharedData::GetInstance()->PlayerInventory->GetItem(SharedData::GetInstance()->Game->ScoreS[i].ID, SharedData::GetInstance()->Game->ScoreS[i].stack);
 			SharedData::GetInstance()->Game->reSetScore();
 			delay = timer + 0.2;
 			InGame = 0;
 			Pnum = 0;
+			currentstate = 0;
 		}
 	}
 	
