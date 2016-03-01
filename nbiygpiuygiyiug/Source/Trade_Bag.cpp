@@ -4,7 +4,7 @@
 
 Bag::Bag() 
 {
-	Slots = 3;
+	Slots = 4;
 	MaxSlot = false;
 	for (int i = 0; i < Slots; i++)
 	{

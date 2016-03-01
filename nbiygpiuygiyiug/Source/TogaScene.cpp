@@ -2172,7 +2172,7 @@ void TogaScene::Init_animation_NPC()
 	for (int i = 0; i <= 3; i++)
 	{
 		Togan newtoga;
-		newtoga.position = Vector3(0, -15, 0);
+		newtoga.position = Vector3(Math::RandFloatMinMax(-50, 50), -15, Math::RandFloatMinMax(-50, 50));
 		newtoga.tempposition = Vector3(0, 0, 0);
 		newtoga.rotate_togan = 0;
 		newtoga.state = 0;

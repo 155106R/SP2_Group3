@@ -227,7 +227,7 @@ void PlanetJellyScene::Init()
 
 	Math::InitRNG();
 	Init_Checker();
-	
+	Init_minigame();
 }
 
 void PlanetJellyScene::Init_Name_NPC()
@@ -313,7 +313,7 @@ void PlanetJellyScene::Init_animation_NPC()
 	meshList[NPC_1]->textureID = LoadTGA("Image//jelly_texture.tga");
 
 	// jelly animation
-	jelly.position = Vector3(0, 0, 0);
+	jelly.position = Vector3(Math::RandFloatMinMax(-50, 50), 0, Math::RandFloatMinMax(-50, 50));
 	jelly.S_Y = 0;
 	jelly.state = 0;
 
@@ -594,6 +594,7 @@ void PlanetJellyScene::Update(double dt)
 	inventory();
 	interactionUpdate(dt);
 	Updata_Checker(dt);
+	Updata_minigame(dt);
 	SharedData::GetInstance()->SD_timecounter += dt;//add time to the timer
 }
 
@@ -949,7 +950,7 @@ void PlanetJellyScene::Render()
 
 
 	renderinteract();
-
+	Render_minigame();
 
 	text();
 
@@ -1182,7 +1183,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 	{
 		if (Application::IsKeyPressed(VK_UP) && timer > delay) // increase amount to drop
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
 			{
 				SBamount++;
@@ -1191,7 +1192,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 
 		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to drop
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount > 1)
 			{
 				SBamount--;
@@ -1248,7 +1249,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 
 		if (Application::IsKeyPressed(VK_UP)  && timer > delay) // increase amount to sell
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
 			{
 				SBamount++;
@@ -1256,7 +1257,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 		}
 		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to sell
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount > 1)
 			{
 				SBamount--;
@@ -1304,7 +1305,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 
 		if ((Application::IsKeyPressed(VK_UP) ) && timer > delay) // increase amount to buy
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->store[SID].GoodS[num].stack)
 			{
 				SBamount++;
@@ -1312,7 +1313,7 @@ void PlanetJellyScene::Updata_Checker(double dt)
 		}
 		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to buy
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount > 1)
 			{
 				SBamount--;
@@ -1877,6 +1878,183 @@ void PlanetJellyScene::inventory()
 				tempnum = 0;
 				currentstate = FREEMOVE;
 			}
+		}
+	}
+}
+
+void PlanetJellyScene::Init_minigame()
+{
+	InGame = 1; // menu
+	Pnum = 0;
+	SharedData::GetInstance()->Game->randSetRocks('B');
+}
+void PlanetJellyScene::Updata_minigame(double dt)
+{
+	if (InGame == 1) // menu
+	{
+		if (Application::IsKeyPressed(VK_UP) && Pnum > 0 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum--;
+		}
+		if (Application::IsKeyPressed(VK_DOWN) && Pnum < 3 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum++;
+		}
+		if (Application::IsKeyPressed(VK_RETURN) && timer > delay) // change mode
+		{
+			delay = timer + 0.2;
+			if (Pnum == 0) InGame = 2; //Instruction && Controls
+			if (Pnum == 1) InGame = 3; // start mining game
+			if (Pnum == 2) InGame = 4; // check mineral list
+			if (Pnum == 3) InGame = 0; // exit game
+			Pnum = 0;
+		}
+	}
+	if (InGame == 2) //Instruction && Controls
+	{
+		if (Application::IsKeyPressed(VK_UP) && Pnum > 0 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum--;
+		}
+		if (Application::IsKeyPressed(VK_DOWN) && Pnum < 3 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum++;
+		}
+		if (Application::IsKeyPressed(VK_RETURN) && timer > delay && Pnum == 3)  // back to menu
+		{
+			delay = timer + 0.2;
+			InGame = 1;
+			Pnum = 0;
+		}
+	}
+	if (InGame == 3) // really In game
+	{
+		SharedData::GetInstance()->Game->startFalling(dt, 'B');
+		if (Application::IsKeyPressed(VK_LEFT) && SharedData::GetInstance()->Game->Board_P > 3 && timer > delay)
+		{
+			delay = timer + 0.1;
+			SharedData::GetInstance()->Game->Board_P--;
+		}
+
+		if (Application::IsKeyPressed(VK_RIGHT) && SharedData::GetInstance()->Game->Board_P < 37 && timer > delay)
+		{
+			delay = timer + 0.1;
+			SharedData::GetInstance()->Game->Board_P++;
+		}
+		if (Application::IsKeyPressed('P') && timer > delay) // end game check score
+		{
+			delay = timer + 0.2;
+			SharedData::GetInstance()->Game->Board_P = 20;
+			for (int i = 0; i < 36; i++) SharedData::GetInstance()->Game->reRandRocks(i, 'B');
+			InGame = 5;
+			Pnum = 0;
+		}
+	}
+	if (InGame == 4) //Instruction && Controls
+	{
+		if (Application::IsKeyPressed(VK_UP) && Pnum > 0 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum--;
+		}
+		if (Application::IsKeyPressed(VK_DOWN) && Pnum < 4 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum++;
+		}
+		if (Application::IsKeyPressed(VK_RETURN) && timer > delay && Pnum == 4) // back to menu
+		{
+			delay = timer + 0.2;
+			InGame = 1;
+			Pnum = 0;
+		}
+	}
+	if (InGame == 5) //Check Score
+	{
+		if (Application::IsKeyPressed(VK_UP) && Pnum > 0 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum--;
+		}
+		if (Application::IsKeyPressed(VK_DOWN) && Pnum < 4 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum++;
+		}
+		if (Application::IsKeyPressed(VK_RETURN) && timer > delay && Pnum == 4) // exit game && Add mineral got in cave to bag
+		{
+			for (int i = 0; i < 4; i++) SharedData::GetInstance()->PlayerInventory->GetItem(SharedData::GetInstance()->Game->ScoreS[i].ID, SharedData::GetInstance()->Game->ScoreS[i].stack);
+			SharedData::GetInstance()->Game->reSetScore();
+			delay = timer + 0.2;
+			InGame = 0;
+			Pnum = 0;
+		}
+	}
+	
+}
+void PlanetJellyScene::Render_minigame()
+{
+	// Game Box
+	if (InGame != 0)
+	{
+		for (int x = 1; x < 40; x++)
+		{
+			for (int y = 1; y < 30; y++)
+			{
+				if ((x == 1 && y < 30) || (x == 39 && y < 30) || (x < 40 && y == 1) || (x < 40 && y == 29))
+					RenderTextOnScreen(meshList[GEO_TEXT], "+", Color(1, 0, 0), 2, x, y);
+			}
+		}
+		// random falling minerals
+		for (int i = 0; i < 36; i++)
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "*", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Rocks[i].P_X, SharedData::GetInstance()->Game->Rocks[i].P_Y);
+		}
+		// moving mining cart
+		RenderTextOnScreen(meshList[GEO_TEXT], "/", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P + 1.4, 2.3);
+		RenderTextOnScreen(meshList[GEO_TEXT], "\\", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P - 1.6, 2.3);
+		for (float x = -1; x <= 1; x += 0.5) RenderTextOnScreen(meshList[GEO_TEXT], "-", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P + x, 2);
+		RenderTextOnScreen(meshList[GEO_TEXT], "o", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P + 0.5, 1.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], "o", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P - 0.5, 1.5);
+		// menu conrols
+		if (InGame == 1) //menu
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 14, (22 - (Pnum)* 2));
+			RenderTextOnScreen(meshList[GEO_TEXT], "Instruction && Controls", Color(1, 0, 0), 2, 16, 22);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Start Mining", Color(1, 0, 0), 2, 16, 20);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Mineral In Cave", Color(1, 0, 0), 2, 16, 18);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Exit Cave", Color(1, 0, 0), 2, 16, 16);
+		}
+		if (InGame == 2) //Instruction && Controls
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "Instruction && Controls", Color(1, 0, 0), 2, 8, 24);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 6, (22 - (Pnum)* 2));
+			RenderTextOnScreen(meshList[GEO_TEXT], "Moving mining cart to collect falling minerals", Color(1, 0, 0), 2, 8, 22);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Control Arrow Left & Right to move mining cart", Color(1, 0, 0), 2, 8, 20);
+			RenderTextOnScreen(meshList[GEO_TEXT], "When in Game Press 'P' to End Game", Color(1, 0, 0), 2, 8, 18);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Back to menu", Color(1, 0, 0), 2, 8, 16);
+		}
+		if (InGame == 4) // mineral list in cave
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "Mineral In Cave", Color(1, 0, 0), 2, 16, 24);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 14, (22 - (Pnum)* 2));
+			for (int i = 4; i < 8; i++) RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->Game->ItemS[i].name, Color(1, 0, 0), 2, 16, 22 - (i - 4) * 2); // jelly planet mineral
+			RenderTextOnScreen(meshList[GEO_TEXT], "Back to menu", Color(1, 0, 0), 2, 16, 14);
+		}
+		if (InGame == 5) // Check Score
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "Mineral Got In Cave", Color(1, 0, 0), 2, 16, 24);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 14, (22 - (Pnum)* 2));
+			for (int i = 0; i < 4; i++)
+			{
+				RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->Game->ScoreS[i].name, Color(1, 0, 0), 2, 16, 22 - i * 2);
+				RenderTextOnScreen(meshList[GEO_TEXT], "x "+ std::to_string(SharedData::GetInstance()->Game->ScoreS[i].stack), Color(1, 0, 0), 2, 24, 22 - i * 2);
+			}
+			RenderTextOnScreen(meshList[GEO_TEXT], "Exit Mining Cave", Color(1, 0, 0), 2, 16, 14);
 		}
 	}
 }
