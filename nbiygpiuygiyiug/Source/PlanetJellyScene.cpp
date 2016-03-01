@@ -768,10 +768,12 @@ void PlanetJellyScene::Render()
 
 	if (currentstate == CAVEGAME)
 	{
+		modelStack.PushMatrix();
 		modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
 		//modelStack.Rotate(90, 1, 0, 0);
 		modelStack.Scale(20, 20, 20);
 		RenderMesh(meshList[GEO_CUBE], false);
+		modelStack.PopMatrix();
 	}
 
 	//render cave
