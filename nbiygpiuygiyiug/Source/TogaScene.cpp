@@ -296,14 +296,13 @@ void TogaScene::Init()
 	Init_Checker();
 	Init_Name_NPC();
 	Init_animation_NPC();
+	Init_minigame();
 }
 
 float inc = 0;
 
 void TogaScene::Update(double dt)
 {
-	cout << mdrone_mineralcount << endl;
-
 	button_prompt = 0;
 
 	player.m_origin = camera.nextPosition;
@@ -397,7 +396,7 @@ void TogaScene::Update(double dt)
 
 	Update_Name_NPC(dt);
 	Update_animation_NPC(dt);
-
+	Updata_minigame(dt);
 
 	SharedData::GetInstance()->SD_timecounter += dt;//add time to the timer
 }
@@ -795,6 +794,7 @@ void TogaScene::Render()
 	renderinteract();
 	text();
 	Render_Checker();
+	Render_minigame();
 }
 
 void TogaScene::Exit()
@@ -1253,13 +1253,13 @@ void TogaScene::interactionUpdate(double dt)
 				button_prompt = 1;
 			}
 
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE )
 			{
 				SID = 0;
 				e_state = 1;
 				button_prompt = 0;
 				interact_state();
-				if (rendertext == 0 && currentstate == 1)
+				if (rendertext == 0 && currentstate == CONVERSE)
 				{
 					rendertext = 1;
 				}
@@ -1270,12 +1270,11 @@ void TogaScene::interactionUpdate(double dt)
 
 				delay = timer + 0.5;//set delay offset
 
-
 			}
 		}
 
 
-		if ((collision(Shophitbox[1], camera.frontTarget) == true))//Upgrade merchant
+		if ((collision(Shophitbox[1], camera.frontTarget) == true) && currentstate != TRADE)//Upgrade merchant
 		{
 			if (currentstate == 0)
 			{
@@ -1287,6 +1286,8 @@ void TogaScene::interactionUpdate(double dt)
 				e_state = 1;
 				button_prompt = 0;
 				interact_state();
+
+
 				if (rendertext == 0 && currentstate == 1)
 				{
 					rendertext = 2;
@@ -1303,7 +1304,7 @@ void TogaScene::interactionUpdate(double dt)
 		}
 
 
-		if ((collision(Shophitbox[2], camera.frontTarget) == true))//Drone merchant
+		if ((collision(Shophitbox[2], camera.frontTarget) == true) && currentstate != TRADE)//Drone merchant
 		{
 			if (currentstate == 0)
 			{
@@ -1330,6 +1331,15 @@ void TogaScene::interactionUpdate(double dt)
 			}
 		}
 
+		if (Application::IsKeyPressed(VK_ESCAPE) && currentstate == TRADE)
+		{
+			shop = false;
+			num = 0;
+			tempnum = 0;
+			currentstate = FREEMOVE;
+			return;
+		}
+
 		if (((collision(Shophitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
 		{
 			if (currentstate == FREEMOVE)
@@ -1339,16 +1349,19 @@ void TogaScene::interactionUpdate(double dt)
 
 			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
 			{
-				delay = timer + 0.5;//set delay offset
+				if (currentstate == FREEMOVE)
+				{
+					delay = timer + 0.5;//set delay offset
 
-				e_state = 1;
-				button_prompt = 0;
-				currentstate = CAVEGAME;
-				//run your game code
+					e_state = 1;
+					button_prompt = 0;
+					InGame = 1;
+					currentstate = CAVEGAME;
+					//run your game code
 
-				//to quit
-				//change currenstate =0;
-
+					//to quit
+					//change currenstate =0;
+				}
 			}
 		
 		}
@@ -1431,13 +1444,7 @@ void TogaScene::interact_state()
 		currentstate = TRADE;
 		return;
 	}
-	else if (currentstate == TRADE)
-	{
-		shop = false;
-		currentstate = FREEMOVE;
-		return;
-	}
-
+	
 }
 
 void TogaScene::renderinteract()
@@ -1475,7 +1482,7 @@ void TogaScene::text()
 		RenderTextOnScreen(meshList[GEO_TEXT], "PLEASE RETURN LATER.", Color(1, 0, 0), 2, 4.2, 3.8);
 		break;
 	case(5):
-		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + "x" + std::to_string(mdrone_mineraltype)+ " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
+		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string(mdrone_mineralcount) + "x" + SharedData::GetInstance()->PlayerInventory->ItemS[(mdrone_mineraltype)-1].name + " READY FOR COLLECTION.", Color(1, 0, 0), 2, 4.2, 5.8);//mining drone (has minerals)
 		break;
 	};
 
@@ -1521,7 +1528,7 @@ void TogaScene::checkCollision()
 void TogaScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I'))// && timer > delay) && e_state == 0)
+	if (Application::IsKeyPressed('I') )// && timer > delay) && e_state == 0)
 	{
 		i_state = 1;
 		if (timer > delay)
@@ -1530,15 +1537,17 @@ void TogaScene::inventory()
 				if (currentstate == 0)
 				{
 					currentstate = INVENTORY;
+					return;
 				}
-				else
+				else if(currentstate ==INVENTORY)
 				{
 					currentstate = FREEMOVE;
+					return;
 				}
 		}
 
 	}
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == INVENTORY && SellState != DROPPING) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == INVENTORY && SellState != DROPPING) && timer > delay)
 	{
 		delay = timer + 0.2;
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
@@ -1549,7 +1558,7 @@ void TogaScene::inventory()
 	}
 	if (SellState == DROPPING)
 	{
-		if (Application::IsKeyPressed(VK_UP) && timer > delay) // increase amount to sell
+		if (Application::IsKeyPressed('W') && timer > delay) // increase amount to sell
 		{
 			delay = timer + 0.2;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
@@ -1558,7 +1567,7 @@ void TogaScene::inventory()
 			}
 		}
 
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to buy/sell
+		if ((Application::IsKeyPressed('S')) && timer > delay) // decrease amount to buy/sell
 		{
 			delay = timer + 0.2;
 			if (SBamount > 1)
@@ -1567,7 +1576,7 @@ void TogaScene::inventory()
 			}
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN)&& confirm == true) && timer > delay) // confirm dropping
+		if ((Application::IsKeyPressed('E')&& confirm == true) && timer > delay) // confirm dropping
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1576,7 +1585,7 @@ void TogaScene::inventory()
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1584,12 +1593,12 @@ void TogaScene::inventory()
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
@@ -1629,7 +1638,7 @@ void TogaScene::Updata_Checker(double dt)
 	}
 
 	// Buying Upgrades
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == TRADE && (SID == 2 || SID == 3) && SellState != UPGRADING && shop == true) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == TRADE && (SID == 2 || SID == 3) && SellState != UPGRADING && shop == true) && timer > delay)
 	{
 		delay = timer + 0.2;
 		SellState = UPGRADING;
@@ -1637,7 +1646,7 @@ void TogaScene::Updata_Checker(double dt)
 
 	if (SellState == UPGRADING)
 	{
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm Upgrade
+		if ((Application::IsKeyPressed('E') && confirm == true) && timer > delay) // confirm Upgrade
 		{
 			delay = timer + 0.2;
 			SharedData::GetInstance()->PlayerInventory->BuyUpgrade(SharedData::GetInstance()->PlayerInventory->store[SID].PowerS[num].ID, SharedData::GetInstance()->PlayerInventory->store[SID].SID);
@@ -1646,7 +1655,7 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1654,18 +1663,18 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
 	}
 	// Buying Drones
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == TRADE && (SID == 4 || SID == 5) && SellState != DRONES && shop == true && SharedData::GetInstance()->PlayerInventory->store[SID].RebotS[num].Sold == false) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == TRADE && (SID == 4 || SID == 5) && SellState != DRONES && shop == true && SharedData::GetInstance()->PlayerInventory->store[SID].RebotS[num].Sold == false) && timer > delay)
 	{
 		delay = timer + 0.2;
 		SellState = DRONES;
@@ -1673,7 +1682,7 @@ void TogaScene::Updata_Checker(double dt)
 
 	if (SellState == DRONES)
 	{
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm buy drone
+		if ((Application::IsKeyPressed('E') && confirm == true) && timer > delay) // confirm buy drone
 		{
 			delay = timer + 0.2;
 			SharedData::GetInstance()->PlayerInventory->BuyDrone(num, SID);
@@ -1682,7 +1691,7 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1690,19 +1699,19 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
 	}
 
 	// droppong items in inventory
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == INVENTORY && SellState != DROPPING) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == INVENTORY && SellState != DROPPING) && timer > delay)
 	{
 		delay = timer + 0.2;
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
@@ -1713,25 +1722,25 @@ void TogaScene::Updata_Checker(double dt)
 
 	if (SellState == DROPPING) // seleting amount to drop
 	{
-		if (Application::IsKeyPressed(VK_UP) && timer > delay) // increase amount to drop
+		if (Application::IsKeyPressed('W') && timer > delay) // increase amount to drop
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
 			{
 				SBamount++;
 			}
 		}
 
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to drop
+		if ((Application::IsKeyPressed('S')) && timer > delay) // decrease amount to drop
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount > 1)
 			{
 				SBamount--;
 			}
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm dropping
+		if ((Application::IsKeyPressed('E') && confirm == true) && timer > delay) // confirm dropping
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1740,7 +1749,7 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1748,19 +1757,19 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
 	}
 
 	// Selling 
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == TRADE && shop == false && SellState != SELLING) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == TRADE && shop == false && SellState != SELLING) && timer > delay)
 	{
 		delay = timer + 0.2;
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
@@ -1770,7 +1779,7 @@ void TogaScene::Updata_Checker(double dt)
 	}
 	if (SellState == SELLING)
 	{
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == true) && timer > delay) // confirm selling
+		if ((Application::IsKeyPressed('E') && confirm == true) && timer > delay) // confirm selling
 		{
 			delay = timer + 0.2;
 			SharedData::GetInstance()->PlayerInventory->sellItem(SharedData::GetInstance()->PlayerInventory->Slot[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[SID].SID);
@@ -1779,23 +1788,23 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_UP) && timer > delay) // increase amount to sell
+		if (Application::IsKeyPressed('W') && timer > delay) // increase amount to sell
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->Slot[num].stack)
 			{
 				SBamount++;
 			}
 		}
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to sell
+		if ((Application::IsKeyPressed('S')) && timer > delay) // decrease amount to sell
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount > 1)
 			{
 				SBamount--;
 			}
 		}
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1803,19 +1812,19 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
 	}
 
 	// Buying
-	if ((Application::IsKeyPressed(VK_RETURN) && currentstate == TRADE && shop == true && (SID == 0 || SID == 1) && SellState != BUYING) && timer > delay)
+	if ((Application::IsKeyPressed('E') && currentstate == TRADE && shop == true && (SID == 0 || SID == 1) && SellState != BUYING) && timer > delay)
 	{
 		delay = timer + 0.2;
 		if (SharedData::GetInstance()->PlayerInventory->Slot[num].stack > 0)
@@ -1826,7 +1835,7 @@ void TogaScene::Updata_Checker(double dt)
 	if (SellState == BUYING)
 	{
 
-		if (Application::IsKeyPressed(VK_RETURN) && confirm == true) // confirm buying
+		if (Application::IsKeyPressed('E') && confirm == true) // confirm buying
 		{
 			delay = timer + 0.2;
 			SharedData::GetInstance()->PlayerInventory->buyItem(SharedData::GetInstance()->PlayerInventory->store[SID].GoodS[num].ID, SBamount, SharedData::GetInstance()->PlayerInventory->store[SID].SID, num);
@@ -1835,23 +1844,23 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if ((Application::IsKeyPressed(VK_UP)) && timer > delay) // increase amount to buy
+		if ((Application::IsKeyPressed('W')) && timer > delay) // increase amount to buy
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount < SharedData::GetInstance()->PlayerInventory->store[SID].GoodS[num].stack)
 			{
 				SBamount++;
 			}
 		}
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay) // decrease amount to buy
+		if ((Application::IsKeyPressed('S')) && timer > delay) // decrease amount to buy
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (SBamount > 1)
 			{
 				SBamount--;
 			}
 		}
-		if ((Application::IsKeyPressed(VK_RETURN) && confirm == false) && timer > delay) // cancel
+		if ((Application::IsKeyPressed('E') && confirm == false) && timer > delay) // cancel
 		{
 			delay = timer + 0.2;
 			SellState = 0;
@@ -1859,12 +1868,12 @@ void TogaScene::Updata_Checker(double dt)
 			confirm = false;
 		}
 
-		if (Application::IsKeyPressed(VK_LEFT)) // confirm/cancel
+		if (Application::IsKeyPressed('A')) // confirm/cancel
 		{
 			confirm = true;
 		}
 
-		if (Application::IsKeyPressed(VK_RIGHT)) // confirm/cancel
+		if (Application::IsKeyPressed('D')) // confirm/cancel
 		{
 			confirm = false;
 		}
@@ -1873,7 +1882,7 @@ void TogaScene::Updata_Checker(double dt)
 	// bag - inventory scrolling part
 	if ((currentstate == TRADE || currentstate == INVENTORY) && SellState == 0)
 	{
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay && shop == true) // scroll down your list
+		if ((Application::IsKeyPressed('S')) && timer > delay && shop == true) // scroll down your list
 		{
 			delay = timer + 0.2;
 			if ((SID == 0 || SID == 1)) // mineral shop
@@ -1911,11 +1920,11 @@ void TogaScene::Updata_Checker(double dt)
 			}
 		}
 
-		if ((Application::IsKeyPressed(VK_DOWN)) && timer > delay && shop == false) // scroll down your list
+		if ((Application::IsKeyPressed('S')) && timer > delay && shop == false) // scroll down your list
 		{
 			if (num < SharedData::GetInstance()->PlayerInventory->Slots - 1)
 			{
-				delay = timer + 0.2;
+				delay = timer + 0.1;
 				num++;
 				if (num > 4)
 				{
@@ -1923,9 +1932,9 @@ void TogaScene::Updata_Checker(double dt)
 				}
 			}
 		}
-		if ((Application::IsKeyPressed(VK_UP) && SellState == 0) && timer > delay) // scroll up your list
+		if ((Application::IsKeyPressed('W') && SellState == 0) && timer > delay) // scroll up your list
 		{
-			delay = timer + 0.2;
+			delay = timer + 0.1;
 			if (num > 0)
 			{
 				num--;
@@ -1940,7 +1949,7 @@ void TogaScene::Updata_Checker(double dt)
 	// store - mineral
 	if (currentstate == TRADE && SellState == 0)
 	{
-		if ((Application::IsKeyPressed(VK_LEFT) && shop != true) && timer > delay) // switch to shop
+		if ((Application::IsKeyPressed('A') && shop != true) && timer > delay) // switch to shop
 		{
 			delay = timer + 0.2;
 			shop = true;
@@ -1948,7 +1957,7 @@ void TogaScene::Updata_Checker(double dt)
 			tempnum = 0;
 		}
 
-		if ((Application::IsKeyPressed(VK_RIGHT) && shop != false) && timer > delay) // switch to bag
+		if ((Application::IsKeyPressed('D') && shop != false) && timer > delay) // switch to bag
 		{
 			delay = timer + 0.2;
 			shop = false;
@@ -2216,7 +2225,7 @@ void TogaScene::Init_animation_NPC()
 	for (int i = 0; i <= 3; i++)
 	{
 		Togan newtoga;
-		newtoga.position = Vector3(0, -15, 0);
+		newtoga.position = Vector3(Math::RandFloatMinMax(-50, 50), -15, Math::RandFloatMinMax(-50, 50));
 		newtoga.tempposition = Vector3(0, 0, 0);
 		newtoga.rotate_togan = 0;
 		newtoga.state = 0;
@@ -2326,6 +2335,189 @@ void TogaScene::Update_animation_NPC(double dt)
 
 			}
 			else togan_NPC_Loop[i].state = 1;
+		}
+	}
+}
+
+
+void TogaScene::Init_minigame()
+{
+	InGame = 0;
+	Pnum = 0;
+}
+void TogaScene::Updata_minigame(double dt)
+{
+	if (InGame == 1) // menu
+	{
+		SharedData::GetInstance()->Game->randSetRocks('A');
+		if (Application::IsKeyPressed('W') && Pnum > 0 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum--;
+		}
+		if (Application::IsKeyPressed('S') && Pnum < 3 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum++;
+		}
+		if (Application::IsKeyPressed('E') && timer > delay) // change mode
+		{
+			delay = timer + 0.2;
+			if (Pnum == 0) InGame = 2; //Instruction && Controls
+			if (Pnum == 1) InGame = 3; // start mining game
+			if (Pnum == 2) InGame = 4; // check mineral list
+			if (Pnum == 3)
+			{
+				currentstate = 0;
+				InGame = 0; // exit game
+			}
+			Pnum = 0;
+		}
+	}
+	if (InGame == 2) //Instruction && Controls
+	{
+		if (Application::IsKeyPressed('W') && Pnum > 0 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum--;
+		}
+		if (Application::IsKeyPressed('S') && Pnum < 3 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum++;
+		}
+		if (Application::IsKeyPressed('E') && timer > delay && Pnum == 3)  // back to menu
+		{
+			delay = timer + 0.2;
+			InGame = 1;
+			Pnum = 0;
+		}
+	}
+	if (InGame == 3) // really In game
+	{
+		SharedData::GetInstance()->Game->startFalling(dt, 'A');
+		if (Application::IsKeyPressed('A') && SharedData::GetInstance()->Game->Board_P > 3 && timer > delay)
+		{
+			delay = timer + 0.1;
+			SharedData::GetInstance()->Game->Board_P--;
+		}
+
+		if (Application::IsKeyPressed('D') && SharedData::GetInstance()->Game->Board_P < 37 && timer > delay)
+		{
+			delay = timer + 0.1;
+			SharedData::GetInstance()->Game->Board_P++;
+		}
+		if (Application::IsKeyPressed('P') && timer > delay) // end game check score
+		{
+			delay = timer + 0.2;
+			SharedData::GetInstance()->Game->Board_P = 20;
+			for (int i = 0; i < 36; i++) SharedData::GetInstance()->Game->reRandRocks(i, 'A');
+			InGame = 5;
+			Pnum = 0;
+		}
+	}
+	if (InGame == 4) //Instruction && Controls
+	{
+		if (Application::IsKeyPressed('W') && Pnum > 0 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum--;
+		}
+		if (Application::IsKeyPressed('S') && Pnum < 4 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum++;
+		}
+		if (Application::IsKeyPressed('E') && timer > delay && Pnum == 4) // back to menu
+		{
+			delay = timer + 0.2;
+			InGame = 1;
+			Pnum = 0;
+		}
+	}
+	if (InGame == 5) //Check Score
+	{
+		if (Application::IsKeyPressed('W') && Pnum > 0 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum--;
+		}
+		if (Application::IsKeyPressed('S') && Pnum < 4 && timer > delay)
+		{
+			delay = timer + 0.2;
+			Pnum++;
+		}
+		if (Application::IsKeyPressed('E') && timer > delay && Pnum == 4) // exit game && Add mineral got in cave to bag
+		{
+			for (int i = 0; i < 4; i++) SharedData::GetInstance()->PlayerInventory->GetItem(SharedData::GetInstance()->Game->ScoreS[i].ID, SharedData::GetInstance()->Game->ScoreS[i].stack);
+			SharedData::GetInstance()->Game->reSetScore();
+			delay = timer + 0.2;
+			InGame = 0;
+			Pnum = 0;
+			currentstate = 0;
+		}
+	}
+
+}
+void TogaScene::Render_minigame()
+{
+	// Game Box
+	if (InGame != 0)
+	{
+		for (int x = 1; x < 40; x++)
+		{
+			for (int y = 1; y < 30; y++)
+			{
+				if ((x == 1 && y < 30) || (x == 39 && y < 30) || (x < 40 && y == 1) || (x < 40 && y == 29))
+					RenderTextOnScreen(meshList[GEO_TEXT], "+", Color(1, 0, 0), 2, x, y);
+			}
+		}
+		// random falling minerals
+		for (int i = 0; i < 36; i++)
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "*", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Rocks[i].P_X, SharedData::GetInstance()->Game->Rocks[i].P_Y);
+		}
+		// moving mining cart
+		RenderTextOnScreen(meshList[GEO_TEXT], "/", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P + 1.4, 2.3);
+		RenderTextOnScreen(meshList[GEO_TEXT], "\\", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P - 1.6, 2.3);
+		for (float x = -1; x <= 1; x += 0.5) RenderTextOnScreen(meshList[GEO_TEXT], "-", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P + x, 2);
+		RenderTextOnScreen(meshList[GEO_TEXT], "o", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P + 0.5, 1.5);
+		RenderTextOnScreen(meshList[GEO_TEXT], "o", Color(1, 0, 0), 2, SharedData::GetInstance()->Game->Board_P - 0.5, 1.5);
+		// menu conrols
+		if (InGame == 1) //menu
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 14, (22 - (Pnum)* 2));
+			RenderTextOnScreen(meshList[GEO_TEXT], "Instruction && Controls", Color(1, 0, 0), 2, 16, 22);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Start Mining", Color(1, 0, 0), 2, 16, 20);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Mineral In Cave", Color(1, 0, 0), 2, 16, 18);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Exit Cave", Color(1, 0, 0), 2, 16, 16);
+		}
+		if (InGame == 2) //Instruction && Controls
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "Instruction && Controls", Color(1, 0, 0), 2, 8, 24);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 6, (22 - (Pnum)* 2));
+			RenderTextOnScreen(meshList[GEO_TEXT], "Moving mining cart to collect falling minerals", Color(1, 0, 0), 2, 8, 22);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Control Arrow Left & Right to move mining cart", Color(1, 0, 0), 2, 8, 20);
+			RenderTextOnScreen(meshList[GEO_TEXT], "When in Game Press 'P' to End Game", Color(1, 0, 0), 2, 8, 18);
+			RenderTextOnScreen(meshList[GEO_TEXT], "Back to menu", Color(1, 0, 0), 2, 8, 16);
+		}
+		if (InGame == 4) // mineral list in cave
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "Mineral In Cave", Color(1, 0, 0), 2, 16, 24);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 14, (22 - (Pnum)* 2));
+			for (int i = 0; i < 4; i++) RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->Game->ItemS[i].name, Color(1, 0, 0), 2, 16, 22 - i * 2); // Toga planet mineral
+			RenderTextOnScreen(meshList[GEO_TEXT], "Back to menu", Color(1, 0, 0), 2, 16, 14);
+		}
+		if (InGame == 5) // Check Score
+		{
+			RenderTextOnScreen(meshList[GEO_TEXT], "Mineral Got In Cave", Color(1, 0, 0), 2, 16, 24);
+			RenderTextOnScreen(meshList[GEO_TEXT], "->", Color(1, 0, 0), 2, 14, (22 - (Pnum)* 2));
+			for (int i = 0; i < 4; i++)
+			{
+				RenderTextOnScreen(meshList[GEO_TEXT], SharedData::GetInstance()->Game->ScoreS[i].name, Color(1, 0, 0), 2, 16, 22 - i * 2);
+				RenderTextOnScreen(meshList[GEO_TEXT], "x " + std::to_string(SharedData::GetInstance()->Game->ScoreS[i].stack), Color(1, 0, 0), 2, 24, 22 - i * 2);
+			}
+			RenderTextOnScreen(meshList[GEO_TEXT], "Exit Mining Cave", Color(1, 0, 0), 2, 16, 14);
 		}
 	}
 }

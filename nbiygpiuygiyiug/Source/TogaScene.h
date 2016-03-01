@@ -166,6 +166,14 @@ private:
 		string NPCname;
 	};
 	vector<name> nameS;
+
+	//mini game
+	void Init_minigame();
+	void Updata_minigame(double dt);
+	void Render_minigame();
+
+	int InGame;
+	int Pnum; //pointer
 	
 	//key states and prompts	
 	

@@ -132,6 +132,8 @@ private:
 	void Updata_minigame(double dt);
 	void Render_minigame();
 
+	int InGame;
+	int Pnum; //pointer
 
 	//mining drone
 	void generate_mdrone();
@@ -145,15 +147,6 @@ private:
 	float mdrone_starttime;
 	bool mdrone_added = true;
 
-
-	struct falling_rocks
-	{
-		Vector3 position;
-		bool state;
-		int score;
-	};
-
-	vector<falling_rocks> Rocks;
 
 	// bag/shop
 	void Init_Checker();
@@ -233,7 +226,7 @@ private:
 
 	};
 	//interactions
-	unsigned currentstate;
+	unsigned currentstate=0;
 	void inventory();
 	void interact_state();
 	void renderinteract();

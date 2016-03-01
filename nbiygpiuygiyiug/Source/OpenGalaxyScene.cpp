@@ -28,8 +28,7 @@ void OpenGalaxyScene::Init()
 	//Definations
 	e_state = 0;//e key state
 
-	//Drone == true;
-	SharedData::GetInstance()->SD_RepairDrone = 1;
+	
 
 	land = false;							//If player is within bounds of landing on a planet
 	Spaceship.rotateY = 0;					//Rotates the ship accordingly to input

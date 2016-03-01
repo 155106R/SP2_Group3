@@ -10,6 +10,7 @@
 #include "TradeCalculation.h"
 #include "Trade_Shop.h"
 #include "Trade_Bag.h"
+#include "CaveGame.h"
 
 using std::map;
 using std::vector;
@@ -140,6 +141,7 @@ public:
 	}
 
 	Bag* PlayerInventory = new Bag;
+	CaveGame* Game = new CaveGame;
 	
 private:
 	//SharedData(){};
