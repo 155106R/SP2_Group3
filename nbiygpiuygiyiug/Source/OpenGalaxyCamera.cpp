@@ -79,11 +79,11 @@ void OpenGalaxyCamera::Update(double dt)
 
 	yaw -= (mousePosition.x - screenMidX) / rotationSpeed;
 
-	float newpitch = pitch-(mousePosition.y - screenMidY) / rotationSpeed;
+	float newpitch = pitch+(mousePosition.y - screenMidY) / rotationSpeed;
 
 	if (newpitch < 50 && newpitch > -50)
 	{
-			pitch -= (mousePosition.y - screenMidY) / rotationSpeed;
+			pitch += (mousePosition.y - screenMidY) / rotationSpeed;
 	}
 
 

@@ -175,6 +175,10 @@ void PlanetJellyScene::Init()
 	meshList[SKYBOX_Znega] = MeshBuilder::GenerateQuad("back", Color(1, 1, 1));
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//jelly_planet//jelly-X.tga");
 
+
+	meshList[GEO_PLANE] = MeshBuilder::GenerateQuad("back", Color(0, 0, 0));
+
+
 	//Render ground mesh
 	meshList[GROUND_MESH] = MeshBuilder::GenerateOBJ("ground", "OBJ//jelly_house.obj");
 	meshList[GROUND_MESH]->textureID = LoadTGA("Image//jelly_house_texture.tga");
@@ -766,15 +770,7 @@ void PlanetJellyScene::Render()
 	RenderMesh(meshList[GROUND_MESH], true);
 	modelStack.PopMatrix();
 
-	if (currentstate == CAVEGAME)
-	{
-		modelStack.PushMatrix();
-		modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
-		//modelStack.Rotate(90, 1, 0, 0);
-		modelStack.Scale(20, 20, 20);
-		RenderMesh(meshList[GEO_CUBE], false);
-		modelStack.PopMatrix();
-	}
+	
 
 	//render cave
 	modelStack.PushMatrix();
@@ -956,6 +952,29 @@ void PlanetJellyScene::Render()
 		break;
 
 	};
+	if (currentstate == CAVEGAME)
+	{
+	glDisable(GL_DEPTH_TEST);
+	Mtx44 ortho;
+	ortho.SetToOrtho(0, 80, 0, 60, -100, 100); //size of screen UI
+	projectionStack.PushMatrix();
+	projectionStack.LoadMatrix(ortho);
+	viewStack.PushMatrix();
+	viewStack.LoadIdentity(); //No need camera for ortho mode
+	modelStack.PushMatrix();
+	modelStack.LoadIdentity(); //Reset modelStack
+
+	modelStack.Translate(40, 30, 0);
+	modelStack.Rotate(90, 1, 0, 0);
+	modelStack.Scale(80, 1, 85);
+	//Render here
+	RenderMesh(meshList[GEO_PLANE], false);
+	projectionStack.PopMatrix();
+	viewStack.PopMatrix();
+	modelStack.PopMatrix();
+	glEnable(GL_DEPTH_TEST);
+	}
+
 	Render_Checker();
 	modelStack.PopMatrix();
 
@@ -1627,7 +1646,7 @@ void PlanetJellyScene::interactionUpdate(double dt)
 				button_prompt = 1;
 			}
 
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE)
 			{
 				e_state = 1;
 				SID = 1; // jelly mineral shop mode
@@ -1643,12 +1662,6 @@ void PlanetJellyScene::interactionUpdate(double dt)
 				}
 				delay = timer + 0.5;//set delay offset
 			}
-			if (Application::IsKeyPressed(VK_ESCAPE))
-			{
-				shop = false;
-				currentstate = FREEMOVE;
-				return;
-			}
 		}
 
 
@@ -1658,7 +1671,7 @@ void PlanetJellyScene::interactionUpdate(double dt)
 			{
 				button_prompt = 1;
 			}
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE)
 			{
 				e_state = 1;
 				SID = 3; // jelly upgrade shop mode
@@ -1675,12 +1688,6 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 				delay = timer + 0.5;//set delay offset
 			}
-			if (Application::IsKeyPressed(VK_ESCAPE))
-			{
-				shop = false;
-				currentstate = FREEMOVE;
-				return;
-			}
 		}
 
 		if ((collision(hitbox[2], camera.frontTarget) == true))//Drone merchant
@@ -1689,7 +1696,7 @@ void PlanetJellyScene::interactionUpdate(double dt)
 			{
 				button_prompt = 1;
 			}
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE)
 			{
 				e_state = 1;
 				SID = 5; // jelly upgrade shop mode
@@ -1705,12 +1712,15 @@ void PlanetJellyScene::interactionUpdate(double dt)
 				}
 				delay = timer + 0.5;//set delay offset
 			}
-			if (Application::IsKeyPressed(VK_ESCAPE))
-			{
-				shop = false;
-				currentstate = FREEMOVE;
-				return;
-			}
+		}
+
+		if (Application::IsKeyPressed(VK_ESCAPE) && currentstate == TRADE)
+		{
+			shop = false;
+			num = 0;
+			tempnum = 0;
+			currentstate = FREEMOVE;
+			return;
 		}
 
 		if (((collision(hitbox[3], camera.frontTarget) == true)) && e_state == 0)//cave
@@ -1720,7 +1730,7 @@ void PlanetJellyScene::interactionUpdate(double dt)
 				button_prompt = 1;
 			}
 
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != CAVEGAME)
 			{
 				if (currentstate == FREEMOVE)
 				{
@@ -1909,18 +1919,18 @@ void PlanetJellyScene::checkCollision()
 void PlanetJellyScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I'))
+	if (Application::IsKeyPressed('I') && (currentstate == INVENTORY || currentstate == FREEMOVE))
 	{
 	
 			i_state = 1;
 			if (timer > delay)
 			{
 				delay = timer + 0.5;
-				if (currentstate == 0 && SharedData::GetInstance()->SD_enableinteract)
+				if (currentstate == 0)
 				{
 					num = 0;
 					tempnum = 0;
-					
+					currentstate = INVENTORY;
 					return;
 				}
 				else if(currentstate = INVENTORY)
@@ -1928,6 +1938,7 @@ void PlanetJellyScene::inventory()
 					num = 0;
 					tempnum = 0;
 					currentstate = FREEMOVE;
+					return;
 				}
 			}
 		

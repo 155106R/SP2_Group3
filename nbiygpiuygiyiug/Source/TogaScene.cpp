@@ -197,7 +197,7 @@ void TogaScene::Init()
 	meshList[SKYBOX_Znega]->textureID = LoadTGA("Image//Skybox//SkyboxToga//lakes_bk.tga");
 	meshList[GROUNDMESH] = MeshBuilder::GenerateQuad("floor", Color(1, 1, 1));
 	meshList[GROUNDMESH]->textureID = LoadTGA("Image//Skybox//SkyboxToga//groundmeshtoga.tga");
-	
+	meshList[GEO_PLANE] = MeshBuilder::GenerateQuad("back", Color(0, 0, 0));
 	//mineral stuff
 	meshList[NPC_MINERAL_BODY] = MeshBuilder::GenerateOBJ("mineral merchant head","OBJ//merchantminerals_bodyA.obj");
 	meshList[NPC_MINERAL_BODY]->textureID = LoadTGA("Image//merchantmineral_textureA.tga");
@@ -733,10 +733,12 @@ void TogaScene::Render()
 
 	if (currentstate == CAVEGAME)
 	{
+		modelStack.PushMatrix();
 		modelStack.Translate(camera.position.x, camera.position.y, camera.position.z);
 		//modelStack.Rotate(90, 1, 0, 0);
 		modelStack.Scale(20, 20, 20);
 		RenderMesh(meshList[GEO_CUBE], false);
+		modelStack.PopMatrix();
 	}
 	
 		viewStack.LoadIdentity();
@@ -788,7 +790,28 @@ void TogaScene::Render()
 		};
 		modelStack.PopMatrix();
 
+		if (currentstate == CAVEGAME)
+		{
+			glDisable(GL_DEPTH_TEST);
+			Mtx44 ortho;
+			ortho.SetToOrtho(0, 80, 0, 60, -100, 100); //size of screen UI
+			projectionStack.PushMatrix();
+			projectionStack.LoadMatrix(ortho);
+			viewStack.PushMatrix();
+			viewStack.LoadIdentity(); //No need camera for ortho mode
+			modelStack.PushMatrix();
+			modelStack.LoadIdentity(); //Reset modelStack
 
+			modelStack.Translate(40, 30, 0);
+			modelStack.Rotate(90, 1, 0, 0);
+			modelStack.Scale(80, 1, 85);
+			//Render here
+			RenderMesh(meshList[GEO_PLANE], false);
+			projectionStack.PopMatrix();
+			viewStack.PopMatrix();
+			modelStack.PopMatrix();
+			glEnable(GL_DEPTH_TEST);
+		}
 	
 	
 	renderinteract();
@@ -1274,13 +1297,13 @@ void TogaScene::interactionUpdate(double dt)
 		}
 
 
-		if ((collision(Shophitbox[1], camera.frontTarget) == true) && currentstate != TRADE)//Upgrade merchant
+		if ((collision(Shophitbox[1], camera.frontTarget) == true) )//Upgrade merchant
 		{
 			if (currentstate == 0)
 			{
 				button_prompt = 1;
 			}
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE)
 			{
 				SID = 2;
 				e_state = 1;
@@ -1304,13 +1327,13 @@ void TogaScene::interactionUpdate(double dt)
 		}
 
 
-		if ((collision(Shophitbox[2], camera.frontTarget) == true) && currentstate != TRADE)//Drone merchant
+		if ((collision(Shophitbox[2], camera.frontTarget) == true) )//Drone merchant
 		{
 			if (currentstate == 0)
 			{
 				button_prompt = 1;
 			}
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != TRADE)
 			{
 				e_state = 1;
 				SID = 4;
@@ -1347,7 +1370,7 @@ void TogaScene::interactionUpdate(double dt)
 				button_prompt = 1;
 			}
 
-			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0)
+			if ((Application::IsKeyPressed('E') && timer > delay) && e_state == 0 && currentstate != CAVEGAME)
 			{
 				if (currentstate == FREEMOVE)
 				{
@@ -1528,7 +1551,7 @@ void TogaScene::checkCollision()
 void TogaScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I') )// && timer > delay) && e_state == 0)
+	if (Application::IsKeyPressed('I') && (currentstate == INVENTORY || currentstate == FREEMOVE))// && timer > delay) && e_state == 0)
 	{
 		i_state = 1;
 		if (timer > delay)
@@ -1536,11 +1559,15 @@ void TogaScene::inventory()
 			delay = timer + 0.5;
 				if (currentstate == 0)
 				{
+					num = 0;
+					tempnum = 0;
 					currentstate = INVENTORY;
 					return;
 				}
 				else if(currentstate ==INVENTORY)
 				{
+					num = 0;
+					tempnum = 0;
 					currentstate = FREEMOVE;
 					return;
 				}
@@ -1924,7 +1951,7 @@ void TogaScene::Updata_Checker(double dt)
 		{
 			if (num < SharedData::GetInstance()->PlayerInventory->Slots - 1)
 			{
-				delay = timer + 0.1;
+				delay = timer + 0.2;
 				num++;
 				if (num > 4)
 				{
@@ -1934,7 +1961,7 @@ void TogaScene::Updata_Checker(double dt)
 		}
 		if ((Application::IsKeyPressed('W') && SellState == 0) && timer > delay) // scroll up your list
 		{
-			delay = timer + 0.1;
+			delay = timer + 0.2;
 			if (num > 0)
 			{
 				num--;
@@ -2244,8 +2271,8 @@ void TogaScene::Update_animation_NPC(double dt)
 		{
 			if (togan_NPC_Loop[i].tempposition.x == 0 && togan_NPC_Loop[i].tempposition.z == 0)
 			{
-				togan_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-50, 50);
-				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-50, 50);
+				togan_NPC_Loop[i].tempposition.x = Math::RandFloatMinMax(-100, 100);
+				togan_NPC_Loop[i].tempposition.z = Math::RandFloatMinMax(-100, 100);
 			}
 			else if (togan_NPC_Loop[i].tempR == 0)
 			{

@@ -26,6 +26,7 @@ class PlanetJellyScene : public Scene
 		GEO_LIGHTBALL,
 		GEO_TEXTBOX,
 		GEO_CUBE,
+		GEO_PLANE,
 
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
