@@ -38,16 +38,17 @@ void OpenGalaxyScene::Init()
 	Spaceship.position = Vector3(0, 0, 0);	//Ship position
 	Spaceship.acceleration = 0;
 	CURRENT_STATE = PILOTING;				//Piloting state by default
-	ex_scale[0] = 1;
-	ex_scaleMax[0] = 0;
-	ex_scale[1] = 1;
-	ex_scaleMax[1] = 0;
-	ex_scale[2] = 1;
-	ex_scaleMax[2] = 0;
-	ex_scale[3] = 1;
-	ex_scaleMax[3] = 0;
-	ex_scale[4] = 1;
-	ex_scaleMax[4] = 0;
+
+	ex_scale[0] = 0;
+	ex_scaleMax[0] = 1;
+	ex_scale[1] = 0;
+	ex_scaleMax[1] = 1;
+	ex_scale[2] = 0;
+	ex_scaleMax[2] = 1;
+	ex_scale[3] = 0;
+	ex_scaleMax[3] = 1;
+	ex_scale[4] = 0;
+	ex_scaleMax[4] = 1;
 
 	//Hardcoded hitbox
 	spaceshipHitbox = AABB::generateAABB(Spaceship.position, 20, 5, 17.5, NULL);
@@ -403,7 +404,7 @@ void OpenGalaxyScene::Update(double dt)
 	//================================================================================================================================================================================//
 	Spaceship.position += (Spaceship.direction) * Spaceship.acceleration * dt;	//Move ship in a direction(Nose is a directional vector)
 
-	if ((Application::IsKeyPressed(VK_SPACE) && CURRENT_STATE != DRILLING) && timer > delay)
+	if ((Application::IsKeyPressed('H') && CURRENT_STATE != DRILLING) && timer > delay)
 	{
 		delay = timer + 0.5;
 		switch (CURRENT_STATE)
@@ -458,11 +459,11 @@ void OpenGalaxyScene::Update(double dt)
 		tempInShipPosition = inShipCamera.position;
 		inShipCamera.Update(dt);										//Movement - Need to add bounds for movement only within the ship
 		inShipCamera.movement();
-		if ((inShipCamera.position.x > 9) ||
-			(inShipCamera.position.x < -9) ||
-			(inShipCamera.position.z > 9) ||
-			(inShipCamera.position.z < -9))
-		{
+		if ((inShipCamera.position.x > Spaceship.position.x + 9) ||
+			(inShipCamera.position.x < Spaceship.position.x + -9) ||
+			(inShipCamera.position.z > Spaceship.position.z + 9) ||
+			(inShipCamera.position.z < Spaceship.position.z + -9)
+			){
 			inShipCamera.position = tempInShipPosition;
 		}
 		break;
@@ -765,10 +766,11 @@ void OpenGalaxyScene::Render()
 	glUniform3fv(m_parameters[U_LIGHT1_POSITION], 1, &lightPosition1_cameraspace.x);
 
 	//Axes
-	RenderMesh(meshList[GEO_AXES], false);
+	//RenderMesh(meshList[GEO_AXES], false);
 
 	//Sun
 	modelStack.PushMatrix();
+	light[0].position = Position(Spaceship.position.x, Spaceship.position.y + 450, Spaceship.position.z);
 	modelStack.Translate(light[0].position.x, light[0].position.y, light[0].position.z);
 	modelStack.Scale(50, 50, 50);
 	RenderMesh(meshList[PLANET_SUN], false);
@@ -791,24 +793,6 @@ void OpenGalaxyScene::Render()
 		modelStack.Scale(allAsteroids[i]->length, allAsteroids[i]->height, allAsteroids[i]->width);											//Give them their appearance
 		RenderMesh(meshList[ASTEROIDS], true);
 		modelStack.PopMatrix();
-
-		//Render hitbox for Astroid
-		modelStack.PushMatrix();
-		modelStack.Translate(
-			(allAsteroids[i]->hitbox.m_origin.x),
-			(allAsteroids[i]->hitbox.m_origin.y),
-			(allAsteroids[i]->hitbox.m_origin.z)
-			);
-		modelStack.Scale(
-			(allAsteroids[i]->hitbox.m_length),
-			(allAsteroids[i]->hitbox.m_height),
-			(allAsteroids[i]->hitbox.m_width)
-			);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-		RenderMesh(meshList[GEO_LIGHTCUBE], false);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-		modelStack.PopMatrix();
-		//Render hitbox for Astroid end
 	}
 
 	//================================================================================================================================================================================//
@@ -905,39 +889,21 @@ void OpenGalaxyScene::Render()
 	//================================================================================================================================================================================//
 
 	//Generate AABB from origin for spaceship
-	modelStack.PushMatrix();
-	modelStack.Translate(
-		(Drill.drillHead.m_origin.x),
-		(Drill.drillHead.m_origin.y),
-		(Drill.drillHead.m_origin.z)
-		);
-	modelStack.Scale(
-		(Drill.drillHead.m_length),
-		(Drill.drillHead.m_height),
-		(Drill.drillHead.m_width)
-		);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	RenderMesh(meshList[GEO_LIGHTCUBE], false);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-	modelStack.PopMatrix();
-
-	//visual test shit
-	modelStack.PushMatrix();
-	modelStack.Translate(
-		(shipInterior.m_origin.x),
-		(shipInterior.m_origin.y),
-		(shipInterior.m_origin.z)
-		);
-	modelStack.Scale(
-		shipInterior.m_length,
-		shipInterior.m_height,
-		shipInterior.m_width
-		);
-	//modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	RenderMesh(meshList[GEO_LIGHTCUBE], false);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-	modelStack.PopMatrix();
+	//modelStack.PushMatrix();
+	//modelStack.Translate(
+	//	(Drill.drillHead.m_origin.x),
+	//	(Drill.drillHead.m_origin.y),
+	//	(Drill.drillHead.m_origin.z)
+	//	);
+	//modelStack.Scale(
+	//	(Drill.drillHead.m_length),
+	//	(Drill.drillHead.m_height),
+	//	(Drill.drillHead.m_width)
+	//	);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
+	//RenderMesh(meshList[GEO_LIGHTCUBE], false);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
+	//modelStack.PopMatrix();
 
 	//================================================================================================================================================================================//
 	//																				Planets																							  //
@@ -949,22 +915,6 @@ void OpenGalaxyScene::Render()
 	RenderMesh(meshList[PLANET_A], false);
 	modelStack.Translate(-1.5, 1, 0);
 	RenderText(meshList[GEO_TEXT], "Planet A", Color(1, 0, 0));
-	modelStack.PushMatrix();
-	modelStack.PopMatrix();
-
-	modelStack.Translate(
-		(planetA_Hitbox.m_origin.x),
-		(planetA_Hitbox.m_origin.y),
-		(planetA_Hitbox.m_origin.z)
-		);
-	modelStack.Scale(
-		(planetA_Hitbox.m_length),
-		(planetA_Hitbox.m_height),
-		(planetA_Hitbox.m_width)
-		);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	RenderMesh(meshList[GEO_LIGHTCUBE], false);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
 	modelStack.PopMatrix();
 
 	//Planet B
@@ -976,22 +926,6 @@ void OpenGalaxyScene::Render()
 	RenderText(meshList[GEO_TEXT], "Planet B", Color(1, 0, 0));
 	modelStack.PopMatrix();
 
-	modelStack.PushMatrix();
-	modelStack.Translate(
-		(planetB_Hitbox.m_origin.x),
-		(planetB_Hitbox.m_origin.y),
-		(planetB_Hitbox.m_origin.z)
-		);
-	modelStack.Scale(
-		(planetB_Hitbox.m_length),
-		(planetB_Hitbox.m_height),
-		(planetB_Hitbox.m_width)
-		);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	RenderMesh(meshList[GEO_LIGHTCUBE], false);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-	modelStack.PopMatrix();
-
 	//Planet C
 	modelStack.PushMatrix();
 	modelStack.Translate(-250, 0, -250);
@@ -999,22 +933,6 @@ void OpenGalaxyScene::Render()
 	RenderMesh(meshList[PLANET_C], false);
 	modelStack.Translate(-1.5, 1, 0);
 	RenderText(meshList[GEO_TEXT], "Planet C", Color(1, 0, 0));
-	modelStack.PopMatrix();
-
-	modelStack.PushMatrix();
-	modelStack.Translate(
-		(planetC_Hitbox.m_origin.x),
-		(planetC_Hitbox.m_origin.y),
-		(planetC_Hitbox.m_origin.z)
-		);
-	modelStack.Scale(
-		(planetC_Hitbox.m_length),
-		(planetC_Hitbox.m_height),
-		(planetC_Hitbox.m_width)
-		);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	RenderMesh(meshList[GEO_LIGHTCUBE], false);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
 	modelStack.PopMatrix();
 
 	//================================================================================================================================================================================//
@@ -1096,8 +1014,7 @@ void OpenGalaxyScene::generateSkybox(){
 }
 
 void OpenGalaxyScene::updateShipMovement(double dt){
-	//For stabilisation
-	if (Spaceship.rotateZ && (!Application::IsKeyPressed('U')) && (!Application::IsKeyPressed('O'))){	//to "stabilize" ship
+	if (Spaceship.rotateZ && (!Application::IsKeyPressed(VK_SPACE)) && (!Application::IsKeyPressed(VK_CONTROL))){	//to "stabilize" ship
 		if (Spaceship.rotateZ > 0){
 			Spaceship.rotateZ -= 0.1f;
 		}
@@ -1106,21 +1023,21 @@ void OpenGalaxyScene::updateShipMovement(double dt){
 		}
 	}
 	//For ship movement
-	if (Application::IsKeyPressed('J')){
+	if (Application::IsKeyPressed('A')){
 		Spaceship.rotateY += 1.0f;
 		Mtx44 rotate;
 		rotate.SetToRotation(1, 0, 1, 0);
 
 		Spaceship.direction = rotate * Spaceship.direction;
 	}
-	if (Application::IsKeyPressed('L')){
+	if (Application::IsKeyPressed('D')){
 		Spaceship.rotateY -= 1.0f;
 		Mtx44 rotate;
 		rotate.SetToRotation(-1, 0, 1, 0);
 
 		Spaceship.direction = rotate * Spaceship.direction;
 	}
-	if (Application::IsKeyPressed('K')){
+	if (Application::IsKeyPressed('S')){
 		if (Spaceship.acceleration > -10.0f){
 			Spaceship.acceleration -= 1.0f;		//deceleration capped at -10.0f
 		}
@@ -1128,7 +1045,7 @@ void OpenGalaxyScene::updateShipMovement(double dt){
 			Spaceship.acceleration = -10;
 		}
 	}
-	if (Application::IsKeyPressed('I')){
+	if (Application::IsKeyPressed('W')){
 		if (Spaceship.acceleration < 100.0f){	//acceleration capped at 100.0f
 			Spaceship.acceleration += 1.0f;
 		}
@@ -1136,19 +1053,19 @@ void OpenGalaxyScene::updateShipMovement(double dt){
 			Spaceship.acceleration = 100;
 		}
 	}
-	if (Application::IsKeyPressed('U')){
+	if (Application::IsKeyPressed(VK_SPACE)){
 		Spaceship.position.y += 0.5f;
 		if (Spaceship.rotateZ < 30.0f){
 			Spaceship.rotateZ += 0.5f;
 		}
 	}
-	if (Application::IsKeyPressed('O')){
+	if (Application::IsKeyPressed(VK_CONTROL)){
 		Spaceship.position.y -= 0.5f;
 		if (Spaceship.rotateZ > -30.0f){
 			Spaceship.rotateZ -= 0.5f;
 		}
 	}
-	if (Application::IsKeyPressed('P')){	//break acceleration to 0
+	if (Application::IsKeyPressed(VK_SHIFT)){	//break acceleration to 0
 		if (Spaceship.acceleration != 0){
 			if (Spaceship.acceleration > 0){
 				Spaceship.acceleration -= 0.5f;
@@ -1189,8 +1106,7 @@ void OpenGalaxyScene::updateDrillMovement(double dt){
 
 void OpenGalaxyScene::drawHUD()
 {
-	switch (CURRENT_STATE){
-	case(PILOTING) :
+	if (CURRENT_STATE == IN_SHIP || CURRENT_STATE == PILOTING){
 		viewStack.LoadIdentity();
 		modelStack.PushMatrix();
 		modelStack.Translate(0, 0, -1);
@@ -1206,9 +1122,8 @@ void OpenGalaxyScene::drawHUD()
 		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)Spaceship.position.y), Color(1, 0, 0), 3, 4.5, 5.5);
 		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)Spaceship.position.z), Color(1, 0, 0), 3, 4.5, 4.5);
 		RenderTextOnScreen(meshList[GEO_TEXT], std::to_string((int)Spaceship.acceleration), Color(1, 0, 0), 4, 18.0, 5.7);
-		break;
+	} else if (CURRENT_STATE == DRILLING){
 
-	case(DRILLING) :
 		viewStack.LoadIdentity();
 		modelStack.PushMatrix();
 		modelStack.Translate(0, 0, -1);
@@ -1223,7 +1138,6 @@ void OpenGalaxyScene::drawHUD()
 			RenderTextOnScreen(meshList[GEO_TEXT], "Press \'B\' to return", Color(1, 0, 0), 4, 4.75, 10);
 		}
 		modelStack.PopMatrix();
-		break;
 	}
 }
 

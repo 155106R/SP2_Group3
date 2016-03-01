@@ -88,17 +88,17 @@ void OpenGalaxyCamera::Update(double dt)
 
 
 
-	if (Application::IsKeyPressed(VK_LEFT) || Application::IsKeyPressed('A'))
+	if (Application::IsKeyPressed(VK_LEFT))
 	{
 		yaw += (float)(-CAMERA_SPEED * dt);
 	
 	}
-	if (Application::IsKeyPressed(VK_RIGHT) || Application::IsKeyPressed('D'))
+	if (Application::IsKeyPressed(VK_RIGHT))
 	{
 		yaw += (float)(CAMERA_SPEED * dt);
 
 	}
-	if (Application::IsKeyPressed(VK_UP) || Application::IsKeyPressed('W'))
+	if (Application::IsKeyPressed(VK_UP))
 	{
 		
 		if (pitch < 50)
@@ -107,7 +107,7 @@ void OpenGalaxyCamera::Update(double dt)
 		}
 
 	}
-	if (Application::IsKeyPressed(VK_DOWN) || Application::IsKeyPressed('S'))
+	if (Application::IsKeyPressed(VK_DOWN))
 	{
 		if (pitch > -50)
 		{
