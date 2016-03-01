@@ -119,7 +119,7 @@ void Application::Run()
 	JellyPlanet->Init();
 
 	m_timer.startTimer();    // Start timer to calculate how long it takes to render this frame
-	while (!glfwWindowShouldClose(m_window) && !IsKeyPressed(VK_ESCAPE))
+	while (!glfwWindowShouldClose(m_window) && !IsKeyPressed(VK_END))
 	{
 		//references from OpenGalaxyScene and SharedData
 		switch (SharedData::GetInstance()->SD_location){
@@ -134,9 +134,19 @@ void Application::Run()
 				break;
 		}
 
-		currentScene->Update(m_timer.getElapsedTime());
+		//Help Button
+		if (IsKeyPressed(VK_F1)){
+			if ((SharedData::GetInstance()->helpMenu) == false){
+				SharedData::GetInstance()->helpMenu = true;
+			}
+			else{
+				SharedData::GetInstance()->helpMenu = false;
+			}
+		}
 
-		currentScene->Render();
+			currentScene->Update(m_timer.getElapsedTime());
+			currentScene->Render();
+		
 		//Swap buffers
 		glfwSwapBuffers(m_window);
 		
