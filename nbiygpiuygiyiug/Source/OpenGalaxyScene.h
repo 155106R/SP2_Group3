@@ -265,6 +265,17 @@ private:
 	Mesh *meshList[NUM_GEOMETRY];
 
 	float ex_x[5], ex_y[5], ex_z[5], ex_scale[5], ex_scaleMax[5];
+
+	//Asteroid breaking effect
+	Vector3 asteroidBreakLocation;
+	Vector3 smallAstPosition[3];
+	float smallAstDirectionX[3];
+	float smallAstDirectionY[3];
+	float smallAstDirectionZ[3];
+	float smallAstScaleX[3];
+	float smallAstScaleY[3];
+	float smallAstScaleZ[3];
+	bool newSmallAst;
 };
 
 #endif

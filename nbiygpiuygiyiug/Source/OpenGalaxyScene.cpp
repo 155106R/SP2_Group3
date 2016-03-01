@@ -37,6 +37,7 @@ void OpenGalaxyScene::Init()
 	Spaceship.position = Vector3(0, 0, 0);	//Ship position
 	Spaceship.acceleration = 0;
 	CURRENT_STATE = PILOTING;				//Piloting state by default
+	asteroidBreakLocation = Vector3(0, 0, 0);
 
 	ex_scale[0] = 0;
 	ex_scaleMax[0] = 1;
@@ -337,6 +338,8 @@ void OpenGalaxyScene::Update(double dt)
 				tempAst->count--;
 			}
 			else {
+				asteroidBreakLocation = tempAst->hitbox.m_origin;
+				newSmallAst = true;
 				delete allAsteroids[i];
 				iter = allAsteroids.erase(iter);
 				break;
@@ -377,9 +380,10 @@ void OpenGalaxyScene::Update(double dt)
 					}
 					SharedData::GetInstance()->PlayerInventory->GetItem(allAsteroids[i]->material, 1);	//Give 1 material per drill
 				}
-
 				else
 				{
+					asteroidBreakLocation = tempAst->hitbox.m_origin;
+					newSmallAst = true;
 					delete allAsteroids[i];
 					allAsteroids.erase(iter);
 					break;
@@ -620,6 +624,26 @@ void OpenGalaxyScene::Update(double dt)
 			}
 		}
 	}
+
+
+	//Asteroids breaking apart when cout < 0
+	for (int i = 0; i < 3; ++i)
+	{
+		if (newSmallAst){
+			smallAstPosition[i] = asteroidBreakLocation;
+			smallAstDirectionX[i] = Math::RandFloatMinMax(-5, 5);
+			smallAstDirectionY[i] = Math::RandFloatMinMax(-5, 5);
+			smallAstDirectionZ[i] = Math::RandFloatMinMax(-5, 5);
+			smallAstScaleX[i] = Math::RandFloatMinMax(5, 10);
+			smallAstScaleY[i] = Math::RandFloatMinMax(5, 10);
+			smallAstScaleZ[i] = Math::RandFloatMinMax(5, 10);
+			newSmallAst = false;
+		}
+		else{
+			smallAstPosition[i] += Vector3(smallAstDirectionX[i], smallAstDirectionY[i], smallAstDirectionZ[i]) * dt;
+		}
+	}
+
 	timer += dt;
 	SharedData::GetInstance()->SD_timecounter += dt;//add time to the timer
 	resetKey();
@@ -819,8 +843,14 @@ void OpenGalaxyScene::Render()
 	//Render Asteroids
 	for (unsigned i = 0; i < allAsteroids.size(); ++i){
 		modelStack.PushMatrix();
-		modelStack.Translate(allAsteroids[i]->hitbox.m_origin.x, allAsteroids[i]->hitbox.m_origin.y, allAsteroids[i]->hitbox.m_origin.z);	//Move asteroids to their positions
-		modelStack.Scale(allAsteroids[i]->length, allAsteroids[i]->height, allAsteroids[i]->width);											//Give them their appearance
+		modelStack.Translate(
+			allAsteroids[i]->hitbox.m_origin.x,
+			allAsteroids[i]->hitbox.m_origin.y, 
+			allAsteroids[i]->hitbox.m_origin.z);	//Move asteroids to their positions
+		modelStack.Scale(
+			allAsteroids[i]->length, 
+			allAsteroids[i]->height, 
+			allAsteroids[i]->width);											//Give them their appearance
 		RenderMesh(meshList[ASTEROIDS], true);
 		modelStack.PopMatrix();
 	}
@@ -904,6 +934,14 @@ void OpenGalaxyScene::Render()
 		}
 	}
 
+	for (int i = 0; i < 3; ++i){
+		modelStack.PushMatrix();
+		modelStack.Translate(smallAstPosition[i].x, smallAstPosition[i].y, smallAstPosition[i].z);
+		modelStack.Scale(smallAstScaleX[i], smallAstScaleY[i], smallAstScaleZ[i]);
+		RenderMesh(meshList[PLANET_SUN], false);
+		modelStack.PopMatrix();
+	}
+
 	if (rdrone_active)
 	{
 		modelStack.PushMatrix();
@@ -914,26 +952,6 @@ void OpenGalaxyScene::Render()
 		RenderMesh(meshList[SPACESHIP_DRONE], true);
 		modelStack.PopMatrix();
 	}
-	//================================================================================================================================================================================//
-	//																				Hitbox																							  //
-	//================================================================================================================================================================================//
-
-	//Generate AABB from origin for spaceship
-	//modelStack.PushMatrix();
-	//modelStack.Translate(
-	//	(Drill.drillHead.m_origin.x),
-	//	(Drill.drillHead.m_origin.y),
-	//	(Drill.drillHead.m_origin.z)
-	//	);
-	//modelStack.Scale(
-	//	(Drill.drillHead.m_length),
-	//	(Drill.drillHead.m_height),
-	//	(Drill.drillHead.m_width)
-	//	);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	//set to line for line axis
-	//RenderMesh(meshList[GEO_LIGHTCUBE], false);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//set back to fill
-	//modelStack.PopMatrix();
 
 	//================================================================================================================================================================================//
 	//																				Planets																							  //
@@ -1260,12 +1278,4 @@ void OpenGalaxyScene::Repairdrone(double dt)
 
 //Author: Randall (155106R)
 //Updated 22/2/2016 - Randall
-
-//Note to self: We are gonna make the ship interior smaller and of a more regular shape so that the hit box stuff is much better
-//Currently we can't do much cause of the irregular shape - so wait for the new interior and fix it
-
-//Okay, so now, I'll just do the drill.
-
-//Do clean up the shipInterior stuff
-
 //Randall, 25/2/2016, 5:09pm
