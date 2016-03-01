@@ -270,13 +270,44 @@ void OpenGalaxyScene::Init()
 	//Particles
 	meshList[PARTICLES] = MeshBuilder::GenerateQuad("fire-things", Color(0, 0, 0));
 	meshList[PARTICLES]->textureID = LoadTGA("Image//sprite_ship.tga");
+
+	//Help pages
+	meshList[HELP_PAGE_SHIP] = MeshBuilder::GenerateQuad("Help page for ship", Color(0.5, 0, 0));
+	meshList[HELP_PAGE_SHIP]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_SHIP]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_SHIP]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_SHIP]->material.kShininess = 0.1f;
+
+	meshList[HELP_PAGE_DRILL] = MeshBuilder::GenerateQuad("Help page for drilling", Color(0, 0.5, 0));
+	meshList[HELP_PAGE_DRILL]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_DRILL]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_DRILL]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_DRILL]->material.kShininess = 0.1f;
+
+	meshList[HELP_PAGE_PLANET] = MeshBuilder::GenerateQuad("Help page for planets", Color(0, 0, 0.5));
+	meshList[HELP_PAGE_PLANET]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_PLANET]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_PLANET]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_PLANET]->material.kShininess = 0.1f;
+
+	meshList[HELP_PAGE_TRADING] = MeshBuilder::GenerateQuad("Help page for trading", Color(0.5, 0.5, 0));
+	meshList[HELP_PAGE_TRADING]->material.kAmbient.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_TRADING]->material.kDiffuse.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_TRADING]->material.kSpecular.Set(0.5f, 0.5f, 0.5f);
+	meshList[HELP_PAGE_TRADING]->material.kShininess = 0.1f;
 }
 
 void OpenGalaxyScene::Update(double dt)
 {
-
-
 	timer += dt;
+
+	//Tab to scroll through help pages
+	if ((SharedData::GetInstance()->helpMenu == true) && (Application::IsKeyPressed(VK_TAB))){
+		SharedData::GetInstance()->currentHelpPage++;
+		if (SharedData::GetInstance()->currentHelpPage == HELP_PAGE_MAX){
+			SharedData::GetInstance()->currentHelpPage = SHIP;//Or 0;
+		}
+	}
 
 	//update hitbox
 	Drill.drillHead.m_origin = Drill.camera.frontTarget;// +Drill.camera.cameraRotationY;// +(Drill.direction * 5);
@@ -858,8 +889,8 @@ void OpenGalaxyScene::Render()
 		modelStack.PushMatrix();
 
 	}
-
 	modelStack.PopMatrix();
+
 
 	if (SharedData::GetInstance()->SD_hullIntegrity < 1){
 		for (int i = 0; i < 5; ++i){
@@ -939,14 +970,49 @@ void OpenGalaxyScene::Render()
 	//================================================================================================================================================================================//
 
 	//Generate HUD
-	drawHUD();
 
+	drawHUD();
 
 	//Text if ship is within range of landing on planets
 	while (land){
 		RenderTextOnScreen(meshList[GEO_TEXT], "Press \"E\" to land on " + nameOfPlanet, Color(1, 0, 0), 4, 3.5, 8.5);
 		break;
 	}
+
+	//Renders Help Pages
+	if (SharedData::GetInstance()->helpMenu == true){
+		glDisable(GL_DEPTH_TEST);
+		Mtx44 ortho;
+		ortho.SetToOrtho(0, 80, 0, 60, -100, 100); //size of screen UI
+		projectionStack.PushMatrix();
+		projectionStack.LoadMatrix(ortho);
+		viewStack.PushMatrix();
+		viewStack.LoadIdentity(); //No need camera for ortho mode
+		modelStack.PushMatrix();
+		modelStack.LoadIdentity(); //Reset modelStack
+		modelStack.Translate(40, 30, 0);
+		modelStack.Rotate(45, 1, 0, 0);
+		modelStack.Scale(80, 1, 85);
+		switch (SharedData::GetInstance()->currentHelpPage){
+		case SHIP:
+			RenderMesh(meshList[HELP_PAGE_SHIP], false);
+			break;
+		case DRILL:
+			RenderMesh(meshList[HELP_PAGE_DRILL], false);
+			break;
+		case PLANET:
+			RenderMesh(meshList[HELP_PAGE_PLANET], false);
+			break;
+		case TRADING:
+			RenderMesh(meshList[HELP_PAGE_TRADING], false);
+			break;
+		}
+		projectionStack.PopMatrix();
+		viewStack.PopMatrix();
+		modelStack.PopMatrix();
+		glEnable(GL_DEPTH_TEST);
+	}
+	
 
 }
 
@@ -1138,6 +1204,7 @@ void OpenGalaxyScene::drawHUD()
 		}
 		modelStack.PopMatrix();
 	}
+	
 }
 
 void OpenGalaxyScene::resetKey()
@@ -1149,6 +1216,9 @@ void OpenGalaxyScene::resetKey()
 	if (!Application::IsKeyPressed(VK_SPACE))
 	{
 		space_state = 0;
+	}
+	if (!Application::IsKeyPressed(VK_TAB)){
+		tab_state = 0;
 	}
 
 	if (SharedData::GetInstance()->SD_enableinteract == false)

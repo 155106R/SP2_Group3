@@ -83,7 +83,6 @@ class OpenGalaxyScene : public Scene
 		Vector3 direction;
 
 		float acceleration;
-		//max acceleration to be taken from Shared Data;
 
 		float rotateZ;
 		float rotateY;
@@ -129,6 +128,11 @@ class OpenGalaxyScene : public Scene
 
 		GEO_TEXT,
 		GEO_HUD,
+
+		HELP_PAGE_SHIP,
+		HELP_PAGE_DRILL,
+		HELP_PAGE_PLANET, 
+		HELP_PAGE_TRADING,
 
 		NUM_GEOMETRY,
 	};
@@ -222,7 +226,7 @@ private:
 	//keystates
 	bool e_state;
 	bool space_state;
-
+	bool tab_state;
 
 
 	//////////

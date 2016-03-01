@@ -25,6 +25,15 @@ enum onPlanet{
 	NUM_PLANETS
 };
 
+enum helpPage{
+	SHIP,
+	DRILL,
+	PLANET,
+	TRADING,
+
+	HELP_PAGE_MAX
+};
+
 class SharedData{
 
 public:
@@ -35,13 +44,15 @@ public:
 		return &data;
 	}
 
+	bool helpMenu = false;
+	unsigned currentHelpPage = 0;
 
 	//game assets
 	float SD_timecounter = 0;
 
 
 	//PlayerAssests
-	float SD_hullIntegrity = 100;
+	float SD_hullIntegrity = -110;
 	int SD_hullmax = 100;
 
 	//upgrades

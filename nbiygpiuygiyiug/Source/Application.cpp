@@ -134,9 +134,19 @@ void Application::Run()
 				break;
 		}
 
-		currentScene->Update(m_timer.getElapsedTime());
+		//Help Button
+		if (IsKeyPressed(VK_F1)){
+			if ((SharedData::GetInstance()->helpMenu) == false){
+				SharedData::GetInstance()->helpMenu = true;
+			}
+			else{
+				SharedData::GetInstance()->helpMenu = false;
+			}
+		}
 
-		currentScene->Render();
+			currentScene->Update(m_timer.getElapsedTime());
+			currentScene->Render();
+		
 		//Swap buffers
 		glfwSwapBuffers(m_window);
 		
