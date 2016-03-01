@@ -1259,7 +1259,7 @@ void TogaScene::interactionUpdate(double dt)
 				e_state = 1;
 				button_prompt = 0;
 				interact_state();
-				if (rendertext == 0 && currentstate == 1)
+				if (rendertext == 0 && currentstate == CONVERSE)
 				{
 					rendertext = 1;
 				}
@@ -1270,7 +1270,12 @@ void TogaScene::interactionUpdate(double dt)
 
 				delay = timer + 0.5;//set delay offset
 
-
+			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
 			}
 		}
 
@@ -1287,6 +1292,8 @@ void TogaScene::interactionUpdate(double dt)
 				e_state = 1;
 				button_prompt = 0;
 				interact_state();
+				cout << "shite" << endl;
+
 				if (rendertext == 0 && currentstate == 1)
 				{
 					rendertext = 2;
@@ -1299,6 +1306,12 @@ void TogaScene::interactionUpdate(double dt)
 				delay = timer + 0.5;//set delay offset
 
 
+			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
 			}
 		}
 
@@ -1327,6 +1340,12 @@ void TogaScene::interactionUpdate(double dt)
 				delay = timer + 0.5;//set delay offset
 
 
+			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
 			}
 		}
 
@@ -1432,13 +1451,7 @@ void TogaScene::interact_state()
 		currentstate = TRADE;
 		return;
 	}
-	else if (currentstate == TRADE)
-	{
-		shop = false;
-		currentstate = FREEMOVE;
-		return;
-	}
-
+	
 }
 
 void TogaScene::renderinteract()
@@ -1522,7 +1535,7 @@ void TogaScene::checkCollision()
 void TogaScene::inventory()
 {
 
-	if (Application::IsKeyPressed('I') && (currentstate == INVENTORY || currentstate == FREEMOVE))// && timer > delay) && e_state == 0)
+	if (Application::IsKeyPressed('I') )// && timer > delay) && e_state == 0)
 	{
 		i_state = 1;
 		if (timer > delay)
@@ -1531,10 +1544,12 @@ void TogaScene::inventory()
 				if (currentstate == 0)
 				{
 					currentstate = INVENTORY;
+					return;
 				}
-				else
+				else if(currentstate ==INVENTORY)
 				{
 					currentstate = FREEMOVE;
+					return;
 				}
 		}
 

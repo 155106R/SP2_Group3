@@ -1641,6 +1641,12 @@ void PlanetJellyScene::interactionUpdate(double dt)
 				}
 				delay = timer + 0.5;//set delay offset
 			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
+			}
 		}
 
 
@@ -1667,6 +1673,12 @@ void PlanetJellyScene::interactionUpdate(double dt)
 
 				delay = timer + 0.5;//set delay offset
 			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
+			}
 		}
 
 		if ((collision(hitbox[2], camera.frontTarget) == true))//Drone merchant
@@ -1690,6 +1702,12 @@ void PlanetJellyScene::interactionUpdate(double dt)
 					rendertext = 0;
 				}
 				delay = timer + 0.5;//set delay offset
+			}
+			if (Application::IsKeyPressed(VK_ESCAPE))
+			{
+				shop = false;
+				currentstate = FREEMOVE;
+				return;
 			}
 		}
 
@@ -1802,14 +1820,7 @@ void PlanetJellyScene::interact_state()
 		currentstate = TRADE;
 		return;
 	}
-	else if (currentstate == TRADE)
-	{
-		num = 0;
-		tempnum = 0;
-		shop = false;
-		currentstate = FREEMOVE;
-		return;
-	}
+
 
 }
 
