@@ -18,6 +18,7 @@
 GLFWwindow* m_window;
 const unsigned char FPS = 60; // FPS of this game
 const unsigned int frameTime = 1000 / FPS; // time for each frame
+float delay = 0;
 
 
 //Define an error callback
@@ -115,14 +116,13 @@ void Application::Run()
 	Scene *OpenGalaxy = new OpenGalaxyScene();
 	Scene *TogaPlanet = new TogaScene();
 	Scene *JellyPlanet = new PlanetJellyScene();
+	TogaPlanet->Init();
+	JellyPlanet->Init();
+	OpenGalaxy->Init();
 
 	currentScene = TogaPlanet;
 
 	//Main Loop
-	OpenGalaxy->Init();
-	//TogaPlanet->Init();
-	//JellyPlanet->Init();
-
 	m_timer.startTimer();    // Start timer to calculate how long it takes to render this frame
 	while (!glfwWindowShouldClose(m_window) && !IsKeyPressed(VK_END))
 	{
@@ -140,33 +140,41 @@ void Application::Run()
 		}
 
 		//Help Button
-		if (IsKeyPressed(VK_F1)){
+		if (IsKeyPressed(VK_F1) && SharedData::GetInstance()-> SD_timecounter > delay)
+		{
+			delay = SharedData::GetInstance()->SD_timecounter + 0.5;
 			if (SharedData::GetInstance()->helpMenu == false){
 				SharedData::GetInstance()->helpMenu = true;
 			}
 			else{
 				SharedData::GetInstance()->helpMenu = false;
 			}
+			
 		}
-		else if (SharedData::GetInstance()->helpMenu == true && Application::IsKeyPressed(VK_TAB)){
-				SharedData::GetInstance()->currentHelpPage++;
-				if (SharedData::GetInstance()->currentHelpPage == HELP_PAGE_MAX){
-					SharedData::GetInstance()->currentHelpPage = 0;
-				}
+		
+		if ((SharedData::GetInstance()->helpMenu == true && Application::IsKeyPressed(VK_TAB)) && SharedData::GetInstance()->SD_timecounter > delay)
+		{
+			delay = SharedData::GetInstance()->SD_timecounter + 0.5;
+			SharedData::GetInstance()->currentHelpPage++;
 		}
+		if (SharedData::GetInstance()->currentHelpPage == HELP_PAGE_MAX){
+			SharedData::GetInstance()->currentHelpPage = SHIP;
+		}
+
+		cout << SharedData::GetInstance()->currentHelpPage << endl;
 
 		//Update and render current scene
 			currentScene->Update(m_timer.getElapsedTime());
 			currentScene->Render();
 
-		if (SharedData::GetInstance()->SD_bitcoins > 500000){
+		/*if (SharedData::GetInstance()->SD_bitcoins > 500000){
 
 		}
 
 		if (IsKeyPressed(VK_F12)){
 			currentScene->Exit();
 			currentScene->Init();
-		}
+		}*/
 
 		//Swap buffers
 		glfwSwapBuffers(m_window);

@@ -74,6 +74,11 @@ class TogaScene : public Scene
 		GEO_SHOP,
 		SHIP,
 
+		HELP_PAGE_SHIP,
+		HELP_PAGE_DRILL,
+		HELP_PAGE_PLANET,
+		HELP_PAGE_TRADING,
+
 
 		NUM_GEOMETRY,
 	};

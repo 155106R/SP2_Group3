@@ -293,6 +293,19 @@ void TogaScene::Init()
 
 	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("Light Cube", Color(0, 0, 0));
 
+	//Help pages
+	meshList[HELP_PAGE_SHIP] = MeshBuilder::GenerateQuad("Help page for ship", Color(0.5, 0, 0));
+	meshList[HELP_PAGE_SHIP]->textureID = LoadTGA("Image//help_ship.tga");
+
+	meshList[HELP_PAGE_DRILL] = MeshBuilder::GenerateQuad("Help page for drilling", Color(0, 0.5, 0));
+	meshList[HELP_PAGE_DRILL]->textureID = LoadTGA("Image//help_drill.tga");
+
+	meshList[HELP_PAGE_PLANET] = MeshBuilder::GenerateQuad("Help page for planets", Color(0, 0, 0.5));
+	meshList[HELP_PAGE_PLANET]->textureID = LoadTGA("Image//help_planets.tga");
+
+	meshList[HELP_PAGE_TRADING] = MeshBuilder::GenerateQuad("Help page for trading", Color(0.5, 0.5, 0));
+	meshList[HELP_PAGE_TRADING]->textureID = LoadTGA("Image//help_trade.tga");
+
 	Init_Checker();
 	Init_Name_NPC();
 	Init_animation_NPC();
@@ -573,7 +586,7 @@ void TogaScene::Render()
 	Position lightPosition_cameraspace = viewStack.Top() * light[0].position;
 	glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
 
-	RenderMesh(meshList[GEO_AXES], false);
+	//RenderMesh(meshList[GEO_AXES], false);
 
 	modelStack.PushMatrix();
 	modelStack.Translate(light[0].position.x, light[0].position.y, light[0].position.z);
@@ -813,11 +826,44 @@ void TogaScene::Render()
 			glEnable(GL_DEPTH_TEST);
 		}
 	
-	
 	renderinteract();
 	text();
 	Render_Checker();
 	Render_minigame();
+
+	//Renders Help Pages
+	if (SharedData::GetInstance()->helpMenu == true){
+		glDisable(GL_DEPTH_TEST);
+		Mtx44 ortho;
+		ortho.SetToOrtho(0, 80, 0, 60, -100, 100); //size of screen UI
+		projectionStack.PushMatrix();
+		projectionStack.LoadMatrix(ortho);
+		viewStack.PushMatrix();
+		viewStack.LoadIdentity(); //No need camera for ortho mode
+		modelStack.PushMatrix();
+		modelStack.LoadIdentity(); //Reset modelStack
+		modelStack.Translate(40, 30, 0);
+		modelStack.Rotate(-45, 1, 0, 0);
+		modelStack.Scale(80, 1, 85);
+		switch (SharedData::GetInstance()->currentHelpPage){
+		case 0:
+			RenderMesh(meshList[HELP_PAGE_SHIP], false);
+			break;
+		case DRILL:
+			RenderMesh(meshList[HELP_PAGE_DRILL], false);
+			break;
+		case PLANET:
+			RenderMesh(meshList[HELP_PAGE_PLANET], false);
+			break;
+		case TRADING:
+			RenderMesh(meshList[HELP_PAGE_TRADING], false);
+			break;
+		}
+		projectionStack.PopMatrix();
+		viewStack.PopMatrix();
+		modelStack.PopMatrix();
+		glEnable(GL_DEPTH_TEST);
+	}
 }
 
 void TogaScene::Exit()

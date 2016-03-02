@@ -58,6 +58,11 @@ class PlanetJellyScene : public Scene
 		GEO_TEXT_BOX,
 		GEO_SHOP,
 
+		HELP_PAGE_SHIP,
+		HELP_PAGE_DRILL,
+		HELP_PAGE_PLANET,
+		HELP_PAGE_TRADING,
+
 		NUM_GEOMETRY,
 	};
 

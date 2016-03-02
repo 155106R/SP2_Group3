@@ -48,7 +48,7 @@ public:
 
 	//Help menu
 	bool helpMenu = false;
-	unsigned currentHelpPage = 0;
+	unsigned currentHelpPage;
 
 	//game assets
 	float SD_timecounter = 0;

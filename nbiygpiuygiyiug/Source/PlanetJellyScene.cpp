@@ -154,7 +154,7 @@ void PlanetJellyScene::Init()
 	}
 
 	//Render wishlist
-	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("Axes", 1000, 1000, 1000);
+	//meshList[GEO_AXES] = MeshBuilder::GenerateAxes("Axes", 1000, 1000, 1000);
 
 	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
 	meshList[GEO_TEXT]->textureID = LoadTGA("Image//pixelFont.tga");
@@ -222,6 +222,19 @@ void PlanetJellyScene::Init()
 
 	meshList[GEO_INVENTORY] = MeshBuilder::GenerateQuad("inventory", Color(0, 0, 0));
 	meshList[GEO_INVENTORY]->textureID = LoadTGA("Image//Inventory_screen.tga");
+
+	//Help pages
+	meshList[HELP_PAGE_SHIP] = MeshBuilder::GenerateQuad("Help page for ship", Color(0.5, 0, 0));
+	meshList[HELP_PAGE_SHIP]->textureID = LoadTGA("Image//help_ship.tga");
+
+	meshList[HELP_PAGE_DRILL] = MeshBuilder::GenerateQuad("Help page for drilling", Color(0, 0.5, 0));
+	meshList[HELP_PAGE_DRILL]->textureID = LoadTGA("Image//help_drill.tga");
+
+	meshList[HELP_PAGE_PLANET] = MeshBuilder::GenerateQuad("Help page for planets", Color(0, 0, 0.5));
+	meshList[HELP_PAGE_PLANET]->textureID = LoadTGA("Image//help_planets.tga");
+
+	meshList[HELP_PAGE_TRADING] = MeshBuilder::GenerateQuad("Help page for trading", Color(0.5, 0.5, 0));
+	meshList[HELP_PAGE_TRADING]->textureID = LoadTGA("Image//help_trade.tga");
 	
 	//Render NCP
 	Init_animation_NPC();
@@ -483,6 +496,9 @@ void PlanetJellyScene::Update(double dt)
 	//cout << SharedData::GetInstance()->SD_enableinteract << endl;
 	//cout << camera.position << endl;
 	button_prompt = 0;
+
+	light[0].type = Light::LIGHT_SPOT;
+	glUniform1i(m_parameters[U_LIGHT0_TYPE], light[0].type);
 
 	player.m_origin = camera.nextPosition;
 	AABB::updateAABB(player);
@@ -750,13 +766,13 @@ void PlanetJellyScene::Render()
 	Vector3 spotDirection_cameraspace = viewStack.Top()*light[0].spotDirection;
 	glUniform3fv(m_parameters[U_LIGHT0_SPOTDIRECTION], 1, &spotDirection_cameraspace.x);
 
-	RenderMesh(meshList[GEO_AXES], false);
+	//RenderMesh(meshList[GEO_AXES], false);
 
 	//render light
-	modelStack.PushMatrix();
+	/*modelStack.PushMatrix();
 	modelStack.Translate(light[0].position.x, light[0].position.y, light[0].position.z);
 	RenderMesh(meshList[GEO_LIGHTBALL], false);
-	modelStack.PopMatrix();
+	modelStack.PopMatrix();*/
 
 	// render skybox
 	modelStack.PushMatrix();
@@ -981,6 +997,40 @@ void PlanetJellyScene::Render()
 
 	renderinteract();
 	Render_minigame();
+
+	//Renders Help Pages
+	if (SharedData::GetInstance()->helpMenu == true){
+		glDisable(GL_DEPTH_TEST);
+		Mtx44 ortho;
+		ortho.SetToOrtho(0, 80, 0, 60, -100, 100); //size of screen UI
+		projectionStack.PushMatrix();
+		projectionStack.LoadMatrix(ortho);
+		viewStack.PushMatrix();
+		viewStack.LoadIdentity(); //No need camera for ortho mode
+		modelStack.PushMatrix();
+		modelStack.LoadIdentity(); //Reset modelStack
+		modelStack.Translate(40, 30, 0);
+		modelStack.Rotate(-45, 1, 0, 0);
+		modelStack.Scale(80, 1, 85);
+		switch (SharedData::GetInstance()->currentHelpPage){
+		case 0:
+			RenderMesh(meshList[HELP_PAGE_SHIP], false);
+			break;
+		case DRILL:
+			RenderMesh(meshList[HELP_PAGE_DRILL], false);
+			break;
+		case PLANET:
+			RenderMesh(meshList[HELP_PAGE_PLANET], false);
+			break;
+		case TRADING:
+			RenderMesh(meshList[HELP_PAGE_TRADING], false);
+			break;
+		}
+		projectionStack.PopMatrix();
+		viewStack.PopMatrix();
+		modelStack.PopMatrix();
+		glEnable(GL_DEPTH_TEST);
+	}
 
 	text();
 
