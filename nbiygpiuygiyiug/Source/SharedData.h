@@ -43,39 +43,43 @@ public:
 		static SharedData data;
 		return &data;
 	}
+	//Pause
+	bool isPaused = false;
 
+	//Help menu
 	bool helpMenu = false;
 	unsigned currentHelpPage = 0;
 
 	//game assets
 	float SD_timecounter = 0;
 
-
 	//PlayerAssests
-	float SD_hullIntegrity = -110;
+	float SD_hullIntegrity = 100;
 	int SD_hullmax = 100;
+	bool SD_playerIsDead = false;
+	bool SD_deathScreen = false;
 
-	//upgrades
+	//Upgrades
 	int SD_hullLevel = 0;
 	int SD_hullCost = 10;
 	
-	
-	//drones
+	//Drones
 	bool SD_RepairDrone = false;//defaulted to zero
-
-	int SD_bitcoins = 0;
-
 	bool SD_MiningDrone_T = false;
 	bool SD_MiningDrone_J = false;
-	int  SD_MiningDrone_stash=0;
+	int  SD_MiningDrone_stash = 0;
 
+	//Currency
+	int SD_bitcoins = 0;
 
-	//PlayerLocation
+	//Player Location
 	unsigned SD_location;
+	unsigned SD_lastLocationVisited;
+
+	//Input delay
 	bool SD_enableinteract = true;
 
-	//stuff to get offset for text character spacing
-	std::vector<std::string> fontData = fillWithFontData("PixelFontData.csv");
+	//To get offset for text character spacing
 	vector<string> fillWithFontData(string path){
 
 		string line;
@@ -139,7 +143,9 @@ public:
 
 		return FINAL;
 	}
+	std::vector<std::string> fontData = fillWithFontData("PixelFontData.csv");
 
+	//Inventory
 	Bag* PlayerInventory = new Bag;
 	CaveGame* Game = new CaveGame;
 	

@@ -101,10 +101,15 @@ void Application::Init()
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 		//return -1;
 	}
+	SharedData::GetInstance()->SD_lastLocationVisited = PLANET_TOGA; //Set by default
+
 }
 
 void Application::Run()
 {
+	//Gets new seed
+	Math::InitRNG();
+
 	Scene *currentScene;
 
 	Scene *OpenGalaxy = new OpenGalaxyScene();
@@ -115,15 +120,15 @@ void Application::Run()
 
 	//Main Loop
 	OpenGalaxy->Init();
-	TogaPlanet->Init();
-	JellyPlanet->Init();
+	//TogaPlanet->Init();
+	//JellyPlanet->Init();
 
 	m_timer.startTimer();    // Start timer to calculate how long it takes to render this frame
 	while (!glfwWindowShouldClose(m_window) && !IsKeyPressed(VK_END))
 	{
 		//references from OpenGalaxyScene and SharedData
 		switch (SharedData::GetInstance()->SD_location){
-			case(OPEN_GALAXY):
+		case(OPEN_GALAXY) :
 				currentScene = OpenGalaxy;
 				break;
 			case(PLANET_TOGA):
@@ -136,17 +141,33 @@ void Application::Run()
 
 		//Help Button
 		if (IsKeyPressed(VK_F1)){
-			if ((SharedData::GetInstance()->helpMenu) == false){
+			if (SharedData::GetInstance()->helpMenu == false){
 				SharedData::GetInstance()->helpMenu = true;
 			}
 			else{
 				SharedData::GetInstance()->helpMenu = false;
 			}
 		}
+		else if (SharedData::GetInstance()->helpMenu == true && Application::IsKeyPressed(VK_TAB)){
+				SharedData::GetInstance()->currentHelpPage++;
+				if (SharedData::GetInstance()->currentHelpPage == HELP_PAGE_MAX){
+					SharedData::GetInstance()->currentHelpPage = 0;
+				}
+		}
 
+		//Update and render current scene
 			currentScene->Update(m_timer.getElapsedTime());
 			currentScene->Render();
-		
+
+		if (SharedData::GetInstance()->SD_bitcoins > 500000){
+
+		}
+
+		if (IsKeyPressed(VK_F12)){
+			currentScene->Exit();
+			currentScene->Init();
+		}
+
 		//Swap buffers
 		glfwSwapBuffers(m_window);
 		
@@ -154,7 +175,7 @@ void Application::Run()
 		glfwPollEvents();
 		m_timer.waitUntil(frameTime);       // Frame rate limiter. Limits each frame to a specified time in ms.   
 
-	} //Check if the ESC key had been pressed or if the window had been closed
+	} //Check if the END key had been pressed or if the window had been closed
 	currentScene->Exit();
 	delete currentScene;
 }

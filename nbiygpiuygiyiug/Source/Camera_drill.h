@@ -21,7 +21,7 @@ public:
 	Vector3 tempPosition;
 	Vector3 nextPosition; 
 
-		float cameraRotationX, cameraRotationY;
+	float cameraRotationX, cameraRotationY;
 	int Counter;
 	int screenMidX;
 	int screenMidY;
@@ -33,8 +33,6 @@ public:
 	float jumpForce;
 	bool _jump;
 	float walkSpeed;
-	void movement();
-
 
 	Camera_drill();
 	~Camera_drill();
@@ -42,8 +40,6 @@ public:
 	virtual void Update(double dt);
 	virtual void Reset();
 	bool Camera_drill::checkCamera(int minX, int minZ, int maxX, int maxZ);
-	virtual void boundCheck(float minX, float minZ, float maxX, float maxZ);
-	virtual void boundCheck2(float minX, float minZ, float maxX, float maxZ);
 
 
 	enum movement

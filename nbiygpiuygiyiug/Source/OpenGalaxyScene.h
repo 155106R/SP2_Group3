@@ -38,14 +38,14 @@ public:
 
 	Asteroid(){		//Default Constructor 
 		material = Math::RandIntMinMax(1, 12);
-		count = Math::RandIntMinMax(1, 50);
+		count = Math::RandIntMinMax(1, 10);
 
 		position = Vector3(Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200), Math::RandFloatMinMax(-200, 200));
 		velocity = Vector3(Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f), Math::RandFloatMinMax(-0.05f, 0.05f));
 
-		length = Math::RandFloatMinMax(1, 5);
-		height = Math::RandFloatMinMax(1, 5);
-		width = Math::RandFloatMinMax(1, 5);
+		length = Math::RandFloatMinMax(1, 5) * count * 0.3;
+		height = Math::RandFloatMinMax(1, 5) * count * 0.3;
+		width = Math::RandFloatMinMax(1, 5) * count * 0.3;
 
 		hitbox = AABB::generateAABB(
 			position,		//Pass in where the asteroid is to set as the origin of hitbox
@@ -117,6 +117,7 @@ class OpenGalaxyScene : public Scene
 
 		ASTEROIDS,
 		PARTICLES,
+		SPARKS,
 
 		SPACESHIP,
 		SPACESHIP_INTERIOR,
@@ -214,8 +215,11 @@ private:
 	void generateSkybox();
 	void generateParticles();
 
+	//Timer
+	float timer = 0;
+	float fiveMinutesHavePassed = 300;
 
-	//DRONE STUFF
+	//Drone assests
 	void Repairdrone(double dt);
 	float rdrone_yrotate = 0;
 	Vector3 rdrone_pos;
@@ -227,14 +231,12 @@ private:
 	bool e_state;
 	bool space_state;
 	bool tab_state;
-
-
-	//////////
-	float timer = 0;
-	float delay;
-	void resetKey();
 	bool land;
 	string nameOfPlanet;
+
+	//Key input delay
+	float delay;
+	void resetKey();
 
 	//Hitboxes
 	AABB spaceshipHitbox;
@@ -244,15 +246,17 @@ private:
 
 	AABB shipInterior;
 
-	unsigned CURRENT_STATE;	//Play state
+	//Play state
+	unsigned CURRENT_STATE = 0;	
 
 	void updateDrillMovement(double dt);
 	void updateShipMovement(double dt);
 
 	Vector3 tempPosition;
 
-	//For Light
-	bool enableLight;
+	//For 
+
+	//bool enableLight;
 
 	//Generates HUD
 	void drawHUD();
@@ -264,6 +268,7 @@ private:
 
 	Mesh *meshList[NUM_GEOMETRY];
 
+	//Explosion effects
 	float ex_x[5], ex_y[5], ex_z[5], ex_scale[5], ex_scaleMax[5];
 
 	//Asteroid breaking effect
@@ -276,6 +281,11 @@ private:
 	float smallAstScaleY[3];
 	float smallAstScaleZ[3];
 	bool newSmallAst;
+
+	//Drilling particle effect
+	Vector3 sparksDirection[50];
+	Vector3 sparksPosition[50];
+	bool drillingCollision;
 };
 
 #endif

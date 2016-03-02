@@ -1398,7 +1398,8 @@ void TogaScene::interactionUpdate(double dt)
 				mdrone_added = false;
 				SharedData::GetInstance()->SD_enableinteract = false;
 				e_state = 1;
-				
+
+				SharedData::GetInstance()->SD_lastLocationVisited = SharedData::GetInstance()->SD_location;
 				SharedData::GetInstance()->SD_location = OPEN_GALAXY;
 			}
 		}
