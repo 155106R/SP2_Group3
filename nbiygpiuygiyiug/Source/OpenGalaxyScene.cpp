@@ -870,6 +870,23 @@ void OpenGalaxyScene::Render()
 	modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
 	modelStack.Rotate(Spaceship.rotateZ, 0, 0, 1);
 
+
+
+	if (SharedData::GetInstance()->SD_hullIntegrity < 10)
+	{
+		for (int i = 0; i < 5; ++i){
+			modelStack.PushMatrix();
+			modelStack.Translate(ex_x[i], ex_y[i], ex_z[i]);
+			modelStack.Scale(ex_scale[i], ex_scale[i], ex_scale[i]);
+			modelStack.Rotate(Spaceship.rotateY, 0, 1, 0);
+			modelStack.Rotate(Spaceship.rotateZ, 0, 0, 1);
+			RenderMesh(meshList[PLANET_SUN], false);
+			modelStack.PopMatrix();
+		}
+	}
+
+
+
 	switch (CURRENT_STATE){
 	case PILOTING:
 		RenderMesh(meshList[SPACESHIP], true);	//To render ship
@@ -1207,6 +1224,15 @@ void OpenGalaxyScene::drawHUD()
 	} else if (CURRENT_STATE == DRILLING){
 
 		viewStack.LoadIdentity();
+		modelStack.PushMatrix();	
+		modelStack.Translate(0, -1.6, -2.7);	
+		modelStack.Rotate(90, 0, 1, 0);
+		modelStack.Rotate(12.58, 0, 0, 1);
+		RenderMesh(meshList[SPACESHIP_DRILL_BODY], true);
+		modelStack.Rotate(Drill.rotate, 1, 0, 0);
+		RenderMesh(meshList[SPACESHIP_DRILL_HEAD], true);
+
+		modelStack.PopMatrix();
 		modelStack.PushMatrix();
 		modelStack.Translate(0, -1.6, -2.7);
 		modelStack.Rotate(90, 0, 1, 0);
